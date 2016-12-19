@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Example Map</title>
+    <style>
+html,head,body {
+  padding:0; margin:0;
+}
+body {
+  font-family: calibri, helvetica, arial, sans-serif;
+  background-color: #ccc;
+}
+.rules {
+  display: flex;
+  flex-direction: row;
+}
+.questions {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: #aaa;
+}
+.card {
+  width: 63.5mm;
+  height: 38mm;
+  background-color: #fff;
+  margin: 5px;
+}
+
+.card--story {
+  background-color: #ffa;
+}
+
+.card--rule {
+  background-color: #cdf;
+}
+
+.card--example {
+  background-color: #cfd;
+}
+
+.card--question {
+  background-color: #fcc;
+}
+
+.card--add {
+  background-color: #eee;
+}
+
+
+    </style>
+    <script src="app.js"></script>
+  </head>
+  <body>
+    <script>Elm.App.fullscreen()</script>
+  </body>
+</html>
