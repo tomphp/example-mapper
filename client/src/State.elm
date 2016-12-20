@@ -1,9 +1,9 @@
 module State exposing (init, update, subscriptions)
 
-import Dict
+import Dict exposing (Dict)
 import Json.Decode as Dec
 import Json.Encode as Enc
-import Types exposing (Model, Msg(..), Card, Rule, CardState(..))
+import Types exposing (Model, Msg(..), Card, Rule, CardState(..), CardId)
 import WebSocket
 
 
@@ -14,32 +14,34 @@ init =
 
 initialModel : Model
 initialModel =
-    { storyCard = { state = Saved, text = "Story" }
+    { cards =
+        Dict.singleton "story-card-id"
+            { id = "story-card-id"
+            , state = Saved
+            , text = "Example Story..."
+            }
+    , storyCard = "story-card-id"
     , rules = []
     , questions = []
+    , error = Nothing
     }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NullMsg ->
-            ( model, Cmd.none )
-
         GetUpdate ->
             ( model, WebSocket.send "ws://localhost:9292" fetchUpdate )
 
         UpdateModel update ->
             ( updateModel model update, Cmd.none )
 
-        EditStory ->
-            ( { model | storyCard = updateCardState Editing model.storyCard }
-            , Cmd.none
-            )
+        EditCard id ->
+            ( updateCardState model id Editing, Cmd.none )
 
-        SaveStory text ->
-            ( { model | storyCard = updateCard Saving text model.storyCard }
-            , WebSocket.send "ws://localhost:9292" <| updateStoryCard text
+        SaveCard id text ->
+            ( updateCardState model id Saving
+            , WebSocket.send "ws://localhost:9292" <| sendUpdateCard id text
             )
 
 
@@ -50,11 +52,12 @@ fetchUpdate =
             [ ( "type", Enc.string "fetch_update" ) ]
 
 
-updateStoryCard : String -> String
-updateStoryCard text =
+sendUpdateCard : CardId -> String -> String
+sendUpdateCard id text =
     Enc.encode 0 <|
         Enc.object
-            [ ( "type", Enc.string "update_story_card" )
+            [ ( "type", Enc.string "update_card" )
+            , ( "id", Enc.string id )
             , ( "text", Enc.string text )
             ]
 
@@ -69,9 +72,11 @@ updateCard state text card =
     { card | state = state, text = text }
 
 
-updateCardState : CardState -> Card -> Card
-updateCardState cardState card =
-    { card | state = cardState }
+updateCardState : Model -> CardId -> CardState -> Model
+updateCardState model id state =
+    { model
+        | cards = Dict.update id (Maybe.map (\card -> { card | state = state })) model.cards
+    }
 
 
 updateModel : Model -> String -> Model
@@ -81,28 +86,31 @@ updateModel model update =
             model
 
         Err msg ->
-            { model | storyCard = { text = msg, state = Saved } }
+            { model | error = Just msg }
 
 
 modelDecoder : Dec.Decoder Model
 modelDecoder =
     Dec.field "state" <|
-        Dec.map3 Model
-            (Dec.field "story_card" card)
+        Dec.map5 Model
+            (Dec.field "cards" <| Dec.dict card)
+            (Dec.field "story_card" Dec.string)
             (Dec.field "rules" <| Dec.list rule)
-            (Dec.field "questions" <| Dec.list card)
+            (Dec.field "questions" <| Dec.list Dec.string)
+            (Dec.succeed Nothing)
 
 
 rule : Dec.Decoder Rule
 rule =
     Dec.map2 Rule
-        (Dec.field "rule_card" card)
-        (Dec.field "examples" <| Dec.list card)
+        (Dec.field "rule_card" Dec.string)
+        (Dec.field "examples" <| Dec.list Dec.string)
 
 
 card : Dec.Decoder Card
 card =
-    Dec.map2 Card
+    Dec.map3 Card
+        (Dec.field "id" Dec.string)
         (Dec.field "state" cardState)
         (Dec.field "text" Dec.string)
 

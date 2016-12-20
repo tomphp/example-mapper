@@ -1,4 +1,4 @@
-module Types exposing (Model, Msg(..), CardState(..), Card, Rule)
+module Types exposing (Model, Msg(..), CardState(..), Card, Rule, CardId)
 
 import Dict exposing (Dict)
 
@@ -10,28 +10,34 @@ type CardState
     | Saved
 
 
+type alias CardId =
+    String
+
+
 type alias Card =
-    { state : CardState
+    { id : CardId
+    , state : CardState
     , text : String
     }
 
 
 type alias Rule =
-    { ruleCard : Card
-    , examples : List Card
+    { ruleCard : CardId
+    , examples : List CardId
     }
 
 
 type alias Model =
-    { storyCard : Card
+    { cards : Dict CardId Card
+    , storyCard : CardId
     , rules : List Rule
-    , questions : List Card
+    , questions : List CardId
+    , error : Maybe String
     }
 
 
 type Msg
-    = NullMsg
-    | GetUpdate
+    = GetUpdate
     | UpdateModel String
-    | EditStory
-    | SaveStory String
+    | EditCard String
+    | SaveCard CardId String

@@ -3,49 +3,67 @@ require 'faye/websocket'
 
 module ExampleMapper
   state = {
-    story_card: {
-      text: 'This story is great',
-      state: :saved
+    cards: {
+      'story-card-id' => {
+        id: 'story-card-id',
+        text: 'This story is great',
+        state: :saved
+      },
+      'rule-card-1-id' => {
+        id: 'rule-card-1-id',
+        text: 'Everything must be wonderful',
+        state: :saved
+      },
+      'example-card-1-id' => {
+        id: 'example-card-1-id',
+        text: 'When nothing is bad, then everything is wonderful',
+        state: :saved
+      },
+      'example-card-2-id' => {
+        id: 'example-card-2-id',
+        text: 'When something is bad, there is an error',
+        state: :saved
+      },
+      'rule-card-2-id' => {
+        id: 'rule-card-2-id',
+        text: 'I like pizza',
+        state: :saved
+      },
+      'example-card-3-id' => {
+        id: 'example-card-3-id',
+        text: 'When pizza is present, I am happy',
+        state: :saved
+      },
+      'question-card-1-id' => {
+        id: 'question-card-1-id',
+        text: 'Why O Why?',
+        state: :saved
+      },
+      'question-card-2-id' => {
+        id: 'question-card-2-id',
+        text: 'Who dunnit?',
+        state: :saved
+      }
     },
+    story_card: 'story-card-id',
     rules: [
       {
-        rule_card: {
-          text: 'Everything must be wonderful',
-          state: :saved
-        },
+        rule_card: 'rule-card-1-id',
         examples: [
-          {
-            text: 'When nothing is bad, then everything is wonderful',
-            state: :saved
-          },
-          {
-            text: 'When something is bad, there is an error',
-            state: :saved
-          }
+          'example-card-1-id',
+          'example-card-2-id'
         ]
       },
       {
-        rule_card: {
-          text: 'I like pizza',
-          state: :saved
-        },
+        rule_card: 'rule-card-2-id',
         examples: [
-          {
-            text: 'When pizza is present, I am happy',
-            state: :saved
-          }
+          'example-card-3-id'
         ]
       }
     ],
     questions: [
-      {
-        text: 'Why O Why?',
-        state: :saved
-      },
-      {
-        text: 'Who dunnit?',
-        state: :saved
-      }
+      'question-card-1-id',
+      'question-card-2-id'
     ]
   }
 
@@ -64,7 +82,7 @@ module ExampleMapper
         data = JSON.parse(event.data)
         puts "Type = #{data['type']}"
 
-        state[:story_card][:text] = data['text'] if data['type'] == 'update_story_card'
+        state[:cards][data['id']][:text] = data['text'] if data['type'] == 'update_card'
 
         clients.each do |client|
           client.send({

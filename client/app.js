@@ -9548,31 +9548,33 @@ var _elm_lang$websocket$WebSocket$onSelfMsg = F3(
 	});
 _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/websocket', init: _elm_lang$websocket$WebSocket$init, onEffects: _elm_lang$websocket$WebSocket$onEffects, onSelfMsg: _elm_lang$websocket$WebSocket$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$websocket$WebSocket$cmdMap, subMap: _elm_lang$websocket$WebSocket$subMap};
 
-var _user$project$Types$Card = F2(
-	function (a, b) {
-		return {state: a, text: b};
+var _user$project$Types$Card = F3(
+	function (a, b, c) {
+		return {id: a, state: b, text: c};
 	});
 var _user$project$Types$Rule = F2(
 	function (a, b) {
 		return {ruleCard: a, examples: b};
 	});
-var _user$project$Types$Model = F3(
-	function (a, b, c) {
-		return {storyCard: a, rules: b, questions: c};
+var _user$project$Types$Model = F5(
+	function (a, b, c, d, e) {
+		return {cards: a, storyCard: b, rules: c, questions: d, error: e};
 	});
 var _user$project$Types$Saved = {ctor: 'Saved'};
 var _user$project$Types$Saving = {ctor: 'Saving'};
 var _user$project$Types$Locked = {ctor: 'Locked'};
 var _user$project$Types$Editing = {ctor: 'Editing'};
-var _user$project$Types$SaveStory = function (a) {
-	return {ctor: 'SaveStory', _0: a};
+var _user$project$Types$SaveCard = F2(
+	function (a, b) {
+		return {ctor: 'SaveCard', _0: a, _1: b};
+	});
+var _user$project$Types$EditCard = function (a) {
+	return {ctor: 'EditCard', _0: a};
 };
-var _user$project$Types$EditStory = {ctor: 'EditStory'};
 var _user$project$Types$UpdateModel = function (a) {
 	return {ctor: 'UpdateModel', _0: a};
 };
 var _user$project$Types$GetUpdate = {ctor: 'GetUpdate'};
-var _user$project$Types$NullMsg = {ctor: 'NullMsg'};
 
 var _user$project$State$stringToCardState = function (s) {
 	var _p0 = s;
@@ -9588,26 +9590,31 @@ var _user$project$State$stringToCardState = function (s) {
 	}
 };
 var _user$project$State$cardState = A2(_elm_lang$core$Json_Decode$map, _user$project$State$stringToCardState, _elm_lang$core$Json_Decode$string);
-var _user$project$State$card = A3(
-	_elm_lang$core$Json_Decode$map2,
+var _user$project$State$card = A4(
+	_elm_lang$core$Json_Decode$map3,
 	_user$project$Types$Card,
+	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$State$cardState),
 	A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string));
 var _user$project$State$rule = A3(
 	_elm_lang$core$Json_Decode$map2,
 	_user$project$Types$Rule,
-	A2(_elm_lang$core$Json_Decode$field, 'rule_card', _user$project$State$card),
+	A2(_elm_lang$core$Json_Decode$field, 'rule_card', _elm_lang$core$Json_Decode$string),
 	A2(
 		_elm_lang$core$Json_Decode$field,
 		'examples',
-		_elm_lang$core$Json_Decode$list(_user$project$State$card)));
+		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)));
 var _user$project$State$modelDecoder = A2(
 	_elm_lang$core$Json_Decode$field,
 	'state',
-	A4(
-		_elm_lang$core$Json_Decode$map3,
+	A6(
+		_elm_lang$core$Json_Decode$map5,
 		_user$project$Types$Model,
-		A2(_elm_lang$core$Json_Decode$field, 'story_card', _user$project$State$card),
+		A2(
+			_elm_lang$core$Json_Decode$field,
+			'cards',
+			_elm_lang$core$Json_Decode$dict(_user$project$State$card)),
+		A2(_elm_lang$core$Json_Decode$field, 'story_card', _elm_lang$core$Json_Decode$string),
 		A2(
 			_elm_lang$core$Json_Decode$field,
 			'rules',
@@ -9615,7 +9622,8 @@ var _user$project$State$modelDecoder = A2(
 		A2(
 			_elm_lang$core$Json_Decode$field,
 			'questions',
-			_elm_lang$core$Json_Decode$list(_user$project$State$card))));
+			_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)),
+		_elm_lang$core$Json_Decode$succeed(_elm_lang$core$Maybe$Nothing)));
 var _user$project$State$updateModel = F2(
 	function (model, update) {
 		var _p1 = A2(_elm_lang$core$Json_Decode$decodeString, _user$project$State$modelDecoder, update);
@@ -9625,15 +9633,26 @@ var _user$project$State$updateModel = F2(
 			return _elm_lang$core$Native_Utils.update(
 				model,
 				{
-					storyCard: {text: _p1._0, state: _user$project$Types$Saved}
+					error: _elm_lang$core$Maybe$Just(_p1._0)
 				});
 		}
 	});
-var _user$project$State$updateCardState = F2(
-	function (cardState, card) {
+var _user$project$State$updateCardState = F3(
+	function (model, id, state) {
 		return _elm_lang$core$Native_Utils.update(
-			card,
-			{state: cardState});
+			model,
+			{
+				cards: A3(
+					_elm_lang$core$Dict$update,
+					id,
+					_elm_lang$core$Maybe$map(
+						function (card) {
+							return _elm_lang$core$Native_Utils.update(
+								card,
+								{state: state});
+						}),
+					model.cards)
+			});
 	});
 var _user$project$State$updateCard = F3(
 	function (state, text, card) {
@@ -9644,29 +9663,38 @@ var _user$project$State$updateCard = F3(
 var _user$project$State$subscriptions = function (model) {
 	return A2(_elm_lang$websocket$WebSocket$listen, 'ws://localhost:9292', _user$project$Types$UpdateModel);
 };
-var _user$project$State$updateStoryCard = function (text) {
-	return A2(
-		_elm_lang$core$Json_Encode$encode,
-		0,
-		_elm_lang$core$Json_Encode$object(
-			{
-				ctor: '::',
-				_0: {
-					ctor: '_Tuple2',
-					_0: 'type',
-					_1: _elm_lang$core$Json_Encode$string('update_story_card')
-				},
-				_1: {
+var _user$project$State$sendUpdateCard = F2(
+	function (id, text) {
+		return A2(
+			_elm_lang$core$Json_Encode$encode,
+			0,
+			_elm_lang$core$Json_Encode$object(
+				{
 					ctor: '::',
 					_0: {
 						ctor: '_Tuple2',
-						_0: 'text',
-						_1: _elm_lang$core$Json_Encode$string(text)
+						_0: 'type',
+						_1: _elm_lang$core$Json_Encode$string('update_card')
 					},
-					_1: {ctor: '[]'}
-				}
-			}));
-};
+					_1: {
+						ctor: '::',
+						_0: {
+							ctor: '_Tuple2',
+							_0: 'id',
+							_1: _elm_lang$core$Json_Encode$string(id)
+						},
+						_1: {
+							ctor: '::',
+							_0: {
+								ctor: '_Tuple2',
+								_0: 'text',
+								_1: _elm_lang$core$Json_Encode$string(text)
+							},
+							_1: {ctor: '[]'}
+						}
+					}
+				}));
+	});
 var _user$project$State$fetchUpdate = A2(
 	_elm_lang$core$Json_Encode$encode,
 	0,
@@ -9684,8 +9712,6 @@ var _user$project$State$update = F2(
 	function (msg, model) {
 		var _p2 = msg;
 		switch (_p2.ctor) {
-			case 'NullMsg':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'GetUpdate':
 				return {
 					ctor: '_Tuple2',
@@ -9698,36 +9724,33 @@ var _user$project$State$update = F2(
 					_0: A2(_user$project$State$updateModel, model, _p2._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'EditStory':
+			case 'EditCard':
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							storyCard: A2(_user$project$State$updateCardState, _user$project$Types$Editing, model.storyCard)
-						}),
+					_0: A3(_user$project$State$updateCardState, model, _p2._0, _user$project$Types$Editing),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
 				var _p3 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							storyCard: A3(_user$project$State$updateCard, _user$project$Types$Saving, _p3, model.storyCard)
-						}),
+					_0: A3(_user$project$State$updateCardState, model, _p3, _user$project$Types$Saving),
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
 						'ws://localhost:9292',
-						_user$project$State$updateStoryCard(_p3))
+						A2(_user$project$State$sendUpdateCard, _p3, _p2._1))
 				};
 		}
 	});
 var _user$project$State$initialModel = {
-	storyCard: {state: _user$project$Types$Saved, text: 'Story'},
+	cards: A2(
+		_elm_lang$core$Dict$singleton,
+		'story-card-id',
+		{id: 'story-card-id', state: _user$project$Types$Saved, text: 'Example Story...'}),
+	storyCard: 'story-card-id',
 	rules: {ctor: '[]'},
-	questions: {ctor: '[]'}
+	questions: {ctor: '[]'},
+	error: _elm_lang$core$Maybe$Nothing
 };
 var _user$project$State$init = {ctor: '_Tuple2', _0: _user$project$State$initialModel, _1: _elm_lang$core$Platform_Cmd$none};
 
@@ -9749,7 +9772,7 @@ var _user$project$CardView$inputValue = A2(
 		}
 	},
 	_elm_lang$core$Json_Decode$string);
-var _user$project$CardView$cardInput = function (text) {
+var _user$project$CardView$cardInput = function (card) {
 	return {
 		ctor: '::',
 		_0: A2(
@@ -9762,13 +9785,16 @@ var _user$project$CardView$cardInput = function (text) {
 					_0: A2(
 						_elm_lang$html$Html_Events$on,
 						'blur',
-						A2(_elm_lang$core$Json_Decode$map, _user$project$Types$SaveStory, _user$project$CardView$inputValue)),
+						A2(
+							_elm_lang$core$Json_Decode$map,
+							_user$project$Types$SaveCard(card.id),
+							_user$project$CardView$inputValue)),
 					_1: {ctor: '[]'}
 				}
 			},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text(text),
+				_0: _elm_lang$html$Html$text(card.text),
 				_1: {ctor: '[]'}
 			}),
 		_1: {ctor: '[]'}
@@ -9833,14 +9859,6 @@ var _user$project$CardView$cardClass = F2(
 				}
 			});
 	});
-var _user$project$CardView$clickEvent = function (cardType) {
-	var _p2 = cardType;
-	if (_p2.ctor === 'StoryCard') {
-		return _user$project$Types$EditStory;
-	} else {
-		return _user$project$Types$GetUpdate;
-	}
-};
 var _user$project$CardView$textOffset = 17;
 var _user$project$CardView$lineHeight = 12;
 var _user$project$CardView$cardHeight = 156;
@@ -9921,40 +9939,39 @@ var _user$project$CardView$cardBackground = function () {
 		},
 		_user$project$CardView$lines);
 }();
-var _user$project$CardView$cardContent = F2(
-	function (cardState, text) {
-		return A2(
-			_elm_lang$svg$Svg$foreignObject,
-			{
+var _user$project$CardView$cardContent = function (card) {
+	return A2(
+		_elm_lang$svg$Svg$foreignObject,
+		{
+			ctor: '::',
+			_0: _elm_lang$svg$Svg_Attributes$x(
+				_elm_lang$core$Basics$toString(_user$project$CardView$lineHeight)),
+			_1: {
 				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$x(
-					_elm_lang$core$Basics$toString(_user$project$CardView$lineHeight)),
+				_0: _elm_lang$svg$Svg_Attributes$y(
+					_elm_lang$core$Basics$toString(_user$project$CardView$textOffset)),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$y(
-						_elm_lang$core$Basics$toString(_user$project$CardView$textOffset)),
+					_0: _elm_lang$svg$Svg_Attributes$width(
+						_elm_lang$core$Basics$toString(_user$project$CardView$cardWidth - (2 * _user$project$CardView$lineHeight))),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$width(
-							_elm_lang$core$Basics$toString(_user$project$CardView$cardWidth - (2 * _user$project$CardView$lineHeight))),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(_user$project$CardView$cardHeight - (2 * _user$project$CardView$lineHeight))),
-							_1: {ctor: '[]'}
-						}
+						_0: _elm_lang$svg$Svg_Attributes$height(
+							_elm_lang$core$Basics$toString(_user$project$CardView$cardHeight - (2 * _user$project$CardView$lineHeight))),
+						_1: {ctor: '[]'}
 					}
 				}
-			},
-			function () {
-				var _p3 = cardState;
-				if (_p3.ctor === 'Editing') {
-					return _user$project$CardView$cardInput(text);
-				} else {
-					return _user$project$CardView$cardText(text);
-				}
-			}());
-	});
+			}
+		},
+		function () {
+			var _p2 = card.state;
+			if (_p2.ctor === 'Editing') {
+				return _user$project$CardView$cardInput(card);
+			} else {
+				return _user$project$CardView$cardText(card.text);
+			}
+		}());
+};
 var _user$project$CardView$card = F2(
 	function (cardType, card) {
 		return A2(
@@ -9962,7 +9979,7 @@ var _user$project$CardView$card = F2(
 			{
 				ctor: '::',
 				_0: _elm_lang$html$Html_Events$onClick(
-					_user$project$CardView$clickEvent(cardType)),
+					_user$project$Types$EditCard(card.id)),
 				_1: {ctor: '[]'}
 			},
 			{
@@ -9990,7 +10007,7 @@ var _user$project$CardView$card = F2(
 						_user$project$CardView$cardBackground,
 						{
 							ctor: '::',
-							_0: A2(_user$project$CardView$cardContent, card.state, card.text),
+							_0: _user$project$CardView$cardContent(card),
 							_1: {ctor: '[]'}
 						})),
 				_1: {ctor: '[]'}
@@ -10057,25 +10074,27 @@ var _user$project$View$examples = function (es) {
 				_1: {ctor: '[]'}
 			}));
 };
-var _user$project$View$rule = function (r) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('rule'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: A2(_user$project$CardView$card, _user$project$CardView$RuleCard, r.ruleCard),
-			_1: {
-				ctor: '::',
-				_0: _user$project$View$examples(r.examples),
-				_1: {ctor: '[]'}
-			}
-		});
-};
-var _user$project$View$questions = function (qs) {
+var _user$project$View$theCard = F2(
+	function (model, id) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			{id: 'error', text: '[error]', state: _user$project$Types$Saved},
+			A2(_elm_lang$core$Dict$get, id, model.cards));
+	});
+var _user$project$View$cardList = F2(
+	function (model, ids) {
+		return A2(
+			_elm_lang$core$List$filterMap,
+			_elm_lang$core$Basics$identity,
+			A2(
+				_elm_lang$core$List$map,
+				function (id) {
+					return A2(_elm_lang$core$Dict$get, id, model.cards);
+				},
+				ids));
+	});
+var _user$project$View$questions = function (model) {
+	var cards = A2(_user$project$View$cardList, model, model.questions);
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -10100,7 +10119,7 @@ var _user$project$View$questions = function (qs) {
 				},
 				_1: {
 					ctor: '::',
-					_0: A2(_elm_lang$core$List$map, _user$project$View$question, qs),
+					_0: A2(_elm_lang$core$List$map, _user$project$View$question, cards),
 					_1: {
 						ctor: '::',
 						_0: {
@@ -10128,7 +10147,30 @@ var _user$project$View$questions = function (qs) {
 				}
 			}));
 };
-var _user$project$View$rules = function (rs) {
+var _user$project$View$rule = F2(
+	function (model, r) {
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class('rule'),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: A2(
+					_user$project$CardView$card,
+					_user$project$CardView$RuleCard,
+					A2(_user$project$View$theCard, model, r.ruleCard)),
+				_1: {
+					ctor: '::',
+					_0: _user$project$View$examples(
+						A2(_user$project$View$cardList, model, r.examples)),
+					_1: {ctor: '[]'}
+				}
+			});
+	});
+var _user$project$View$rules = function (model) {
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -10138,7 +10180,10 @@ var _user$project$View$rules = function (rs) {
 		},
 		A2(
 			_elm_lang$core$List$append,
-			A2(_elm_lang$core$List$map, _user$project$View$rule, rs),
+			A2(
+				_elm_lang$core$List$map,
+				_user$project$View$rule(model),
+				model.rules),
 			{
 				ctor: '::',
 				_0: A2(
@@ -10176,14 +10221,29 @@ var _user$project$View$view = function (model) {
 				}),
 			_1: {
 				ctor: '::',
-				_0: A2(_user$project$CardView$card, _user$project$CardView$StoryCard, model.storyCard),
+				_0: A2(
+					_elm_lang$html$Html$p,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(
+							A2(_elm_lang$core$Maybe$withDefault, '', model.error)),
+						_1: {ctor: '[]'}
+					}),
 				_1: {
 					ctor: '::',
-					_0: _user$project$View$rules(model.rules),
+					_0: A2(
+						_user$project$CardView$card,
+						_user$project$CardView$StoryCard,
+						A2(_user$project$View$theCard, model, model.storyCard)),
 					_1: {
 						ctor: '::',
-						_0: _user$project$View$questions(model.questions),
-						_1: {ctor: '[]'}
+						_0: _user$project$View$rules(model),
+						_1: {
+							ctor: '::',
+							_0: _user$project$View$questions(model),
+							_1: {ctor: '[]'}
+						}
 					}
 				}
 			}

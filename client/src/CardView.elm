@@ -35,13 +35,13 @@ textOffset =
 
 card : CardType -> Card -> Html.Html Msg
 card cardType card =
-    Html.div [ Html.Events.onClick <| clickEvent cardType ]
+    Html.div [ Html.Events.onClick <| EditCard card.id ]
         [ svg
             [ width <| toString cardWidth
             , height <| toString cardHeight
             , class <| cardClass cardType card.state
             ]
-            (List.append cardBackground [ cardContent card.state card.text ])
+            (List.append cardBackground [ cardContent card ])
         ]
 
 
@@ -62,16 +62,6 @@ cardBackground =
                 []
             ]
             lines
-
-
-clickEvent : CardType -> Msg
-clickEvent cardType =
-    case cardType of
-        StoryCard ->
-            EditStory
-
-        _ ->
-            GetUpdate
 
 
 cardClass : CardType -> CardState -> String
@@ -135,20 +125,20 @@ lines =
             lines
 
 
-cardContent : CardState -> String -> Svg Msg
-cardContent cardState text =
+cardContent : Card -> Svg Msg
+cardContent card =
     foreignObject
         [ x <| toString lineHeight
         , y <| toString textOffset
         , width <| toString (cardWidth - 2 * lineHeight)
         , height <| toString (cardHeight - 2 * lineHeight)
         ]
-        (case cardState of
+        (case card.state of
             Editing ->
-                cardInput text
+                cardInput card
 
             _ ->
-                cardText text
+                cardText card.text
         )
 
 
@@ -157,13 +147,13 @@ cardText text =
     [ Html.p [ class "card__text" ] [ Html.text text ] ]
 
 
-cardInput : String -> List (Html.Html Msg)
-cardInput text =
+cardInput : Card -> List (Html.Html Msg)
+cardInput card =
     [ Html.textarea
         [ Html.Attributes.class "card__input"
-        , Html.Events.on "blur" (Json.map SaveStory inputValue)
+        , Html.Events.on "blur" (Json.map (SaveCard card.id) inputValue)
         ]
-        [ Html.text text ]
+        [ Html.text card.text ]
     ]
 
 
