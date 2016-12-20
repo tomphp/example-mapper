@@ -9,18 +9,13 @@ import WebSocket
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Cmd.none )
+    ( initialModel, fetchUpdate )
 
 
 initialModel : Model
 initialModel =
-    { cards =
-        Dict.singleton "story-card-id"
-            { id = "story-card-id"
-            , state = Saved
-            , text = "Example Story..."
-            }
-    , storyCard = "story-card-id"
+    { cards = Dict.empty
+    , storyCard = ""
     , rules = []
     , questions = []
     , error = Nothing
@@ -31,7 +26,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetUpdate ->
-            ( model, WebSocket.send "ws://localhost:9292" fetchUpdate )
+            ( model, fetchUpdate )
 
         UpdateModel update ->
             ( updateModel model update, Cmd.none )
@@ -44,12 +39,45 @@ update msg model =
             , WebSocket.send "ws://localhost:9292" <| sendUpdateCard id text
             )
 
+        AddQuestion ->
+            ( model, WebSocket.send "ws://localhost:9292" sendAddQuestion )
 
-fetchUpdate : String
+        AddRule ->
+            ( model, WebSocket.send "ws://localhost:9292" sendAddRule )
+
+        AddExample ruleId ->
+            ( model, WebSocket.send "ws://localhost:9292" <| sendAddExample ruleId )
+
+
+fetchUpdate : Cmd Msg
 fetchUpdate =
+    WebSocket.send "ws://localhost:9292" <|
+        Enc.encode 0 <|
+            Enc.object
+                [ ( "type", Enc.string "fetch_update" ) ]
+
+
+sendAddQuestion : String
+sendAddQuestion =
     Enc.encode 0 <|
         Enc.object
-            [ ( "type", Enc.string "fetch_update" ) ]
+            [ ( "type", Enc.string "add_question" ) ]
+
+
+sendAddRule : String
+sendAddRule =
+    Enc.encode 0 <|
+        Enc.object
+            [ ( "type", Enc.string "add_rule" ) ]
+
+
+sendAddExample : Int -> String
+sendAddExample ruleId =
+    Enc.encode 0 <|
+        Enc.object
+            [ ( "type", Enc.string "add_example" )
+            , ( "rule_id", Enc.int ruleId )
+            ]
 
 
 sendUpdateCard : CardId -> String -> String

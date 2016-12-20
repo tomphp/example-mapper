@@ -23,8 +23,10 @@ rules : Model -> Html Msg
 rules model =
     div [ class "rules" ] <|
         List.append
-            (List.map (rule model) model.rules)
-            [ button [ onClick GetUpdate, class "add-button" ] [ text "Add Rule" ] ]
+            (List.indexedMap (rule model) model.rules)
+            [ button [ onClick AddRule, class "add-button" ] [ text "Add Rule" ]
+            , div [ class "rule-padding" ] []
+            ]
 
 
 cardList : Model -> List CardId -> List Card
@@ -50,25 +52,28 @@ questions model =
             (List.concat
                 [ [ h2 [] [ text "Questions" ] ]
                 , (List.map question cards)
-                , [ button [ onClick GetUpdate, class "add-button" ] [ text "Add Question" ] ]
+                , [ button [ onClick AddQuestion, class "add-button" ] [ text "Add Question" ] ]
                 ]
             )
 
 
-rule : Model -> Rule -> Html Msg
-rule model r =
+rule : Model -> Int -> Rule -> Html Msg
+rule model id r =
     div [ class "rule" ]
         [ card RuleCard <| theCard model r.ruleCard
-        , examples <| cardList model r.examples
+        , examples id <| cardList model r.examples
         ]
 
 
-examples : List Card -> Html Msg
-examples es =
+examples : Int -> List Card -> Html Msg
+examples ruleId es =
     div [ class "examples" ]
         (List.append
             (List.map example es)
-            [ button [ onClick GetUpdate, class "add-button" ] [ text "Add Example" ] ]
+            [ button
+                [ onClick (AddExample ruleId), class "add-button" ]
+                [ text "Add Example" ]
+            ]
         )
 
 

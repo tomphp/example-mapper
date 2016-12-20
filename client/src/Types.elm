@@ -41,3 +41,6 @@ type Msg
     | UpdateModel String
     | EditCard String
     | SaveCard CardId String
+    | AddQuestion
+    | AddRule
+    | AddExample Int

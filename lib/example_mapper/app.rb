@@ -1,69 +1,21 @@
 require 'json'
 require 'faye/websocket'
+require 'securerandom'
 
 module ExampleMapper
+  story_id = SecureRandom.uuid
   state = {
     cards: {
-      'story-card-id' => {
-        id: 'story-card-id',
-        text: 'This story is great',
-        state: :saved
-      },
-      'rule-card-1-id' => {
-        id: 'rule-card-1-id',
-        text: 'Everything must be wonderful',
-        state: :saved
-      },
-      'example-card-1-id' => {
-        id: 'example-card-1-id',
-        text: 'When nothing is bad, then everything is wonderful',
-        state: :saved
-      },
-      'example-card-2-id' => {
-        id: 'example-card-2-id',
-        text: 'When something is bad, there is an error',
-        state: :saved
-      },
-      'rule-card-2-id' => {
-        id: 'rule-card-2-id',
-        text: 'I like pizza',
-        state: :saved
-      },
-      'example-card-3-id' => {
-        id: 'example-card-3-id',
-        text: 'When pizza is present, I am happy',
-        state: :saved
-      },
-      'question-card-1-id' => {
-        id: 'question-card-1-id',
-        text: 'Why O Why?',
-        state: :saved
-      },
-      'question-card-2-id' => {
-        id: 'question-card-2-id',
-        text: 'Who dunnit?',
+      story_id => {
+        id: story_id,
+        text: 'As a ??? I want to ???',
         state: :saved
       }
     },
-    story_card: 'story-card-id',
+    story_card: story_id,
     rules: [
-      {
-        rule_card: 'rule-card-1-id',
-        examples: [
-          'example-card-1-id',
-          'example-card-2-id'
-        ]
-      },
-      {
-        rule_card: 'rule-card-2-id',
-        examples: [
-          'example-card-3-id'
-        ]
-      }
     ],
     questions: [
-      'question-card-1-id',
-      'question-card-2-id'
     ]
   }
 
@@ -81,8 +33,40 @@ module ExampleMapper
       ws.on :message do |event|
         data = JSON.parse(event.data)
         puts "Type = #{data['type']}"
+        puts "Packet = #{data.inspect}"
 
-        state[:cards][data['id']][:text] = data['text'] if data['type'] == 'update_card'
+        case data['type']
+        when 'update_card'
+          state[:cards][data['id']][:text] = data['text']
+
+        when 'add_question'
+          id = SecureRandom.uuid
+          state[:cards][id] = {
+            id: id,
+            text: '',
+            state: :saved
+          }
+          state[:questions] << id
+
+        when 'add_rule'
+          id = SecureRandom.uuid
+          state[:cards][id] = {
+            id: id,
+            text: '',
+            state: :saved
+          }
+          state[:rules] << { rule_card: id, examples: [] }
+
+        when 'add_example'
+          id = SecureRandom.uuid
+          state[:cards][id] = {
+            id: id,
+            text: '',
+            state: :saved
+          }
+          state[:rules][data['rule_id']][:examples] << id
+
+        end
 
         clients.each do |client|
           client.send({

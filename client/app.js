@@ -9564,6 +9564,11 @@ var _user$project$Types$Saved = {ctor: 'Saved'};
 var _user$project$Types$Saving = {ctor: 'Saving'};
 var _user$project$Types$Locked = {ctor: 'Locked'};
 var _user$project$Types$Editing = {ctor: 'Editing'};
+var _user$project$Types$AddExample = function (a) {
+	return {ctor: 'AddExample', _0: a};
+};
+var _user$project$Types$AddRule = {ctor: 'AddRule'};
+var _user$project$Types$AddQuestion = {ctor: 'AddQuestion'};
 var _user$project$Types$SaveCard = F2(
 	function (a, b) {
 		return {ctor: 'SaveCard', _0: a, _1: b};
@@ -9695,7 +9700,30 @@ var _user$project$State$sendUpdateCard = F2(
 					}
 				}));
 	});
-var _user$project$State$fetchUpdate = A2(
+var _user$project$State$sendAddExample = function (ruleId) {
+	return A2(
+		_elm_lang$core$Json_Encode$encode,
+		0,
+		_elm_lang$core$Json_Encode$object(
+			{
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'type',
+					_1: _elm_lang$core$Json_Encode$string('add_example')
+				},
+				_1: {
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'rule_id',
+						_1: _elm_lang$core$Json_Encode$int(ruleId)
+					},
+					_1: {ctor: '[]'}
+				}
+			}));
+};
+var _user$project$State$sendAddRule = A2(
 	_elm_lang$core$Json_Encode$encode,
 	0,
 	_elm_lang$core$Json_Encode$object(
@@ -9704,20 +9732,45 @@ var _user$project$State$fetchUpdate = A2(
 			_0: {
 				ctor: '_Tuple2',
 				_0: 'type',
-				_1: _elm_lang$core$Json_Encode$string('fetch_update')
+				_1: _elm_lang$core$Json_Encode$string('add_rule')
 			},
 			_1: {ctor: '[]'}
 		}));
+var _user$project$State$sendAddQuestion = A2(
+	_elm_lang$core$Json_Encode$encode,
+	0,
+	_elm_lang$core$Json_Encode$object(
+		{
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'type',
+				_1: _elm_lang$core$Json_Encode$string('add_question')
+			},
+			_1: {ctor: '[]'}
+		}));
+var _user$project$State$fetchUpdate = A2(
+	_elm_lang$websocket$WebSocket$send,
+	'ws://localhost:9292',
+	A2(
+		_elm_lang$core$Json_Encode$encode,
+		0,
+		_elm_lang$core$Json_Encode$object(
+			{
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'type',
+					_1: _elm_lang$core$Json_Encode$string('fetch_update')
+				},
+				_1: {ctor: '[]'}
+			})));
 var _user$project$State$update = F2(
 	function (msg, model) {
 		var _p2 = msg;
 		switch (_p2.ctor) {
 			case 'GetUpdate':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: A2(_elm_lang$websocket$WebSocket$send, 'ws://localhost:9292', _user$project$State$fetchUpdate)
-				};
+				return {ctor: '_Tuple2', _0: model, _1: _user$project$State$fetchUpdate};
 			case 'UpdateModel':
 				return {
 					ctor: '_Tuple2',
@@ -9730,7 +9783,7 @@ var _user$project$State$update = F2(
 					_0: A3(_user$project$State$updateCardState, model, _p2._0, _user$project$Types$Editing),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			default:
+			case 'SaveCard':
 				var _p3 = _p2._0;
 				return {
 					ctor: '_Tuple2',
@@ -9740,19 +9793,37 @@ var _user$project$State$update = F2(
 						'ws://localhost:9292',
 						A2(_user$project$State$sendUpdateCard, _p3, _p2._1))
 				};
+			case 'AddQuestion':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(_elm_lang$websocket$WebSocket$send, 'ws://localhost:9292', _user$project$State$sendAddQuestion)
+				};
+			case 'AddRule':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(_elm_lang$websocket$WebSocket$send, 'ws://localhost:9292', _user$project$State$sendAddRule)
+				};
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: A2(
+						_elm_lang$websocket$WebSocket$send,
+						'ws://localhost:9292',
+						_user$project$State$sendAddExample(_p2._0))
+				};
 		}
 	});
 var _user$project$State$initialModel = {
-	cards: A2(
-		_elm_lang$core$Dict$singleton,
-		'story-card-id',
-		{id: 'story-card-id', state: _user$project$Types$Saved, text: 'Example Story...'}),
-	storyCard: 'story-card-id',
+	cards: _elm_lang$core$Dict$empty,
+	storyCard: '',
 	rules: {ctor: '[]'},
 	questions: {ctor: '[]'},
 	error: _elm_lang$core$Maybe$Nothing
 };
-var _user$project$State$init = {ctor: '_Tuple2', _0: _user$project$State$initialModel, _1: _elm_lang$core$Platform_Cmd$none};
+var _user$project$State$init = {ctor: '_Tuple2', _0: _user$project$State$initialModel, _1: _user$project$State$fetchUpdate};
 
 var _user$project$CardView$divisibleBy = F2(
 	function (divisor, number) {
@@ -10042,38 +10113,40 @@ var _user$project$View$example = function (e) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$View$examples = function (es) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('examples'),
-			_1: {ctor: '[]'}
-		},
-		A2(
-			_elm_lang$core$List$append,
-			A2(_elm_lang$core$List$map, _user$project$View$example, es),
+var _user$project$View$examples = F2(
+	function (ruleId, es) {
+		return A2(
+			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$button,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onClick(_user$project$Types$GetUpdate),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('add-button'),
-							_1: {ctor: '[]'}
-						}
-					},
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html$text('Add Example'),
-						_1: {ctor: '[]'}
-					}),
+				_0: _elm_lang$html$Html_Attributes$class('examples'),
 				_1: {ctor: '[]'}
-			}));
-};
+			},
+			A2(
+				_elm_lang$core$List$append,
+				A2(_elm_lang$core$List$map, _user$project$View$example, es),
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$button,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$Types$AddExample(ruleId)),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$class('add-button'),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Add Example'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				}));
+	});
 var _user$project$View$theCard = F2(
 	function (model, id) {
 		return A2(
@@ -10128,7 +10201,7 @@ var _user$project$View$questions = function (model) {
 								_elm_lang$html$Html$button,
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(_user$project$Types$GetUpdate),
+									_0: _elm_lang$html$Html_Events$onClick(_user$project$Types$AddQuestion),
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html_Attributes$class('add-button'),
@@ -10147,8 +10220,8 @@ var _user$project$View$questions = function (model) {
 				}
 			}));
 };
-var _user$project$View$rule = F2(
-	function (model, r) {
+var _user$project$View$rule = F3(
+	function (model, id, r) {
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -10164,7 +10237,9 @@ var _user$project$View$rule = F2(
 					A2(_user$project$View$theCard, model, r.ruleCard)),
 				_1: {
 					ctor: '::',
-					_0: _user$project$View$examples(
+					_0: A2(
+						_user$project$View$examples,
+						id,
 						A2(_user$project$View$cardList, model, r.examples)),
 					_1: {ctor: '[]'}
 				}
@@ -10181,7 +10256,7 @@ var _user$project$View$rules = function (model) {
 		A2(
 			_elm_lang$core$List$append,
 			A2(
-				_elm_lang$core$List$map,
+				_elm_lang$core$List$indexedMap,
 				_user$project$View$rule(model),
 				model.rules),
 			{
@@ -10190,7 +10265,7 @@ var _user$project$View$rules = function (model) {
 					_elm_lang$html$Html$button,
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html_Events$onClick(_user$project$Types$GetUpdate),
+						_0: _elm_lang$html$Html_Events$onClick(_user$project$Types$AddRule),
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$html$Html_Attributes$class('add-button'),
@@ -10202,7 +10277,18 @@ var _user$project$View$rules = function (model) {
 						_0: _elm_lang$html$Html$text('Add Rule'),
 						_1: {ctor: '[]'}
 					}),
-				_1: {ctor: '[]'}
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Attributes$class('rule-padding'),
+							_1: {ctor: '[]'}
+						},
+						{ctor: '[]'}),
+					_1: {ctor: '[]'}
+				}
 			}));
 };
 var _user$project$View$view = function (model) {
