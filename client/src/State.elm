@@ -3,22 +3,23 @@ module State exposing (init, update, subscriptions)
 import Dict exposing (Dict)
 import Json.Decode as Dec
 import Json.Encode as Enc
-import Types exposing (Model, Msg(..), Card, Rule, CardState(..), CardId)
+import Types exposing (Model, Msg(..), Card, Rule, CardState(..), CardId, Flags)
 import WebSocket
 
 
-init : ( Model, Cmd Msg )
-init =
-    ( initialModel, fetchUpdate )
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    ( initialModel flags, fetchUpdate flags )
 
 
-initialModel : Model
-initialModel =
+initialModel : Flags -> Model
+initialModel flags =
     { cards = Dict.empty
     , storyCard = ""
     , rules = []
     , questions = []
     , error = Nothing
+    , flags = flags
     }
 
 
@@ -26,7 +27,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         GetUpdate ->
-            ( model, fetchUpdate )
+            ( model, fetchUpdate model.flags )
 
         UpdateModel update ->
             ( updateModel model update, Cmd.none )
@@ -36,22 +37,22 @@ update msg model =
 
         SaveCard id text ->
             ( updateCardState model id Saving
-            , WebSocket.send "ws://localhost:9292" <| sendUpdateCard id text
+            , WebSocket.send model.flags.backendUrl <| sendUpdateCard id text
             )
 
         AddQuestion ->
-            ( model, WebSocket.send "ws://localhost:9292" sendAddQuestion )
+            ( model, WebSocket.send model.flags.backendUrl sendAddQuestion )
 
         AddRule ->
-            ( model, WebSocket.send "ws://localhost:9292" sendAddRule )
+            ( model, WebSocket.send model.flags.backendUrl sendAddRule )
 
         AddExample ruleId ->
-            ( model, WebSocket.send "ws://localhost:9292" <| sendAddExample ruleId )
+            ( model, WebSocket.send model.flags.backendUrl <| sendAddExample ruleId )
 
 
-fetchUpdate : Cmd Msg
-fetchUpdate =
-    WebSocket.send "ws://localhost:9292" <|
+fetchUpdate : Flags -> Cmd Msg
+fetchUpdate flags =
+    WebSocket.send flags.backendUrl <|
         Enc.encode 0 <|
             Enc.object
                 [ ( "type", Enc.string "fetch_update" ) ]
@@ -92,7 +93,7 @@ sendUpdateCard id text =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen "ws://localhost:9292" UpdateModel
+    WebSocket.listen model.flags.backendUrl UpdateModel
 
 
 updateCard : CardState -> String -> Card -> Card
@@ -109,23 +110,24 @@ updateCardState model id state =
 
 updateModel : Model -> String -> Model
 updateModel model update =
-    case (Dec.decodeString modelDecoder update) of
-        Ok model ->
-            model
+    case (Dec.decodeString (modelDecoder model.flags) update) of
+        Ok m ->
+            m
 
         Err msg ->
             { model | error = Just msg }
 
 
-modelDecoder : Dec.Decoder Model
-modelDecoder =
+modelDecoder : Flags -> Dec.Decoder Model
+modelDecoder flags =
     Dec.field "state" <|
-        Dec.map5 Model
+        Dec.map6 Model
             (Dec.field "cards" <| Dec.dict card)
             (Dec.field "story_card" Dec.string)
             (Dec.field "rules" <| Dec.list rule)
             (Dec.field "questions" <| Dec.list Dec.string)
             (Dec.succeed Nothing)
+            (Dec.succeed flags)
 
 
 rule : Dec.Decoder Rule

@@ -1,4 +1,4 @@
-module Types exposing (Model, Msg(..), CardState(..), Card, Rule, CardId)
+module Types exposing (Model, Msg(..), CardState(..), Card, Rule, CardId, Flags)
 
 import Dict exposing (Dict)
 
@@ -8,6 +8,10 @@ type CardState
     | Locked
     | Saving
     | Saved
+
+
+type alias Flags =
+    { backendUrl : String }
 
 
 type alias CardId =
@@ -33,6 +37,7 @@ type alias Model =
     , rules : List Rule
     , questions : List CardId
     , error : Maybe String
+    , flags : Flags
     }
 
 

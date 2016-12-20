@@ -4,6 +4,7 @@ source 'https://rubygems.org'
 gem 'faye-websocket'
 gem 'puma'
 gem 'rake'
+gem 'sinatra'
 
 group :development do
   gem 'rerun'

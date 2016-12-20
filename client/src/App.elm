@@ -6,9 +6,9 @@ import Html
 import Types
 
 
-main : Program Never Types.Model Types.Msg
+main : Program Types.Flags Types.Model Types.Msg
 main =
-    Html.program
+    Html.programWithFlags
         { init = init
         , view = view
         , update = update

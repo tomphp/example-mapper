@@ -9548,6 +9548,9 @@ var _elm_lang$websocket$WebSocket$onSelfMsg = F3(
 	});
 _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/websocket', init: _elm_lang$websocket$WebSocket$init, onEffects: _elm_lang$websocket$WebSocket$onEffects, onSelfMsg: _elm_lang$websocket$WebSocket$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$websocket$WebSocket$cmdMap, subMap: _elm_lang$websocket$WebSocket$subMap};
 
+var _user$project$Types$Flags = function (a) {
+	return {backendUrl: a};
+};
 var _user$project$Types$Card = F3(
 	function (a, b, c) {
 		return {id: a, state: b, text: c};
@@ -9556,9 +9559,9 @@ var _user$project$Types$Rule = F2(
 	function (a, b) {
 		return {ruleCard: a, examples: b};
 	});
-var _user$project$Types$Model = F5(
-	function (a, b, c, d, e) {
-		return {cards: a, storyCard: b, rules: c, questions: d, error: e};
+var _user$project$Types$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {cards: a, storyCard: b, rules: c, questions: d, error: e, flags: f};
 	});
 var _user$project$Types$Saved = {ctor: 'Saved'};
 var _user$project$Types$Saving = {ctor: 'Saving'};
@@ -9609,29 +9612,35 @@ var _user$project$State$rule = A3(
 		_elm_lang$core$Json_Decode$field,
 		'examples',
 		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)));
-var _user$project$State$modelDecoder = A2(
-	_elm_lang$core$Json_Decode$field,
-	'state',
-	A6(
-		_elm_lang$core$Json_Decode$map5,
-		_user$project$Types$Model,
-		A2(
-			_elm_lang$core$Json_Decode$field,
-			'cards',
-			_elm_lang$core$Json_Decode$dict(_user$project$State$card)),
-		A2(_elm_lang$core$Json_Decode$field, 'story_card', _elm_lang$core$Json_Decode$string),
-		A2(
-			_elm_lang$core$Json_Decode$field,
-			'rules',
-			_elm_lang$core$Json_Decode$list(_user$project$State$rule)),
-		A2(
-			_elm_lang$core$Json_Decode$field,
-			'questions',
-			_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)),
-		_elm_lang$core$Json_Decode$succeed(_elm_lang$core$Maybe$Nothing)));
+var _user$project$State$modelDecoder = function (flags) {
+	return A2(
+		_elm_lang$core$Json_Decode$field,
+		'state',
+		A7(
+			_elm_lang$core$Json_Decode$map6,
+			_user$project$Types$Model,
+			A2(
+				_elm_lang$core$Json_Decode$field,
+				'cards',
+				_elm_lang$core$Json_Decode$dict(_user$project$State$card)),
+			A2(_elm_lang$core$Json_Decode$field, 'story_card', _elm_lang$core$Json_Decode$string),
+			A2(
+				_elm_lang$core$Json_Decode$field,
+				'rules',
+				_elm_lang$core$Json_Decode$list(_user$project$State$rule)),
+			A2(
+				_elm_lang$core$Json_Decode$field,
+				'questions',
+				_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)),
+			_elm_lang$core$Json_Decode$succeed(_elm_lang$core$Maybe$Nothing),
+			_elm_lang$core$Json_Decode$succeed(flags)));
+};
 var _user$project$State$updateModel = F2(
 	function (model, update) {
-		var _p1 = A2(_elm_lang$core$Json_Decode$decodeString, _user$project$State$modelDecoder, update);
+		var _p1 = A2(
+			_elm_lang$core$Json_Decode$decodeString,
+			_user$project$State$modelDecoder(model.flags),
+			update);
 		if (_p1.ctor === 'Ok') {
 			return _p1._0;
 		} else {
@@ -9666,7 +9675,7 @@ var _user$project$State$updateCard = F3(
 			{state: state, text: text});
 	});
 var _user$project$State$subscriptions = function (model) {
-	return A2(_elm_lang$websocket$WebSocket$listen, 'ws://localhost:9292', _user$project$Types$UpdateModel);
+	return A2(_elm_lang$websocket$WebSocket$listen, model.flags.backendUrl, _user$project$Types$UpdateModel);
 };
 var _user$project$State$sendUpdateCard = F2(
 	function (id, text) {
@@ -9749,28 +9758,34 @@ var _user$project$State$sendAddQuestion = A2(
 			},
 			_1: {ctor: '[]'}
 		}));
-var _user$project$State$fetchUpdate = A2(
-	_elm_lang$websocket$WebSocket$send,
-	'ws://localhost:9292',
-	A2(
-		_elm_lang$core$Json_Encode$encode,
-		0,
-		_elm_lang$core$Json_Encode$object(
-			{
-				ctor: '::',
-				_0: {
-					ctor: '_Tuple2',
-					_0: 'type',
-					_1: _elm_lang$core$Json_Encode$string('fetch_update')
-				},
-				_1: {ctor: '[]'}
-			})));
+var _user$project$State$fetchUpdate = function (flags) {
+	return A2(
+		_elm_lang$websocket$WebSocket$send,
+		flags.backendUrl,
+		A2(
+			_elm_lang$core$Json_Encode$encode,
+			0,
+			_elm_lang$core$Json_Encode$object(
+				{
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'type',
+						_1: _elm_lang$core$Json_Encode$string('fetch_update')
+					},
+					_1: {ctor: '[]'}
+				})));
+};
 var _user$project$State$update = F2(
 	function (msg, model) {
 		var _p2 = msg;
 		switch (_p2.ctor) {
 			case 'GetUpdate':
-				return {ctor: '_Tuple2', _0: model, _1: _user$project$State$fetchUpdate};
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$State$fetchUpdate(model.flags)
+				};
 			case 'UpdateModel':
 				return {
 					ctor: '_Tuple2',
@@ -9790,20 +9805,20 @@ var _user$project$State$update = F2(
 					_0: A3(_user$project$State$updateCardState, model, _p3, _user$project$Types$Saving),
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
-						'ws://localhost:9292',
+						model.flags.backendUrl,
 						A2(_user$project$State$sendUpdateCard, _p3, _p2._1))
 				};
 			case 'AddQuestion':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: A2(_elm_lang$websocket$WebSocket$send, 'ws://localhost:9292', _user$project$State$sendAddQuestion)
+					_1: A2(_elm_lang$websocket$WebSocket$send, model.flags.backendUrl, _user$project$State$sendAddQuestion)
 				};
 			case 'AddRule':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: A2(_elm_lang$websocket$WebSocket$send, 'ws://localhost:9292', _user$project$State$sendAddRule)
+					_1: A2(_elm_lang$websocket$WebSocket$send, model.flags.backendUrl, _user$project$State$sendAddRule)
 				};
 			default:
 				return {
@@ -9811,19 +9826,28 @@ var _user$project$State$update = F2(
 					_0: model,
 					_1: A2(
 						_elm_lang$websocket$WebSocket$send,
-						'ws://localhost:9292',
+						model.flags.backendUrl,
 						_user$project$State$sendAddExample(_p2._0))
 				};
 		}
 	});
-var _user$project$State$initialModel = {
-	cards: _elm_lang$core$Dict$empty,
-	storyCard: '',
-	rules: {ctor: '[]'},
-	questions: {ctor: '[]'},
-	error: _elm_lang$core$Maybe$Nothing
+var _user$project$State$initialModel = function (flags) {
+	return {
+		cards: _elm_lang$core$Dict$empty,
+		storyCard: '',
+		rules: {ctor: '[]'},
+		questions: {ctor: '[]'},
+		error: _elm_lang$core$Maybe$Nothing,
+		flags: flags
+	};
 };
-var _user$project$State$init = {ctor: '_Tuple2', _0: _user$project$State$initialModel, _1: _user$project$State$fetchUpdate};
+var _user$project$State$init = function (flags) {
+	return {
+		ctor: '_Tuple2',
+		_0: _user$project$State$initialModel(flags),
+		_1: _user$project$State$fetchUpdate(flags)
+	};
+};
 
 var _user$project$CardView$divisibleBy = F2(
 	function (divisor, number) {
@@ -10336,8 +10360,15 @@ var _user$project$View$view = function (model) {
 		});
 };
 
-var _user$project$App$main = _elm_lang$html$Html$program(
-	{init: _user$project$State$init, view: _user$project$View$view, update: _user$project$State$update, subscriptions: _user$project$State$subscriptions})();
+var _user$project$App$main = _elm_lang$html$Html$programWithFlags(
+	{init: _user$project$State$init, view: _user$project$View$view, update: _user$project$State$update, subscriptions: _user$project$State$subscriptions})(
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (backendUrl) {
+			return _elm_lang$core$Json_Decode$succeed(
+				{backendUrl: backendUrl});
+		},
+		A2(_elm_lang$core$Json_Decode$field, 'backendUrl', _elm_lang$core$Json_Decode$string)));
 
 var Elm = {};
 Elm['App'] = Elm['App'] || {};
