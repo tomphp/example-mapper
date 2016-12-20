@@ -29,6 +29,10 @@ namespace :tests do
   end
 end
 
+task :build do
+  sh 'cd client; elm-make src/App.elm --output ../app/assets/app.js; cd ..'
+end
+
 desc 'Run all tests'
 task tests: [
   'tests:rubocop',

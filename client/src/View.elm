@@ -24,7 +24,7 @@ rules model =
     div [ class "rules" ] <|
         List.append
             (List.indexedMap (rule model) model.rules)
-            [ button [ onClick AddRule, class "add-button" ] [ text "Add Rule" ]
+            [ button [ onClick AddRule, class "card card--rule" ] [ text "Add Rule" ]
             , div [ class "rule-padding" ] []
             ]
 
@@ -52,7 +52,7 @@ questions model =
             (List.concat
                 [ [ h2 [] [ text "Questions" ] ]
                 , (List.map question cards)
-                , [ button [ onClick AddQuestion, class "add-button" ] [ text "Add Question" ] ]
+                , [ button [ onClick AddQuestion, class "card card--question" ] [ text "Add Question" ] ]
                 ]
             )
 
@@ -71,7 +71,7 @@ examples ruleId es =
         (List.append
             (List.map example es)
             [ button
-                [ onClick (AddExample ruleId), class "add-button" ]
+                [ onClick (AddExample ruleId), class "card card--example" ]
                 [ text "Add Example" ]
             ]
         )

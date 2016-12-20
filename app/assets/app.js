@@ -10159,7 +10159,7 @@ var _user$project$View$examples = F2(
 								_user$project$Types$AddExample(ruleId)),
 							_1: {
 								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$class('add-button'),
+								_0: _elm_lang$html$Html_Attributes$class('card card--example'),
 								_1: {ctor: '[]'}
 							}
 						},
@@ -10228,7 +10228,7 @@ var _user$project$View$questions = function (model) {
 									_0: _elm_lang$html$Html_Events$onClick(_user$project$Types$AddQuestion),
 									_1: {
 										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$class('add-button'),
+										_0: _elm_lang$html$Html_Attributes$class('card card--question'),
 										_1: {ctor: '[]'}
 									}
 								},
@@ -10292,7 +10292,7 @@ var _user$project$View$rules = function (model) {
 						_0: _elm_lang$html$Html_Events$onClick(_user$project$Types$AddRule),
 						_1: {
 							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$class('add-button'),
+							_0: _elm_lang$html$Html_Attributes$class('card card--rule'),
 							_1: {ctor: '[]'}
 						}
 					},

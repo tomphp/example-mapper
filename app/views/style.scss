@@ -1,0 +1,119 @@
+@import url('https://fonts.googleapis.com/css?family=Covered+By+Your+Grace');
+
+$card-width: 254px;
+$card-height: 156px;
+
+$card-red: #fcc;
+$card-yellow: #ffa;
+$card-blue: #cdf;
+$card-green: #cfd;
+
+$card-line-height: 24px;
+$card-font-size: 24px;
+$card-font-family: 'Covered By Your Grace', cursive;
+
+html, head, body {
+  padding:0;
+  margin:0;
+}
+
+body {
+  font-family: calibri, helvetica, arial, sans-serif;
+  background-color: #dab88f;
+  background: url('wood.jpg');
+}
+.rules {
+  display: flex;
+  flex-direction: row;
+}
+
+.questions {
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    background-color: rgba(128, 128, 128, 0.7);
+    padding: 30px;
+    padding-bottom: 15px;
+    padding-left: 15px;
+    border-radius: 20px;
+    box-shadow: #666 5px 5px 5px;
+}
+
+.add-button {
+  width: $card-width;
+  height: $card-height;
+}
+
+.card {
+  background-color: #ccf;
+  box-shadow: 3px 3px 10px #888888;
+  margin: 2px;
+  width: $card-width;
+  height: $card-height;
+  border-radius: 0;
+  border: none;
+  cursor: pointer;
+
+  &--story {
+    background-color: $card-yellow;
+  }
+
+  &--rule {
+    background-color: $card-blue;
+  }
+
+  &--example {
+    background-color: $card-green;
+  }
+
+  &--question {
+    background-color: $card-red;
+  }
+
+  &--add {
+    background-color: #eee;
+  }
+
+  &--editing {
+    background-color: #fff;
+  }
+
+  &--saving {
+    background-color: #ccc;
+  }
+
+  &__headline {
+    stroke: #d00;
+    stroke-width: 1;
+  }
+
+  &__line {
+    stroke: #00d;
+    stroke-width: 1;
+  }
+
+  &__text {
+    line-height: $card-line-height;
+    padding: 0;
+    margin: 0;
+    font-size: $card-font-size;
+    font-family: $card-font-family;
+  }
+
+  &__input {
+    width: 220px;
+    height: 122px;
+    line-height: $card-line-height;
+    padding: 0;
+    margin: 0;
+    font-size: $card-font-size;
+    font-family: $card-font-family;
+    border: 0;
+    background-color: transparent;
+    resize: none;
+  }
+}
+
+textarea.card__input:focus {
+    outline-width: 0;
+}
