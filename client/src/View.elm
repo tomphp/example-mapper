@@ -11,10 +11,9 @@ view : Model -> Html Msg
 view model =
     div []
         [ h1 [] [ text "Example Mapper" ]
-        , card StoryCard Saved model.storyCard.text
+        , card StoryCard model.storyCard
         , rules model.rules
         , questions model.questions
-        , button [ onClick GetUpdate ] [ text "Click Me" ]
         ]
 
 
@@ -40,7 +39,7 @@ questions qs =
 rule : Rule -> Html Msg
 rule r =
     div [ class "rule" ]
-        [ card RuleCard Saved r.ruleCard.text
+        [ card RuleCard r.ruleCard
         , examples r.examples
         ]
 
@@ -56,9 +55,9 @@ examples es =
 
 example : Card -> Html Msg
 example e =
-    div [] [ card ExampleCard Saved e.text ]
+    div [] [ card ExampleCard e ]
 
 
 question : Card -> Html Msg
 question q =
-    div [ class "colum" ] [ card QuestionCard Saved q.text ]
+    div [ class "colum" ] [ card QuestionCard q ]

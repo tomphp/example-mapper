@@ -49,21 +49,35 @@ module ExampleMapper
     ]
   }
 
+  clients = []
+
   App = lambda do |env|
     if Faye::WebSocket.websocket?(env)
       ws = Faye::WebSocket.new(env)
 
+      ws.on :open do |_event|
+        p [:open, ws.object_id]
+        clients << ws
+      end
+
       ws.on :message do |event|
-        puts "Message #{event.inspect}"
-        ws.send({
-          type: :update_state,
-          state: state
-        }.to_json)
+        data = JSON.parse(event.data)
+        puts "Type = #{data['type']}"
+
+        state[:story_card][:text] = data['text'] if data['type'] == 'update_story_card'
+
+        clients.each do |client|
+          client.send({
+            type: :update_state,
+            state: state
+          }.to_json)
+        end
       end
 
       ws.on :close do |event|
         puts 'Closing Down'
         p [:close, event.code, event.reason]
+        clients.delete(ws)
         ws = nil
       end
 

@@ -20,11 +20,17 @@ body {
   display: flex;
   flex-direction: row;
 }
+
 .questions {
     position: absolute;
-    top: 0;
-    right: 0;
-    background: #aaa;
+    top: -20px;
+    right: -20px;
+    background-color: rgba(128, 128, 128, 0.7);
+    padding: 30px;
+    padding-bottom: 15px;
+    padding-left: 15px;
+    border-radius: 20px;
+    box-shadow: #666 5px 5px 5px;
 }
 
 .add-button {
@@ -59,6 +65,14 @@ body {
   background-color: #eee;
 }
 
+.card--editing {
+  background-color: #fff;
+}
+
+.card--saving {
+  background-color: #ccc;
+}
+
 .card__headline {
   stroke: #d00;
   stroke-width: 1;
@@ -75,6 +89,22 @@ body {
   margin: 0;
   font-size: 24px;
   font-family: 'Covered By Your Grace', cursive;
+}
+.card__input {
+  width: 220px;
+  height: 122px;
+  line-height: 24px;
+  padding: 0;
+  margin: 0;
+  font-size: 24px;
+  font-family: 'Covered By Your Grace', cursive;
+  border: 0;
+  background-color: transparent;
+  resize: none;
+}
+
+textarea.card__input:focus {
+    outline-width: 0;
 }
     </style>
     <script src="app.js"></script>

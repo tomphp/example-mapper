@@ -33,3 +33,5 @@ type Msg
     = NullMsg
     | GetUpdate
     | UpdateModel String
+    | EditStory
+    | SaveStory String

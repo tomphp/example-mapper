@@ -1,7 +1,8 @@
 module State exposing (init, update, subscriptions)
 
 import Dict
-import Json.Decode as Json
+import Json.Decode as Dec
+import Json.Encode as Enc
 import Types exposing (Model, Msg(..), Card, Rule, CardState(..))
 import WebSocket
 
@@ -14,11 +15,7 @@ init =
 initialModel : Model
 initialModel =
     { storyCard = { state = Saved, text = "Story" }
-    , rules =
-        [ { ruleCard = { state = Saved, text = "Some Rule" }
-          , examples = []
-          }
-        ]
+    , rules = []
     , questions = []
     }
 
@@ -30,10 +27,36 @@ update msg model =
             ( model, Cmd.none )
 
         GetUpdate ->
-            ( model, WebSocket.send "ws://localhost:9292" "fetch update" )
+            ( model, WebSocket.send "ws://localhost:9292" fetchUpdate )
 
         UpdateModel update ->
             ( updateModel model update, Cmd.none )
+
+        EditStory ->
+            ( { model | storyCard = updateCardState Editing model.storyCard }
+            , Cmd.none
+            )
+
+        SaveStory text ->
+            ( { model | storyCard = updateCard Saving text model.storyCard }
+            , WebSocket.send "ws://localhost:9292" <| updateStoryCard text
+            )
+
+
+fetchUpdate : String
+fetchUpdate =
+    Enc.encode 0 <|
+        Enc.object
+            [ ( "type", Enc.string "fetch_update" ) ]
+
+
+updateStoryCard : String -> String
+updateStoryCard text =
+    Enc.encode 0 <|
+        Enc.object
+            [ ( "type", Enc.string "update_story_card" )
+            , ( "text", Enc.string text )
+            ]
 
 
 subscriptions : Model -> Sub Msg
@@ -41,9 +64,19 @@ subscriptions model =
     WebSocket.listen "ws://localhost:9292" UpdateModel
 
 
+updateCard : CardState -> String -> Card -> Card
+updateCard state text card =
+    { card | state = state, text = text }
+
+
+updateCardState : CardState -> Card -> Card
+updateCardState cardState card =
+    { card | state = cardState }
+
+
 updateModel : Model -> String -> Model
 updateModel model update =
-    case (Json.decodeString modelDecoder update) of
+    case (Dec.decodeString modelDecoder update) of
         Ok model ->
             model
 
@@ -51,32 +84,32 @@ updateModel model update =
             { model | storyCard = { text = msg, state = Saved } }
 
 
-modelDecoder : Json.Decoder Model
+modelDecoder : Dec.Decoder Model
 modelDecoder =
-    Json.field "state" <|
-        Json.map3 Model
-            (Json.field "story_card" card)
-            (Json.field "rules" <| Json.list rule)
-            (Json.field "questions" <| Json.list card)
+    Dec.field "state" <|
+        Dec.map3 Model
+            (Dec.field "story_card" card)
+            (Dec.field "rules" <| Dec.list rule)
+            (Dec.field "questions" <| Dec.list card)
 
 
-rule : Json.Decoder Rule
+rule : Dec.Decoder Rule
 rule =
-    Json.map2 Rule
-        (Json.field "rule_card" card)
-        (Json.field "examples" <| Json.list card)
+    Dec.map2 Rule
+        (Dec.field "rule_card" card)
+        (Dec.field "examples" <| Dec.list card)
 
 
-card : Json.Decoder Card
+card : Dec.Decoder Card
 card =
-    Json.map2 Card
-        (Json.field "state" cardState)
-        (Json.field "text" Json.string)
+    Dec.map2 Card
+        (Dec.field "state" cardState)
+        (Dec.field "text" Dec.string)
 
 
-cardState : Json.Decoder CardState
+cardState : Dec.Decoder CardState
 cardState =
-    Json.map stringToCardState Json.string
+    Dec.map stringToCardState Dec.string
 
 
 stringToCardState : String -> CardState
