@@ -4,12 +4,17 @@
     <meta charset="UTF-8">
     <title>Example Map</title>
     <style>
+@import url('https://fonts.googleapis.com/css?family=Covered+By+Your+Grace');
+
 html,head,body {
-  padding:0; margin:0;
+  padding:0;
+  margin:0;
 }
+
 body {
   font-family: calibri, helvetica, arial, sans-serif;
-  background-color: #ccc;
+  background-color: #c5c0c0;;
+  background: url('wood.jpg');
 }
 .rules {
   display: flex;
@@ -21,11 +26,17 @@ body {
     right: 0;
     background: #aaa;
 }
+
+.add-button {
+  width: 254px;
+  height: 156px;
+}
+
 .card {
-  width: 63.5mm;
-  height: 38mm;
-  background-color: #fff;
-  margin: 5px;
+  border: solid 1px black;
+  background-color: #ccf;
+  box-shadow: 2px 2px 10px #888888;
+  margin: 2px;
 }
 
 .card--story {
@@ -48,7 +59,23 @@ body {
   background-color: #eee;
 }
 
+.card__headline {
+  stroke: #d00;
+  stroke-width: 1;
+}
 
+.card__line {
+  stroke: #00d;
+  stroke-width: 1;
+}
+
+.card__text {
+  line-height: 24px;
+  padding: 0;
+  margin: 0;
+  font-size: 24px;
+  font-family: 'Covered By Your Grace', cursive;
+}
     </style>
     <script src="app.js"></script>
   </head>
