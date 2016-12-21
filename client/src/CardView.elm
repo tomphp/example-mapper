@@ -150,7 +150,8 @@ cardText text =
 cardInput : Card -> List (Html.Html Msg)
 cardInput card =
     [ Html.textarea
-        [ Html.Attributes.class "card__input"
+        [ Html.Attributes.id ("card-input-" ++ card.id)
+        , Html.Attributes.class "card__input"
         , Html.Events.on "blur" (Json.map (SaveCard card.id) inputValue)
         ]
         [ Html.text card.text ]

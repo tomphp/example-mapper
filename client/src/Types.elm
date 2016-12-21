@@ -43,6 +43,7 @@ type alias Model =
 
 type Msg
     = GetUpdate
+    | Noop
     | UpdateModel String
     | EditCard String
     | SaveCard CardId String

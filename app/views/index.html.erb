@@ -4,9 +4,37 @@
     <meta charset="UTF-8">
     <title>Example Map</title>
     <link rel="stylesheet" href="/styles.css">
-    <script src="app.js"></script>
   </head>
   <body>
-    <script>Elm.App.fullscreen({backendUrl: 'ws://' + window.document.location.host + '/'})</script>
+    <header>
+      <h1>Example Maps</h1>
+      <h2>You stories start here!</h2>
+    </header>
+
+    <h3>What story would you like to map?</h3>
+
+    <form action="/" method="POST">
+      <div>
+        <svg width="254" height="156" class="card card--story">
+          <line x1="0" y1="24" x2="254" y2="24" class="card__headline"></line>
+          <line x1="0" y1="36" x2="254" y2="36" class="card__line"></line>
+          <line x1="0" y1="48" x2="254" y2="48" class="card__line"></line>
+          <line x1="0" y1="60" x2="254" y2="60" class="card__line"></line>
+          <line x1="0" y1="72" x2="254" y2="72" class="card__line"></line>
+          <line x1="0" y1="84" x2="254" y2="84" class="card__line"></line>
+          <line x1="0" y1="96" x2="254" y2="96" class="card__line"></line>
+          <line x1="0" y1="108" x2="254" y2="108" class="card__line"></line>
+          <line x1="0" y1="120" x2="254" y2="120" class="card__line"></line>
+          <line x1="0" y1="132" x2="254" y2="132" class="card__line"></line>
+          <line x1="0" y1="144" x2="254" y2="144" class="card__line"></line>
+          <line x1="0" y1="156" x2="254" y2="156" class="card__line"></line>
+          <foreignObject x="12" y="17" width="230" height="132">
+            <textarea class="card__input" name="story" autofocus></textarea>
+          </foreignObject>
+        </svg>
+      </div>
+
+      <button>Start Mapping</button>
+    </form>
   </body>
 </html>

@@ -16,8 +16,16 @@ module ExampleMapper
       scss :style
     end
 
-    get "/" do
-      erb :"index.html"
+    get '/' do
+      erb :'index.html'
+    end
+
+    post '/' do
+      redirect '/workspace'
+    end
+
+    get "/workspace" do
+      erb :"workspace.html"
     end
   end
 end

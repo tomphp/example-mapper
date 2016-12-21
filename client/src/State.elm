@@ -1,9 +1,11 @@
 module State exposing (init, update, subscriptions)
 
 import Dict exposing (Dict)
+import Dom
 import Json.Decode as Dec
 import Json.Encode as Enc
 import Types exposing (Model, Msg(..), Card, Rule, CardState(..), CardId, Flags)
+import Task
 import WebSocket
 
 
@@ -26,6 +28,9 @@ initialModel flags =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        Noop ->
+            ( model, Cmd.none )
+
         GetUpdate ->
             ( model, fetchUpdate model.flags )
 
@@ -33,7 +38,9 @@ update msg model =
             ( updateModel model update, Cmd.none )
 
         EditCard id ->
-            ( updateCardState model id Editing, Cmd.none )
+            ( updateCardState model id Editing
+            , Task.attempt (always Noop) (Dom.focus <| "card-input-" ++ id)
+            )
 
         SaveCard id text ->
             ( updateCardState model id Saving
