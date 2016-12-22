@@ -95,8 +95,10 @@ module ExampleMapper
           begin
           puts 'Closing Down'
           p [:close, event.code, event.reason]
-          @clients[story_id].delete(ws) unless @clients[story_id].nil?
-          @clients.delete(story_id) if @clients[story_id].empty?
+          unless @clients[story_id].nil?
+            @clients[story_id].delete(ws)
+            @clients.delete(story_id) if @clients[story_id].empty?
+          end
           ws = nil
           rescue => e
             puts e.inspect
