@@ -99,7 +99,7 @@ module ExampleMapper
         config = %r(mysql://(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^/]+)/(?<db>[^?]+)\?reconnect=true)
                  .match(ENV['CLEARDB_DATABASE_URL'])
 
-        Mysql2::Client.new(
+        @client ||= Mysql2::Client.new(
           host: config['host'],
           username: config['user'],
           password: config['pass'],
