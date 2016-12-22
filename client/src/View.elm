@@ -10,9 +10,8 @@ import CardView exposing (card, CardType(..))
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ h1 [] [ text "Example Mapper" ]
-        , p [] [ text <| Maybe.withDefault "" model.error ]
+    div [ class "workspace" ]
+        [ p [] [ text <| Maybe.withDefault "" model.error ]
         , card StoryCard <| theCard model model.storyCard
         , rules model
         , questions model
@@ -23,9 +22,9 @@ rules : Model -> Html Msg
 rules model =
     div [ class "rules" ] <|
         List.append
-            (List.indexedMap (rule model) model.rules)
-            [ button [ onClick AddRule, class "card card--rule" ] [ text "Add Rule" ]
-            , div [ class "rule-padding" ] []
+            (List.map (rule model) model.rules)
+            [ div [] [ button [ onClick AddRule, class "card card--rule" ] [ text "Add Rule" ] ]
+            , div [] [ div [ class "rule-padding" ] [] ]
             ]
 
 
@@ -39,7 +38,7 @@ cardList model ids =
 theCard : Model -> CardId -> Card
 theCard model id =
     Dict.get id model.cards
-        |> Maybe.withDefault { id = "error", text = "[error]", state = Saved }
+        |> Maybe.withDefault { id = "error", text = "Loading...", state = Saving }
 
 
 questions : Model -> Html Msg
@@ -57,15 +56,15 @@ questions model =
             )
 
 
-rule : Model -> Int -> Rule -> Html Msg
-rule model id r =
+rule : Model -> Rule -> Html Msg
+rule model r =
     div [ class "rule" ]
         [ card RuleCard <| theCard model r.ruleCard
-        , examples id <| cardList model r.examples
+        , examples r.ruleCard <| cardList model r.examples
         ]
 
 
-examples : Int -> List Card -> Html Msg
+examples : String -> List Card -> Html Msg
 examples ruleId es =
     div [ class "examples" ]
         (List.append

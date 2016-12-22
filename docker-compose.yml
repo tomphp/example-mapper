@@ -1,0 +1,36 @@
+version: '2'
+
+volumes:
+  mysql_data:
+  gems:
+
+services:
+  db:
+    image: mariadb
+    volumes:
+    - mysql_data:/var/lib/mysql
+    - ./sql:/docker-entrypoint-initdb.d
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpw
+      MYSQL_DATABASE: mapper
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpw
+
+  app:
+    image: ruby
+    ports:
+    - 9000:9000
+    links:
+    - db
+    volumes:
+    - gems:/usr/local/bundle
+    - .:/usr/src/app
+    working_dir: /usr/src/app
+    command: "sh -c 'bundle install && bundle exec rerun --background --dir lib --dir app -- bundle exec rackup --host 0.0.0.0 -p 9000'"
+    environment:
+      CLEARDB_DATABASE_URL: mysql://user:userpw@db/mapper?reconnect=true
+    depends_on:
+    - db
+

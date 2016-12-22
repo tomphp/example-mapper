@@ -15,6 +15,7 @@ $card-font-family: 'Covered By Your Grace', cursive;
 html, head, body {
   padding:0;
   margin:0;
+  color: #005;
 }
 
 body {
@@ -22,13 +23,22 @@ body {
   background-color: #dab88f;
   background: url('wood.jpg');
 }
+
+.workspace {
+  margin-top: 80px;
+}
+
 .rules {
   display: flex;
   flex-direction: row;
 }
 
+.rule-padding {
+  width: 300px;
+}
+
 .questions {
-    position: absolute;
+    position: fixed;
     top: -20px;
     right: -20px;
     background-color: rgba(128, 128, 128, 0.7);
@@ -37,11 +47,79 @@ body {
     padding-left: 15px;
     border-radius: 20px;
     box-shadow: #666 5px 5px 5px;
+    max-height: 3.5 * $card-height;
+    overflow-y: scroll;
 }
 
 .add-button {
   width: $card-width;
   height: $card-height;
+}
+
+.site-title {
+  text-align: center;
+
+  &__example-card {
+    transform: rotate(-5deg);
+  }
+
+  &__mapper-card {
+    transform: rotate(3deg);
+    margin-left: -10px !important;
+  }
+
+  &__sub-title {
+    font-family: $card-font-family;
+  }
+}
+
+.new-story {
+  text-align:center;
+
+  &__title {
+    font-family: $card-font-family;
+  }
+
+  &__card {
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+}
+
+.introduction {
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 15px;
+    border-radius: 20px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+
+    &__beta-notice {
+      color: #c00;
+      font-weight: bold;
+    }
+}
+
+.invite {
+    position: fixed;
+    top: -20px;
+    left: -20px;
+    background-color: rgba(128, 128, 128, 0.7);
+    padding: 30px;
+    padding-bottom: 15px;
+    padding-right: 15px;
+    border-radius: 20px;
+    box-shadow: #666 5px 5px 5px;
+    color: #fff;
+
+    &__url {
+      display: block;
+      background-color: #fff;
+      color: #00c;
+      padding:5px;
+      text-decoration: none;
+      font-weight: bold;
+    }
 }
 
 .card {
@@ -98,6 +176,13 @@ body {
     margin: 0;
     font-size: $card-font-size;
     font-family: $card-font-family;
+
+    &--title {
+      padding-top: $card-font-size * 1;
+      font-size: $card-font-size * 3;
+      line-height: $card-font-size * 3;
+      text-align: center;
+    }
   }
 
   &__input {

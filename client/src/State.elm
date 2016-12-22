@@ -44,17 +44,17 @@ update msg model =
 
         SaveCard id text ->
             ( updateCardState model id Saving
-            , WebSocket.send model.flags.backendUrl <| sendUpdateCard id text
+            , WebSocket.send model.flags.backendUrl <| sendUpdateCard model.flags id text
             )
 
         AddQuestion ->
-            ( model, WebSocket.send model.flags.backendUrl sendAddQuestion )
+            ( model, WebSocket.send model.flags.backendUrl <| sendAddQuestion model.flags )
 
         AddRule ->
-            ( model, WebSocket.send model.flags.backendUrl sendAddRule )
+            ( model, WebSocket.send model.flags.backendUrl <| sendAddRule model.flags )
 
         AddExample ruleId ->
-            ( model, WebSocket.send model.flags.backendUrl <| sendAddExample ruleId )
+            ( model, WebSocket.send model.flags.backendUrl <| sendAddExample model.flags ruleId )
 
 
 fetchUpdate : Flags -> Cmd Msg
@@ -62,37 +62,45 @@ fetchUpdate flags =
     WebSocket.send flags.backendUrl <|
         Enc.encode 0 <|
             Enc.object
-                [ ( "type", Enc.string "fetch_update" ) ]
+                [ ( "type", Enc.string "fetch_update" )
+                , ( "story_id", Enc.string flags.storyId )
+                ]
 
 
-sendAddQuestion : String
-sendAddQuestion =
+sendAddQuestion : Flags -> String
+sendAddQuestion flags =
     Enc.encode 0 <|
         Enc.object
-            [ ( "type", Enc.string "add_question" ) ]
-
-
-sendAddRule : String
-sendAddRule =
-    Enc.encode 0 <|
-        Enc.object
-            [ ( "type", Enc.string "add_rule" ) ]
-
-
-sendAddExample : Int -> String
-sendAddExample ruleId =
-    Enc.encode 0 <|
-        Enc.object
-            [ ( "type", Enc.string "add_example" )
-            , ( "rule_id", Enc.int ruleId )
+            [ ( "type", Enc.string "add_question" )
+            , ( "story_id", Enc.string flags.storyId )
             ]
 
 
-sendUpdateCard : CardId -> String -> String
-sendUpdateCard id text =
+sendAddRule : Flags -> String
+sendAddRule flags =
+    Enc.encode 0 <|
+        Enc.object
+            [ ( "type", Enc.string "add_rule" )
+            , ( "story_id", Enc.string flags.storyId )
+            ]
+
+
+sendAddExample : Flags -> String -> String
+sendAddExample flags ruleId =
+    Enc.encode 0 <|
+        Enc.object
+            [ ( "type", Enc.string "add_example" )
+            , ( "story_id", Enc.string flags.storyId )
+            , ( "rule_id", Enc.string ruleId )
+            ]
+
+
+sendUpdateCard : Flags -> CardId -> String -> String
+sendUpdateCard flags id text =
     Enc.encode 0 <|
         Enc.object
             [ ( "type", Enc.string "update_card" )
+            , ( "story_id", Enc.string flags.storyId )
             , ( "id", Enc.string id )
             , ( "text", Enc.string text )
             ]

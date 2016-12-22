@@ -35,11 +35,13 @@ textOffset =
 
 card : CardType -> Card -> Html.Html Msg
 card cardType card =
-    Html.div [ Html.Events.onClick <| EditCard card.id ]
+    Html.div
+        [ Html.Events.onClick <| EditCard card.id
+        , Html.Attributes.class <| cardClass cardType card.state
+        ]
         [ svg
             [ width <| toString cardWidth
             , height <| toString cardHeight
-            , class <| cardClass cardType card.state
             ]
             (List.append cardBackground [ cardContent card ])
         ]

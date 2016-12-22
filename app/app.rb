@@ -1,4 +1,5 @@
 require 'compass'
+require 'mysql2'
 require 'sinatra/base'
 require 'tilt/erb'
 
@@ -12,6 +13,15 @@ module ExampleMapper
       config.sass_dir = 'views'
     end
 
+    def client
+      Mysql2::Client.new(
+        host: 'db',
+        username: 'user',
+        password: 'userpw',
+        database: 'mapper'
+      )
+    end
+
     get "/styles.css" do
       scss :style
     end
@@ -21,11 +31,28 @@ module ExampleMapper
     end
 
     post '/' do
-      redirect '/workspace'
+      story_id = SecureRandom.uuid
+      card_id = SecureRandom.uuid
+      text = client.escape(params[:story])
+
+      client.query("INSERT INTO cards (card_id,story_id,text,state) VALUES('#{card_id}', '#{story_id}', '#{text}', 'saved')")
+      client.query("INSERT INTO stories (story_id,story_card) VALUES('#{story_id}', '#{card_id}')")
+
+      redirect "/workspace/#{story_id}"
     end
 
-    get "/workspace" do
-      erb :"workspace.html"
+    get "/workspace/:id" do
+      @url = request.url
+      @story_id = client.escape(params[:id])
+
+      result = client.query("SELECT * FROM stories WHERE story_id='#{@story_id}'")
+
+      if result.count == 0
+        status 404
+        'Not found!'
+      else
+        erb :"workspace.html"
+      end
     end
   end
 end

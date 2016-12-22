@@ -7,6 +7,15 @@
     <script src="/app.js"></script>
   </head>
   <body>
-    <script>Elm.App.fullscreen({backendUrl: 'ws://' + window.document.location.host + '/'})</script>
+    <div class="invite">
+      Invite others to collaborate with this URL:
+      <a href="<%= @url %>" class="invite__url"><%= @url %></a>
+    </div>
+  <script>
+Elm.App.fullscreen({
+  backendUrl: 'ws://' + window.document.location.host + '/',
+  storyId: '<%= @story_id %>'
+});
+  </script>
   </body>
 </html>

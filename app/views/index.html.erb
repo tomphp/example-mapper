@@ -6,16 +6,75 @@
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <header>
-      <h1>Example Maps</h1>
-      <h2>You stories start here!</h2>
+    <header class="site-title">
+      <h1 class="site-title__main-title">
+        <svg width="254" height="156" class="card card--rule site-title__example-card">
+          <line x1="0" y1="24" x2="254" y2="24" class="card__headline"></line>
+          <line x1="0" y1="36" x2="254" y2="36" class="card__line"></line>
+          <line x1="0" y1="48" x2="254" y2="48" class="card__line"></line>
+          <line x1="0" y1="60" x2="254" y2="60" class="card__line"></line>
+          <line x1="0" y1="72" x2="254" y2="72" class="card__line"></line>
+          <line x1="0" y1="84" x2="254" y2="84" class="card__line"></line>
+          <line x1="0" y1="96" x2="254" y2="96" class="card__line"></line>
+          <line x1="0" y1="108" x2="254" y2="108" class="card__line"></line>
+          <line x1="0" y1="120" x2="254" y2="120" class="card__line"></line>
+          <line x1="0" y1="132" x2="254" y2="132" class="card__line"></line>
+          <line x1="0" y1="144" x2="254" y2="144" class="card__line"></line>
+          <line x1="0" y1="156" x2="254" y2="156" class="card__line"></line>
+          <foreignObject x="12" y="17" width="230" height="132">
+            <p class="card__text card__text--title">Example</p>
+          </foreignObject>
+        </svg>
+        <svg width="254" height="156" class="card card--example site-title__mapper-card">
+          <line x1="0" y1="24" x2="254" y2="24" class="card__headline"></line>
+          <line x1="0" y1="36" x2="254" y2="36" class="card__line"></line>
+          <line x1="0" y1="48" x2="254" y2="48" class="card__line"></line>
+          <line x1="0" y1="60" x2="254" y2="60" class="card__line"></line>
+          <line x1="0" y1="72" x2="254" y2="72" class="card__line"></line>
+          <line x1="0" y1="84" x2="254" y2="84" class="card__line"></line>
+          <line x1="0" y1="96" x2="254" y2="96" class="card__line"></line>
+          <line x1="0" y1="108" x2="254" y2="108" class="card__line"></line>
+          <line x1="0" y1="120" x2="254" y2="120" class="card__line"></line>
+          <line x1="0" y1="132" x2="254" y2="132" class="card__line"></line>
+          <line x1="0" y1="144" x2="254" y2="144" class="card__line"></line>
+          <line x1="0" y1="156" x2="254" y2="156" class="card__line"></line>
+          <foreignObject x="12" y="17" width="230" height="132">
+            <p class="card__text card__text--title">Mapper</p>
+          </foreignObject>
+        </svg>
+      </h1>
+      <h2 class="site-title__sub-title">Your stories start here!</h2>
     </header>
 
-    <h3>What story would you like to map?</h3>
+    <div class="introduction">
+      <p class="introduction__beta-notice">
+        This site is in a very earliy beta state, so expect bugs &amp; missing features.
+        If you would like to report issues or request features then please email
+        <a href="mailto:feedback@example-mapper.io">feedback@example-mapper.io</a>.
+      </p>
 
+      <p>
+        Example Mapping a is a collaborative process used by <abbr>BDD</abbr>
+        teams to discover the examples which describe a new feature.
+        To learn more about Example Mapping, see Matt Wynne's introductory
+        <a href="https://cucumber.io/blog/2015/12/08/example-mapping-introduction"
+           target="_blank">blog post</a>.
+      </p>
+      <p>
+        This site allows remote teams to take advantage of Example Mapping by
+        providing a virtual Example Mapping workspace.
+      </p>
+    </div>
+
+    <div class="new-story">
     <form action="/" method="POST">
-      <div>
-        <svg width="254" height="156" class="card card--story">
+      <p>To start mapping, describe you story in the index card below and click
+        <strong>Start Mapping</strong></p>
+
+      <h3 class="new-story__title">What story would you like to map?</h3>
+
+      <div class="new-story__card card card--story">
+        <svg width="254" height="156">
           <line x1="0" y1="24" x2="254" y2="24" class="card__headline"></line>
           <line x1="0" y1="36" x2="254" y2="36" class="card__line"></line>
           <line x1="0" y1="48" x2="254" y2="48" class="card__line"></line>
@@ -34,7 +93,7 @@
         </svg>
       </div>
 
-      <button>Start Mapping</button>
+      <button class="new-story__button">Start Mapping</button>
     </form>
   </body>
 </html>

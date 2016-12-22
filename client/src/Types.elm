@@ -11,7 +11,9 @@ type CardState
 
 
 type alias Flags =
-    { backendUrl : String }
+    { backendUrl : String
+    , storyId : String
+    }
 
 
 type alias CardId =
@@ -49,4 +51,4 @@ type Msg
     | SaveCard CardId String
     | AddQuestion
     | AddRule
-    | AddExample Int
+    | AddExample String
