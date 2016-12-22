@@ -14,12 +14,15 @@ module ExampleMapper
     end
 
     def client
-      Mysql2::Client.new(
-        host: 'db',
-        username: 'user',
-        password: 'userpw',
-        database: 'mapper'
-      )
+        config = %r(mysql://(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^/]+)/(?<db>[^?]+)\?reconnect=true)
+                 .match(ENV['CLEARDB_DATABASE_URL'])
+
+        @client ||= Mysql2::Client.new(
+          host: config['host'],
+          username: config['user'],
+          password: config['pass'],
+          database: config['db']
+        )
     end
 
     get "/styles.css" do
