@@ -10,7 +10,7 @@ module ExampleMapper
 
       def initialize(app)
         @app     = app
-        @clients = []
+        @clients = {}
         story_id = SecureRandom.uuid
         @state = {
           cards: {
@@ -43,17 +43,23 @@ module ExampleMapper
         return @app.call(env) unless Faye::WebSocket.websocket?(env)
 
         ws = Faye::WebSocket.new(env)
+        story_id = nil
 
-        ws.on :open do |_event|
+        ws.on :open do |event|
+          puts 'OPEN'
           p [:open, ws.object_id]
-          @clients << ws
         end
 
         ws.on :message do |event|
+          puts 'MESSAGE'
           data = JSON.parse(event.data)
           puts "Type = #{data['type']}"
           puts "Story = #{data['story_id']}"
           puts "Packet = #{data.inspect}"
+
+          story_id = data['story_id']
+          @clients[story_id] = [] if @clients[story_id].nil?
+          @clients[story_id] << ws unless @clients[story_id].include? ws
 
           case data['type']
           when 'update_card'
@@ -75,7 +81,7 @@ module ExampleMapper
             @add_example_stmt.execute(data['rule_id'], id)
           end
 
-          @clients.each do |client|
+          @clients[story_id].each do |client|
             client.send({
               type: :update_state,
               state: state(data['story_id'])
@@ -84,10 +90,15 @@ module ExampleMapper
         end
 
         ws.on :close do |event|
+          begin
           puts 'Closing Down'
           p [:close, event.code, event.reason]
-          @clients.delete(ws)
+          @clients[story_id].delete(ws)
+          @clients.delete(story_id) if @clients[story_id].empty?
           ws = nil
+          rescue => e
+            puts e.inspect
+          end
         end
 
         ws.rack_response
