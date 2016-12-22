@@ -9,6 +9,8 @@ module ExampleMapper
       KEEPALIVE_TIME = 15
 
       def initialize(app)
+        puts 'Creating the Middleware'
+
         @app     = app
         @clients = {}
         story_id = SecureRandom.uuid
@@ -40,7 +42,7 @@ module ExampleMapper
       end
 
       def call(env)
-        return @app.call(env) unless Faye::WebSocket.websocket?(env)
+        return @app.call(env.merge(mysql_client: client)) unless Faye::WebSocket.websocket?(env)
 
         ws = Faye::WebSocket.new(env)
         story_id = nil
@@ -93,7 +95,7 @@ module ExampleMapper
           begin
           puts 'Closing Down'
           p [:close, event.code, event.reason]
-          @clients[story_id].delete(ws)
+          @clients[story_id].delete(ws) unless @clients[story_id].nil?
           @clients.delete(story_id) if @clients[story_id].empty?
           ws = nil
           rescue => e
@@ -116,7 +118,9 @@ module ExampleMapper
           password: config['pass'],
           database: config['db'],
           reconnect: true
-        )
+        ).tap do |c|
+          puts 'Creating in the Middleware'
+        end
       end
 
       def state(story_id)

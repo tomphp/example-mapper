@@ -13,17 +13,10 @@ module ExampleMapper
       config.sass_dir = 'views'
     end
 
-    def client
-        config = %r(mysql://(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^/]+)/(?<db>[^?]+)\?reconnect=true)
-                 .match(ENV['CLEARDB_DATABASE_URL'])
-
-        @client ||= Mysql2::Client.new(
-          host: config['host'],
-          username: config['user'],
-          password: config['pass'],
-          database: config['db'],
-          reconnect: true
-        )
+    helpers do
+      def client
+        env[:mysql_client]
+      end
     end
 
     get "/styles.css" do
