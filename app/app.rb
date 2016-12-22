@@ -21,7 +21,8 @@ module ExampleMapper
           host: config['host'],
           username: config['user'],
           password: config['pass'],
-          database: config['db']
+          database: config['db'],
+          reconnect: true
         )
     end
 
