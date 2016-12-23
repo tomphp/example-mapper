@@ -28,17 +28,6 @@ module ExampleMapper
           questions: [
           ]
         }
-
-        @fetch_story_stmt = client.prepare('SELECT * FROM stories WHERE story_id = ?')
-        @fetch_cards_stmt = client.prepare('SELECT * FROM cards WHERE story_id = ?')
-        @fetch_questions_stmt = client.prepare('SELECT * FROM questions WHERE story_id = ? ORDER BY created ASC')
-        @fetch_rules_stmt = client.prepare('SELECT * FROM rules WHERE story_id = ? ORDER BY created ASC')
-        @fetch_examples_stmt = client.prepare('SELECT * FROM examples WHERE rule_card_id = ? ORDER BY created ASC')
-        @update_card_query_stmt = client.prepare('UPDATE cards SET text = ? WHERE card_id = ?')
-        @add_card_stmt = client.prepare('INSERT INTO cards (card_id,story_id,text,state) VALUES(?,?,?,?)')
-        @add_question_stmt = client.prepare('INSERT INTO questions (story_id,card_id,created) VALUES(?,?,NOW())')
-        @add_rule_stmt = client.prepare('INSERT INTO rules (story_id,card_id,created) VALUES(?,?,NOW())')
-        @add_example_stmt = client.prepare('INSERT INTO examples (rule_card_id,card_id,created) VALUES(?,?,NOW())')
       end
 
       def call(env)
@@ -65,22 +54,22 @@ module ExampleMapper
 
           case data['type']
           when 'update_card'
-            @update_card_query_stmt.execute(data['text'], data['id'])
+            update_card_query(data['text'], data['id'])
 
           when 'add_question'
             id = SecureRandom.uuid
-            @add_card_stmt.execute(id, data['story_id'], '', 'saved')
-            @add_question_stmt.execute(data['story_id'], id)
+            add_card(id, data['story_id'], '', 'saved')
+            add_question(data['story_id'], id)
 
           when 'add_rule'
             id = SecureRandom.uuid
-            @add_card_stmt.execute(id, data['story_id'], '', 'saved')
-            @add_rule_stmt.execute(data['story_id'], id)
+            add_card(id, data['story_id'], '', 'saved')
+            add_rule(data['story_id'], id)
 
           when 'add_example'
             id = SecureRandom.uuid
-            @add_card_stmt.execute(id, data['story_id'], '', 'saved')
-            @add_example_stmt.execute(data['rule_id'], id)
+            add_card(id, data['story_id'], '', 'saved')
+            add_example(data['rule_id'], id)
           end
 
           @clients[story_id].each do |client|
@@ -131,7 +120,7 @@ module ExampleMapper
           rules: [],
           questions: []
         }
-        @fetch_cards_stmt.execute(story_id).each do |row|
+        fetch_cards(story_id).each do |row|
           result[:cards][row['card_id']] = {
             id: row['card_id'],
             text: row['text'],
@@ -139,17 +128,17 @@ module ExampleMapper
           }
         end
 
-        row = @fetch_story_stmt.execute(story_id).first
+        row = fetch_story(story_id).first
         result[:story_card] = row['story_card']
 
-        result[:questions] = @fetch_questions_stmt.execute(story_id).map do |row|
+        result[:questions] = fetch_questions(story_id).map do |row|
           row['card_id']
         end
 
-        result[:rules] = @fetch_rules_stmt.execute(story_id).map do |row|
+        result[:rules] = fetch_rules(story_id).map do |row|
           {
             rule_card: row['card_id'],
-            examples: @fetch_examples_stmt.execute(row['card_id']).map do |r|
+            examples: fetch_examples(row['card_id']).map do |r|
               r['card_id']
             end
           }
@@ -160,6 +149,63 @@ module ExampleMapper
         result
       rescue => e
         puts e.inspect
+      end
+
+      def fetch_story(story_id)
+        story_id = client.escape(story_id)
+        client.query("SELECT * FROM stories WHERE story_id = '#{story_id}'")
+      end
+
+      def fetch_cards(story_id)
+        story_id = client.escape(story_id)
+        client.query("SELECT * FROM cards WHERE story_id = '#{story_id}'")
+      end
+
+      def fetch_questions(story_id)
+        story_id = client.escape(story_id)
+        client.query("SELECT * FROM questions WHERE story_id = '#{story_id}' ORDER BY created ASC")
+      end
+
+      def fetch_rules(story_id)
+        story_id = client.escape(story_id)
+        client.query("SELECT * FROM rules WHERE story_id = '#{story_id}' ORDER BY created ASC")
+      end
+
+      def fetch_examples(rule_card_id)
+        rule_card_id = client.escape(rule_card_id)
+        client.query("SELECT * FROM examples WHERE rule_card_id = '#{rule_card_id}' ORDER BY created ASC")
+      end
+
+      def update_card_query(text, card_id)
+        text = client.escape(text)
+        card_id = client.escape(card_id)
+        client.query("UPDATE cards SET text = '#{text}' WHERE card_id = '#{card_id}'")
+      end
+
+      def add_card(card_id, story_id, text, state)
+        card_id = client.escape(card_id)
+        story_id = client.escape(story_id)
+        text = client.escape(text)
+        state = client.escape(state)
+        client.query("INSERT INTO cards (card_id,story_id,text,state) VALUES('#{card_id}','#{story_id}','#{text}','#{state}')")
+      end
+
+      def add_question(story_id, card_id)
+        story_id = client.escape(story_id)
+        card_id = client.escape(card_id)
+        client.query("INSERT INTO questions (story_id,card_id,created) VALUES('#{story_id}','#{card_id}',NOW())")
+      end
+
+      def add_rule(story_id, card_id)
+        story_id = client.escape(story_id)
+        card_id = client.escape(card_id)
+        client.query("INSERT INTO rules (story_id,card_id,created) VALUES('#{story_id}','#{card_id}',NOW())")
+      end
+
+      def add_example(rule_card_id, card_id)
+        rule_card_id = client.escape(rule_card_id)
+        card_id = client.escape(card_id)
+        client.query("INSERT INTO examples (rule_card_id,card_id,created) VALUES('#{rule_card_id}','#{card_id}',NOW())")
       end
     end
   end
