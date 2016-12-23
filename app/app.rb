@@ -15,7 +15,7 @@ module ExampleMapper
 
     helpers do
       def client
-        env[:db_client]
+        env[:mysql_client]
       end
     end
 
@@ -32,8 +32,8 @@ module ExampleMapper
       card_id = SecureRandom.uuid
       text = client.escape(params[:story])
 
-      client.exec_prepared('add_card_stmt', [card_id, story_id, text, 'saved'])
-      client.exec_prepared('add_story_stmt', [story_id, card_id])
+      client.query("INSERT INTO cards (card_id,story_id,text,state) VALUES('#{card_id}', '#{story_id}', '#{text}', 'saved')")
+      client.query("INSERT INTO stories (story_id,story_card) VALUES('#{story_id}', '#{card_id}')")
 
       redirect "/workspace/#{story_id}"
     end
