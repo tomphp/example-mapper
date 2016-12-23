@@ -1,6 +1,6 @@
 require 'faye/websocket'
 require 'json'
-require 'mysql2'
+require 'pg'
 require 'securerandom'
 
 module ExampleMapper
@@ -29,20 +29,21 @@ module ExampleMapper
           ]
         }
 
-        @fetch_story_stmt = client.prepare('SELECT * FROM stories WHERE story_id = ?')
-        @fetch_cards_stmt = client.prepare('SELECT * FROM cards WHERE story_id = ?')
-        @fetch_questions_stmt = client.prepare('SELECT * FROM questions WHERE story_id = ? ORDER BY created ASC')
-        @fetch_rules_stmt = client.prepare('SELECT * FROM rules WHERE story_id = ? ORDER BY created ASC')
-        @fetch_examples_stmt = client.prepare('SELECT * FROM examples WHERE rule_card_id = ? ORDER BY created ASC')
-        @update_card_query_stmt = client.prepare('UPDATE cards SET text = ? WHERE card_id = ?')
-        @add_card_stmt = client.prepare('INSERT INTO cards (card_id,story_id,text,state) VALUES(?,?,?,?)')
-        @add_question_stmt = client.prepare('INSERT INTO questions (story_id,card_id,created) VALUES(?,?,NOW())')
-        @add_rule_stmt = client.prepare('INSERT INTO rules (story_id,card_id,created) VALUES(?,?,NOW())')
-        @add_example_stmt = client.prepare('INSERT INTO examples (rule_card_id,card_id,created) VALUES(?,?,NOW())')
+        db_client.prepare('fetch_story_stmt', 'SELECT * FROM stories WHERE story_id = $1')
+        db_client.prepare('fetch_cards_stmt', 'SELECT * FROM cards WHERE story_id = $1')
+        db_client.prepare('fetch_questions_stmt', 'SELECT * FROM questions WHERE story_id = $1 ORDER BY created ASC')
+        db_client.prepare('fetch_rules_stmt', 'SELECT * FROM rules WHERE story_id = $1 ORDER BY created ASC')
+        db_client.prepare('fetch_examples_stmt', 'SELECT * FROM examples WHERE rule_card_id = $1 ORDER BY created ASC')
+        db_client.prepare('update_card_query_stmt', 'UPDATE cards SET text = $1 WHERE card_id = $2')
+        db_client.prepare('add_story_stmt', 'INSERT INTO stories (story_id,story_card) VALUES($1, $2)')
+        db_client.prepare('add_card_stmt', 'INSERT INTO cards (card_id,story_id,text,state) VALUES($1, $2, $3, $4)')
+        db_client.prepare('add_question_stmt', 'INSERT INTO questions (story_id,card_id,created) VALUES($1, $2, NOW())')
+        db_client.prepare('add_rule_stmt', 'INSERT INTO rules (story_id,card_id,created) VALUES($1, $2, NOW())')
+        db_client.prepare('add_example_stmt', 'INSERT INTO examples (rule_card_id,card_id,created) VALUES($1, $2, NOW())')
       end
 
       def call(env)
-        return @app.call(env.merge(mysql_client: client)) unless Faye::WebSocket.websocket?(env)
+        return @app.call(env.merge(db_client: db_client)) unless Faye::WebSocket.websocket?(env)
 
         ws = Faye::WebSocket.new(env)
         story_id = nil
@@ -65,22 +66,22 @@ module ExampleMapper
 
           case data['type']
           when 'update_card'
-            @update_card_query_stmt.execute(data['text'], data['id'])
+            db_client.exec_prepared('update_card_query_stmt', [data['text'], data['id']])
 
           when 'add_question'
             id = SecureRandom.uuid
-            @add_card_stmt.execute(id, data['story_id'], '', 'saved')
-            @add_question_stmt.execute(data['story_id'], id)
+            db_client.exec_prepared('add_card_stmt', [id, data['story_id'], '', 'saved'])
+            db_client.exec_prepared('add_question_stmt', [data['story_id'], id])
 
           when 'add_rule'
             id = SecureRandom.uuid
-            @add_card_stmt.execute(id, data['story_id'], '', 'saved')
-            @add_rule_stmt.execute(data['story_id'], id)
+            db_client.exec_prepared('add_card_stmt', [id, data['story_id'], '', 'saved'])
+            db_client.exec_prepared('add_rule_stmt', [data['story_id'], id])
 
           when 'add_example'
             id = SecureRandom.uuid
-            @add_card_stmt.execute(id, data['story_id'], '', 'saved')
-            @add_example_stmt.execute(data['rule_id'], id)
+            db_client.exec_prepared('add_card_stmt', [id, data['story_id'], '', 'saved'])
+            db_client.exec_prepared('add_example_stmt', [data['rule_id'], id])
           end
 
           @clients[story_id].each do |client|
@@ -110,19 +111,15 @@ module ExampleMapper
         puts e.inspect
       end
 
-      def client
-        config = %r(mysql://(?<user>[^:]+):(?<pass>[^@]+)@(?<host>[^/]+)/(?<db>[^?]+)\?reconnect=true)
-                 .match(ENV['CLEARDB_DATABASE_URL'])
+      def db_client
+        config = URI.parse(ENV['DATABASE_URL'])
 
-        @client ||= Mysql2::Client.new(
-          host: config['host'],
-          username: config['user'],
-          password: config['pass'],
-          database: config['db'],
-          reconnect: true
-        ).tap do |c|
-          puts 'Creating in the Middleware'
-        end
+        @db_client ||= PG.connect(
+          host: config.host,
+          user: config.user,
+          password: config.password,
+          dbname: config.path[1..-1],
+        )
       end
 
       def state(story_id)
@@ -131,7 +128,7 @@ module ExampleMapper
           rules: [],
           questions: []
         }
-        @fetch_cards_stmt.execute(story_id).each do |row|
+        db_client.exec_prepared('fetch_cards_stmt', [story_id]).each do |row|
           result[:cards][row['card_id']] = {
             id: row['card_id'],
             text: row['text'],
@@ -139,17 +136,17 @@ module ExampleMapper
           }
         end
 
-        row = @fetch_story_stmt.execute(story_id).first
+        row = db_client.exec_prepared('fetch_story_stmt', [story_id]).first
         result[:story_card] = row['story_card']
 
-        result[:questions] = @fetch_questions_stmt.execute(story_id).map do |row|
+        result[:questions] = db_client.exec_prepared('fetch_questions_stmt', [story_id]).map do |row|
           row['card_id']
         end
 
-        result[:rules] = @fetch_rules_stmt.execute(story_id).map do |row|
+        result[:rules] = db_client.exec_prepared('fetch_rules_stmt', [story_id]).map do |row|
           {
             rule_card: row['card_id'],
-            examples: @fetch_examples_stmt.execute(row['card_id']).map do |r|
+            examples: db_client.exec_prepared('fetch_examples_stmt', [row['card_id']]).map do |r|
               r['card_id']
             end
           }
