@@ -14,8 +14,8 @@ module ExampleMapper
     end
 
     helpers do
-      def client
-        env[:mysql_client]
+      def storage
+        env[:storage]
       end
     end
 
@@ -30,19 +30,19 @@ module ExampleMapper
     post '/' do
       story_id = SecureRandom.uuid
       card_id = SecureRandom.uuid
-      text = client.escape(params[:story])
+      text = params[:story]
 
-      client.query("INSERT INTO cards (card_id,story_id,text,state) VALUES('#{card_id}', '#{story_id}', '#{text}', 'saved')")
-      client.query("INSERT INTO stories (story_id,story_card) VALUES('#{story_id}', '#{card_id}')")
+      storage.add_card(card_id, story_id, text, 'saved')
+      storage.add_story(story_id, card_id)
 
       redirect "/workspace/#{story_id}"
     end
 
     get "/workspace/:id" do
       @url = request.url
-      @story_id = client.escape(params[:id])
+      @story_id = params[:id]
 
-      result = client.query("SELECT * FROM stories WHERE story_id='#{@story_id}'")
+      result = storage.fetch_story(@story_id)
 
       if result.count == 0
         status 404
