@@ -13,7 +13,9 @@ group :development do
 end
 
 group :test do
+  gem 'capybara'
   gem 'cucumber'
+  gem 'poltergeist'
   gem 'rspec'
   gem 'rubocop'
 end

@@ -1,19 +1,18 @@
 Before do
   @users = {}
+  @driver = CapybaraDriver.new
 end
 
 Given(/^(\w+) has created a new story$/) do |user|
   step %(#{user} creates a new story "Example Story")
 end
 
-Given(/^(\w+) has joined (\w+)'s story$/) do |user, owner|
-  @users[user] = DomainDriver.join_story(@users[owner].story.id)
+When(/^(\w+) creates a new story "([^"]*)"$/) do |user, text|
+  @driver.create_story(user, text)
 end
 
-When(/^(\w+) creates a new story "([^"]*)"$/) do |user, text|
-  @users[user] = DomainDriver.create_story(text)
-
-  step "#{user} has joined #{user}'s story"
+Given(/^(\w+) has joined (\w+)'s story$/) do |user, owner|
+  @users[user] = DomainDriver.join_story(@users[owner].story.id)
 end
 
 When(/^(\w+) adds a rule "([^"]*)"$/) do |user, text|
