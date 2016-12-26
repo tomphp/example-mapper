@@ -22,7 +22,7 @@ module ExampleMapper
         ws = Faye::WebSocket.new(env)
         story_id = nil
 
-        ws.on :open do |event|
+        ws.on :open do |_event|
           puts 'OPEN'
           p [:open, ws.object_id]
         end
@@ -68,13 +68,13 @@ module ExampleMapper
 
         ws.on :close do |event|
           begin
-          puts 'Closing Down'
-          p [:close, event.code, event.reason]
-          unless @clients[story_id].nil?
-            @clients[story_id].delete(ws)
-            @clients.delete(story_id) if @clients[story_id].empty?
-          end
-          ws = nil
+            puts 'Closing Down'
+            p [:close, event.code, event.reason]
+            unless @clients[story_id].nil?
+              @clients[story_id].delete(ws)
+              @clients.delete(story_id) if @clients[story_id].empty?
+            end
+            ws = nil
           rescue => e
             puts e.inspect
           end

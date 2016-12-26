@@ -19,7 +19,7 @@ module ExampleMapper
       end
     end
 
-    get "/styles.css" do
+    get '/styles.css' do
       scss :style
     end
 
@@ -38,13 +38,13 @@ module ExampleMapper
       redirect "/workspace/#{story_id}"
     end
 
-    get "/workspace/:id" do
+    get '/workspace/:id' do
       @url = request.url
       @story_id = params[:id]
 
       result = storage.fetch_story(@story_id)
 
-      if result.count == 0
+      if result.count.zero?
         status 404
         'Not found!'
       else
