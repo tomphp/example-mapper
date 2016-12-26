@@ -44,7 +44,7 @@ module ExampleMapper
 
       result = storage.fetch_story(@story_id)
 
-      if result.count.zero?
+      if result.nil?
         status 404
         'Not found!'
       else

@@ -40,28 +40,25 @@ module ExampleMapper
 
           case data['type']
           when 'update_card'
-            @storage.update_card_query(data['text'], data['id'])
+            @storage.update_card(data['text'], data['id'])
 
           when 'add_question'
             id = SecureRandom.uuid
-            @storage.add_card(id, data['story_id'], '', 'saved')
-            @storage.add_question(data['story_id'], id)
+            @storage.add_question(data['story_id'], id, '')
 
           when 'add_rule'
             id = SecureRandom.uuid
-            @storage.add_card(id, data['story_id'], '', 'saved')
-            @storage.add_rule(data['story_id'], id)
+            @storage.add_rule(data['story_id'], id, '')
 
           when 'add_example'
             id = SecureRandom.uuid
-            @storage.add_card(id, data['story_id'], '', 'saved')
-            @storage.add_example(data['rule_id'], id)
+            @storage.add_example(data['story_id'], data['rule_id'], id, '')
           end
 
           @clients[story_id].each do |client|
             client.send({
               type: :update_state,
-              state: state(data['story_id'])
+              state: @storage.fetch_story(data['story_id'])
             }.to_json)
           end
         end
@@ -81,43 +78,6 @@ module ExampleMapper
         end
 
         ws.rack_response
-      rescue => e
-        puts e.inspect
-      end
-
-      def state(story_id)
-        result = {
-          cards: {},
-          rules: [],
-          questions: []
-        }
-        @storage.fetch_cards(story_id).each do |row|
-          result[:cards][row['card_id']] = {
-            id: row['card_id'],
-            text: row['text'],
-            state: row['state'].to_sym
-          }
-        end
-
-        row = @storage.fetch_story(story_id).first
-        result[:story_card] = row['story_card']
-
-        result[:questions] = @storage.fetch_questions(story_id).map do |row|
-          row['card_id']
-        end
-
-        result[:rules] = @storage.fetch_rules(story_id).map do |row|
-          {
-            rule_card: row['card_id'],
-            examples: @storage.fetch_examples(row['card_id']).map do |r|
-              r['card_id']
-            end
-          }
-        end
-
-        puts result.inspect
-
-        result
       rescue => e
         puts e.inspect
       end
