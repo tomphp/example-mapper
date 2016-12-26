@@ -18,24 +18,28 @@ module ExampleMapper
         @storage     = Infrastructure::MysqlStorageAdapter.new
       end
 
+      def with_error_handling
+        yield
+      rescue => e
+        puts e.inspect
+        raise e
+      end
+
       def call(env)
         return @app.call(env.merge(storage: @storage)) unless Faye::WebSocket.websocket?(env)
 
         ws = Faye::WebSocket.new(env)
-        story_id = nil
+        story_id = File.basename(env['REQUEST_PATH'])
 
-        ws.on :open do |event|
-          begin
-            story_id = File.basename(env['REQUEST_PATH'])
+        ws.on :open do |_event|
+          with_error_handling do
             @connections.register(story_id, ws)
             p [:open, ws.object_id, story_id]
-          rescue => e
-            puts e.inspect
           end
         end
 
         ws.on :message do |event|
-          begin
+          with_error_handling do
             data = JSON.parse(event.data)
             p [:message, data['type'], story_id, data.inspect]
 
@@ -62,18 +66,14 @@ module ExampleMapper
                 state: @storage.fetch_story(story_id)
               }.to_json)
             end
-          rescue => e
-            puts e.inspect
           end
         end
 
         ws.on :close do |event|
-          begin
+          with_error_handling do
             p [:close, event.code, event.reason, story_id]
             @connections.release(story_id, ws)
             ws = nil
-          rescue => e
-            puts e.inspect
           end
         end
 
