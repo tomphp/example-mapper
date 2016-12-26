@@ -13,8 +13,7 @@
     </div>
   <script>
 Elm.App.fullscreen({
-  backendUrl: 'ws://' + window.document.location.host + '/',
-  storyId: '<%= @story_id %>'
+  backendUrl: '<%= @ws_url %>',
 });
   </script>
   </body>

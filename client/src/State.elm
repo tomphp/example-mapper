@@ -62,27 +62,21 @@ fetchUpdate flags =
     WebSocket.send flags.backendUrl <|
         Enc.encode 0 <|
             Enc.object
-                [ ( "type", Enc.string "fetch_update" )
-                , ( "story_id", Enc.string flags.storyId )
-                ]
+                [ ( "type", Enc.string "fetch_update" ) ]
 
 
 sendAddQuestion : Flags -> String
 sendAddQuestion flags =
     Enc.encode 0 <|
         Enc.object
-            [ ( "type", Enc.string "add_question" )
-            , ( "story_id", Enc.string flags.storyId )
-            ]
+            [ ( "type", Enc.string "add_question" ) ]
 
 
 sendAddRule : Flags -> String
 sendAddRule flags =
     Enc.encode 0 <|
         Enc.object
-            [ ( "type", Enc.string "add_rule" )
-            , ( "story_id", Enc.string flags.storyId )
-            ]
+            [ ( "type", Enc.string "add_rule" ) ]
 
 
 sendAddExample : Flags -> String -> String
@@ -90,7 +84,6 @@ sendAddExample flags ruleId =
     Enc.encode 0 <|
         Enc.object
             [ ( "type", Enc.string "add_example" )
-            , ( "story_id", Enc.string flags.storyId )
             , ( "rule_id", Enc.string ruleId )
             ]
 
@@ -100,7 +93,6 @@ sendUpdateCard flags id text =
     Enc.encode 0 <|
         Enc.object
             [ ( "type", Enc.string "update_card" )
-            , ( "story_id", Enc.string flags.storyId )
             , ( "id", Enc.string id )
             , ( "text", Enc.string text )
             ]

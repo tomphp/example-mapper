@@ -9737,10 +9737,9 @@ var _elm_lang$websocket$WebSocket$onSelfMsg = F3(
 	});
 _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/websocket', init: _elm_lang$websocket$WebSocket$init, onEffects: _elm_lang$websocket$WebSocket$onEffects, onSelfMsg: _elm_lang$websocket$WebSocket$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$websocket$WebSocket$cmdMap, subMap: _elm_lang$websocket$WebSocket$subMap};
 
-var _user$project$Types$Flags = F2(
-	function (a, b) {
-		return {backendUrl: a, storyId: b};
-	});
+var _user$project$Types$Flags = function (a) {
+	return {backendUrl: a};
+};
 var _user$project$Types$Card = F3(
 	function (a, b, c) {
 		return {id: a, state: b, text: c};
@@ -9885,25 +9884,17 @@ var _user$project$State$sendUpdateCard = F3(
 						ctor: '::',
 						_0: {
 							ctor: '_Tuple2',
-							_0: 'story_id',
-							_1: _elm_lang$core$Json_Encode$string(flags.storyId)
+							_0: 'id',
+							_1: _elm_lang$core$Json_Encode$string(id)
 						},
 						_1: {
 							ctor: '::',
 							_0: {
 								ctor: '_Tuple2',
-								_0: 'id',
-								_1: _elm_lang$core$Json_Encode$string(id)
+								_0: 'text',
+								_1: _elm_lang$core$Json_Encode$string(text)
 							},
-							_1: {
-								ctor: '::',
-								_0: {
-									ctor: '_Tuple2',
-									_0: 'text',
-									_1: _elm_lang$core$Json_Encode$string(text)
-								},
-								_1: {ctor: '[]'}
-							}
+							_1: {ctor: '[]'}
 						}
 					}
 				}));
@@ -9925,18 +9916,10 @@ var _user$project$State$sendAddExample = F2(
 						ctor: '::',
 						_0: {
 							ctor: '_Tuple2',
-							_0: 'story_id',
-							_1: _elm_lang$core$Json_Encode$string(flags.storyId)
+							_0: 'rule_id',
+							_1: _elm_lang$core$Json_Encode$string(ruleId)
 						},
-						_1: {
-							ctor: '::',
-							_0: {
-								ctor: '_Tuple2',
-								_0: 'rule_id',
-								_1: _elm_lang$core$Json_Encode$string(ruleId)
-							},
-							_1: {ctor: '[]'}
-						}
+						_1: {ctor: '[]'}
 					}
 				}));
 	});
@@ -9952,15 +9935,7 @@ var _user$project$State$sendAddRule = function (flags) {
 					_0: 'type',
 					_1: _elm_lang$core$Json_Encode$string('add_rule')
 				},
-				_1: {
-					ctor: '::',
-					_0: {
-						ctor: '_Tuple2',
-						_0: 'story_id',
-						_1: _elm_lang$core$Json_Encode$string(flags.storyId)
-					},
-					_1: {ctor: '[]'}
-				}
+				_1: {ctor: '[]'}
 			}));
 };
 var _user$project$State$sendAddQuestion = function (flags) {
@@ -9975,15 +9950,7 @@ var _user$project$State$sendAddQuestion = function (flags) {
 					_0: 'type',
 					_1: _elm_lang$core$Json_Encode$string('add_question')
 				},
-				_1: {
-					ctor: '::',
-					_0: {
-						ctor: '_Tuple2',
-						_0: 'story_id',
-						_1: _elm_lang$core$Json_Encode$string(flags.storyId)
-					},
-					_1: {ctor: '[]'}
-				}
+				_1: {ctor: '[]'}
 			}));
 };
 var _user$project$State$fetchUpdate = function (flags) {
@@ -10001,15 +9968,7 @@ var _user$project$State$fetchUpdate = function (flags) {
 						_0: 'type',
 						_1: _elm_lang$core$Json_Encode$string('fetch_update')
 					},
-					_1: {
-						ctor: '::',
-						_0: {
-							ctor: '_Tuple2',
-							_0: 'story_id',
-							_1: _elm_lang$core$Json_Encode$string(flags.storyId)
-						},
-						_1: {ctor: '[]'}
-					}
+					_1: {ctor: '[]'}
 				})));
 };
 var _user$project$State$update = F2(
@@ -10626,13 +10585,8 @@ var _user$project$App$main = _elm_lang$html$Html$programWithFlags(
 	A2(
 		_elm_lang$core$Json_Decode$andThen,
 		function (backendUrl) {
-			return A2(
-				_elm_lang$core$Json_Decode$andThen,
-				function (storyId) {
-					return _elm_lang$core$Json_Decode$succeed(
-						{backendUrl: backendUrl, storyId: storyId});
-				},
-				A2(_elm_lang$core$Json_Decode$field, 'storyId', _elm_lang$core$Json_Decode$string));
+			return _elm_lang$core$Json_Decode$succeed(
+				{backendUrl: backendUrl});
 		},
 		A2(_elm_lang$core$Json_Decode$field, 'backendUrl', _elm_lang$core$Json_Decode$string)));
 

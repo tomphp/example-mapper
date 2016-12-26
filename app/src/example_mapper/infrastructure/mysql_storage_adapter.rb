@@ -64,7 +64,8 @@ module ExampleMapper
               "SET text = '#{e(text)}' WHERE card_id = '#{e(card_id)}'")
       end
 
-      def add_story(story_id, card_id)
+      def add_story(story_id, card_id, text)
+        add_card(card_id, story_id, text, 'saved')
         query('INSERT INTO stories (story_id,story_card) '\
               "VALUES('#{e(story_id)}', '#{e(card_id)}')")
       end

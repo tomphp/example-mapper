@@ -1,6 +1,7 @@
 require 'faye/websocket'
 require 'json'
 require 'example_mapper/infrastructure/mysql_storage_adapter'
+require 'example_mapper/infrastructure/websocket_connections'
 require 'securerandom'
 
 module ExampleMapper
@@ -11,9 +12,10 @@ module ExampleMapper
       def initialize(app)
         puts 'Creating the Middleware'
 
-        @app     = app
-        @clients = {}
-        @storage = Infrastructure::MysqlStorageAdapter.new
+        @app         = app
+        @clients     = {}
+        @connections = Infrastructure::WebsocketConnections.new
+        @storage     = Infrastructure::MysqlStorageAdapter.new
       end
 
       def call(env)
@@ -22,55 +24,53 @@ module ExampleMapper
         ws = Faye::WebSocket.new(env)
         story_id = nil
 
-        ws.on :open do |_event|
-          puts 'OPEN'
-          p [:open, ws.object_id]
+        ws.on :open do |event|
+          begin
+            story_id = File.basename(env['REQUEST_PATH'])
+            @connections.register(story_id, ws)
+            p [:open, ws.object_id, story_id]
+          rescue => e
+            puts e.inspect
+          end
         end
 
         ws.on :message do |event|
-          puts 'MESSAGE'
-          data = JSON.parse(event.data)
-          puts "Type = #{data['type']}"
-          puts "Story = #{data['story_id']}"
-          puts "Packet = #{data.inspect}"
+          begin
+            data = JSON.parse(event.data)
+            p [:message, data['type'], story_id, data.inspect]
 
-          story_id = data['story_id']
-          @clients[story_id] = [] if @clients[story_id].nil?
-          @clients[story_id] << ws unless @clients[story_id].include? ws
+            case data['type']
+            when 'update_card'
+              @storage.update_card(data['text'], data['id'])
 
-          case data['type']
-          when 'update_card'
-            @storage.update_card(data['text'], data['id'])
+            when 'add_question'
+              id = SecureRandom.uuid
+              @storage.add_question(story_id, id, '')
 
-          when 'add_question'
-            id = SecureRandom.uuid
-            @storage.add_question(data['story_id'], id, '')
+            when 'add_rule'
+              id = SecureRandom.uuid
+              @storage.add_rule(story_id, id, '')
 
-          when 'add_rule'
-            id = SecureRandom.uuid
-            @storage.add_rule(data['story_id'], id, '')
+            when 'add_example'
+              id = SecureRandom.uuid
+              @storage.add_example(story_id, data['rule_id'], id, '')
+            end
 
-          when 'add_example'
-            id = SecureRandom.uuid
-            @storage.add_example(data['story_id'], data['rule_id'], id, '')
-          end
-
-          @clients[story_id].each do |client|
-            client.send({
-              type: :update_state,
-              state: @storage.fetch_story(data['story_id'])
-            }.to_json)
+            @connections.for(story_id).each do |socket|
+              socket.send({
+                type: :update_state,
+                state: @storage.fetch_story(story_id)
+              }.to_json)
+            end
+          rescue => e
+            puts e.inspect
           end
         end
 
         ws.on :close do |event|
           begin
-            puts 'Closing Down'
-            p [:close, event.code, event.reason]
-            unless @clients[story_id].nil?
-              @clients[story_id].delete(ws)
-              @clients.delete(story_id) if @clients[story_id].empty?
-            end
+            p [:close, event.code, event.reason, story_id]
+            @connections.release(story_id, ws)
             ws = nil
           rescue => e
             puts e.inspect
