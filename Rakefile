@@ -1,5 +1,9 @@
-require 'standalone_migrations'
-StandaloneMigrations::Tasks.load_tasks
+begin
+  require 'standalone_migrations'
+  StandaloneMigrations::Tasks.load_tasks
+rescue LoadError
+  puts 'Skipping migrations'
+end
 
 namespace :tests do
   begin
