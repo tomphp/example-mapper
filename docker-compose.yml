@@ -28,7 +28,7 @@ services:
     - gems:/usr/local/bundle
     - .:/usr/src/app
     working_dir: /usr/src/app
-    command: "sh -c 'bundle install && bundle exec rerun --background --dir lib --dir app -- bundle exec rackup --host 0.0.0.0 -p 9000'"
+    command: "sh -c 'bundle install && bundle exec rerun --background --dir app -- bundle exec rackup --host 0.0.0.0 -p 9000'"
     environment:
       CLEARDB_DATABASE_URL: mysql://user:userpw@db/mapper?reconnect=true
     depends_on:

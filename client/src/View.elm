@@ -1,7 +1,7 @@
 module View exposing (view)
 
 import Dict
-import Types exposing (Model, Msg(..), Card, Rule, CardState(..), CardId)
+import Types exposing (Model, Msg(..), Card, Rule, CardState(..), CardId, AddButtonState(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -18,12 +18,27 @@ view model =
         ]
 
 
+addButton : CardType -> AddButtonState -> Msg -> String -> String -> String -> Html Msg
+addButton cardType state action id cssClass label =
+    case state of
+        Preparing ->
+            card
+                cardType
+                { id = id
+                , state = Editing
+                , text = ""
+                }
+
+        _ ->
+            button [ onClick action, class ("card " ++ cssClass) ] [ text label ]
+
+
 rules : Model -> Html Msg
 rules model =
     div [ class "rules" ] <|
         List.append
-            (List.map (rule model) model.rules)
-            [ div [] [ button [ onClick AddRule, class "card card--rule" ] [ text "Add Rule" ] ]
+            (List.map (rule model) (Dict.values model.rules))
+            [ div [] [ addButton NewRuleCard model.addRule AddRule "new-rule" "card--rule" "Add Rule" ]
             , div [] [ div [ class "rule-padding" ] [] ]
             ]
 
@@ -51,7 +66,7 @@ questions model =
             (List.concat
                 [ [ h2 [] [ text "Questions" ] ]
                 , (List.map question cards)
-                , [ button [ onClick AddQuestion, class "card card--question" ] [ text "Add Question" ] ]
+                , [ addButton NewQuestionCard model.addQuestion AddQuestion "new-question" "card--question" "Add Question" ]
                 ]
             )
 
@@ -60,18 +75,22 @@ rule : Model -> Rule -> Html Msg
 rule model r =
     div [ class "rule" ]
         [ card RuleCard <| theCard model r.ruleCard
-        , examples r.ruleCard <| cardList model r.examples
+        , examples r <| cardList model r.examples
         ]
 
 
-examples : String -> List Card -> Html Msg
-examples ruleId es =
+examples : Rule -> List Card -> Html Msg
+examples rule es =
     div [ class "examples" ]
         (List.append
             (List.map example es)
-            [ button
-                [ onClick (AddExample ruleId), class "card card--example" ]
-                [ text "Add Example" ]
+            [ addButton
+                (NewExampleCard rule.ruleCard)
+                rule.addExample
+                (AddExample rule.ruleCard)
+                "new-example"
+                "card--example"
+                "Add Example"
             ]
         )
 

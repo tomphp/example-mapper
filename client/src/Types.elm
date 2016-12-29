@@ -1,4 +1,14 @@
-module Types exposing (Model, Msg(..), CardState(..), Card, Rule, CardId, Flags)
+module Types
+    exposing
+        ( Model
+        , Msg(..)
+        , CardState(..)
+        , AddButtonState(..)
+        , Card
+        , Rule
+        , CardId
+        , Flags
+        )
 
 import Dict exposing (Dict)
 
@@ -8,6 +18,12 @@ type CardState
     | Locked
     | Saving
     | Saved
+
+
+type AddButtonState
+    = Button
+    | Preparing
+    | Sending
 
 
 type alias Flags =
@@ -28,16 +44,19 @@ type alias Card =
 type alias Rule =
     { ruleCard : CardId
     , examples : List CardId
+    , addExample : AddButtonState
     }
 
 
 type alias Model =
     { cards : Dict CardId Card
     , storyCard : CardId
-    , rules : List Rule
+    , rules : Dict CardId Rule
     , questions : List CardId
     , error : Maybe String
     , flags : Flags
+    , addRule : AddButtonState
+    , addQuestion : AddButtonState
     }
 
 
@@ -50,3 +69,6 @@ type Msg
     | AddQuestion
     | AddRule
     | AddExample String
+    | SendNewQuestion String
+    | SendNewRule String
+    | SendNewExample String String

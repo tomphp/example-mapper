@@ -14,3 +14,13 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+
+-- main =
+--     Html.program
+--         { init = init
+--         , view = view
+--         , update = update
+--         , subscriptions = subscriptions
+--         }

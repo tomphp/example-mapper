@@ -15,6 +15,9 @@ type CardType
     | RuleCard
     | ExampleCard
     | QuestionCard
+    | NewRuleCard
+    | NewExampleCard String
+    | NewQuestionCard
 
 
 cardWidth =
@@ -43,7 +46,7 @@ card cardType card =
             [ width <| toString cardWidth
             , height <| toString cardHeight
             ]
-            (List.append cardBackground [ cardContent card ])
+            (List.append cardBackground [ cardContent cardType card ])
         ]
 
 
@@ -84,6 +87,15 @@ cardTypeClass cardType =
             " card--example"
 
         QuestionCard ->
+            " card--question"
+
+        NewRuleCard ->
+            " card--rule"
+
+        NewExampleCard _ ->
+            " card--example"
+
+        NewQuestionCard ->
             " card--question"
 
 
@@ -127,8 +139,8 @@ lines =
             lines
 
 
-cardContent : Card -> Svg Msg
-cardContent card =
+cardContent : CardType -> Card -> Svg Msg
+cardContent cardType card =
     foreignObject
         [ x <| toString lineHeight
         , y <| toString textOffset
@@ -137,7 +149,7 @@ cardContent card =
         ]
         (case card.state of
             Editing ->
-                cardInput card
+                cardInput cardType card
 
             _ ->
                 cardText card.text
@@ -146,18 +158,41 @@ cardContent card =
 
 cardText : String -> List (Html.Html Msg)
 cardText text =
-    [ Html.p [ class "card__text" ] [ Html.text text ] ]
+    [ Html.p [ class "card__text" ] (nl2br text) ]
 
 
-cardInput : Card -> List (Html.Html Msg)
-cardInput card =
+nl2br : String -> List (Html.Html msg)
+nl2br text =
+    String.split "\n" text
+        |> List.map Html.text
+        |> List.intersperse (Html.br [] [])
+
+
+cardInput : CardType -> Card -> List (Html.Html Msg)
+cardInput cardType card =
     [ Html.textarea
         [ Html.Attributes.id ("card-input-" ++ card.id)
         , Html.Attributes.class "card__input"
-        , Html.Events.on "blur" (Json.map (SaveCard card.id) inputValue)
+        , Html.Events.on "blur" (Json.map (saveAction cardType card) inputValue)
         ]
         [ Html.text card.text ]
     ]
+
+
+saveAction : CardType -> Card -> (String -> Msg)
+saveAction cardType card =
+    case cardType of
+        NewRuleCard ->
+            SendNewRule
+
+        NewQuestionCard ->
+            SendNewQuestion
+
+        NewExampleCard id ->
+            SendNewExample id
+
+        _ ->
+            SaveCard card.id
 
 
 inputValue : Json.Decoder String

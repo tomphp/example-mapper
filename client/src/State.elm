@@ -2,100 +2,108 @@ module State exposing (init, update, subscriptions)
 
 import Dict exposing (Dict)
 import Dom
-import Json.Decode as Dec
-import Json.Encode as Enc
-import Types exposing (Model, Msg(..), Card, Rule, CardState(..), CardId, Flags)
+import Json.Decode exposing (decodeString)
+import List
+import Maybe.Extra
+import Requests
+import StateDecoder exposing (..)
+import Types
+    exposing
+        ( Model
+        , Msg(..)
+        , Rule
+        , CardState(..)
+        , AddButtonState(..)
+        , CardId
+        , Flags
+        )
 import Task
 import WebSocket
 
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( initialModel flags, fetchUpdate flags )
+    ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
+
+
+
+-- init : ( Model, Cmd Msg )
+-- init =
+--     let
+--         flags =
+--             { backendUrl = "ws://localhost:9000/workspace/626e107c-9ca7-4a2a-b1d1-10b076df7cc6" }
+--     in
+--         ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
 
 
 initialModel : Flags -> Model
 initialModel flags =
     { cards = Dict.empty
     , storyCard = ""
-    , rules = []
+    , rules = Dict.empty
     , questions = []
     , error = Nothing
     , flags = flags
+    , addRule = Button
+    , addQuestion = Button
     }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        Noop ->
-            ( model, Cmd.none )
+    let
+        send =
+            WebSocket.send model.flags.backendUrl
+    in
+        case msg of
+            Noop ->
+                ( model, Cmd.none )
 
-        GetUpdate ->
-            ( model, fetchUpdate model.flags )
+            GetUpdate ->
+                ( model, Requests.refresh |> send )
 
-        UpdateModel update ->
-            ( updateModel model update, Cmd.none )
+            UpdateModel update ->
+                ( updateModel model update, Cmd.none )
 
-        EditCard id ->
-            ( updateCardState model id Editing
-            , Task.attempt (always Noop) (Dom.focus <| "card-input-" ++ id)
-            )
+            EditCard id ->
+                ( updateCardState model id Editing, focusCardInput id )
 
-        SaveCard id text ->
-            ( updateCardState model id Saving
-            , WebSocket.send model.flags.backendUrl <| sendUpdateCard model.flags id text
-            )
+            SaveCard id text ->
+                ( updateCardState model id Saving
+                , Requests.updateCard id text |> send
+                )
 
-        AddQuestion ->
-            ( model, WebSocket.send model.flags.backendUrl <| sendAddQuestion model.flags )
+            AddQuestion ->
+                ( { model | addQuestion = Preparing }, focusCardInput "new-rule" )
 
-        AddRule ->
-            ( model, WebSocket.send model.flags.backendUrl <| sendAddRule model.flags )
+            AddRule ->
+                ( { model | addRule = Preparing }, focusCardInput "new-rule" )
 
-        AddExample ruleId ->
-            ( model, WebSocket.send model.flags.backendUrl <| sendAddExample model.flags ruleId )
+            AddExample ruleId ->
+                ( updateAddExampleState model ruleId Preparing
+                , focusCardInput "new-example"
+                )
 
+            SendNewQuestion text ->
+                ( { model | addQuestion = Button }, Requests.addQuestion text |> send )
 
-fetchUpdate : Flags -> Cmd Msg
-fetchUpdate flags =
-    WebSocket.send flags.backendUrl <|
-        Enc.encode 0 <|
-            Enc.object
-                [ ( "type", Enc.string "fetch_update" ) ]
+            SendNewRule text ->
+                ( { model | addRule = Button }, Requests.addRule text |> send )
 
-
-sendAddQuestion : Flags -> String
-sendAddQuestion flags =
-    Enc.encode 0 <|
-        Enc.object
-            [ ( "type", Enc.string "add_question" ) ]
-
-
-sendAddRule : Flags -> String
-sendAddRule flags =
-    Enc.encode 0 <|
-        Enc.object
-            [ ( "type", Enc.string "add_rule" ) ]
+            SendNewExample ruleId text ->
+                ( updateAddExampleState model ruleId Button
+                , Requests.addExample ruleId text |> send
+                )
 
 
-sendAddExample : Flags -> String -> String
-sendAddExample flags ruleId =
-    Enc.encode 0 <|
-        Enc.object
-            [ ( "type", Enc.string "add_example" )
-            , ( "rule_id", Enc.string ruleId )
-            ]
+updateAddExampleState : Model -> CardId -> AddButtonState -> Model
+updateAddExampleState model ruleId state =
+    { model | rules = Dict.update ruleId (Maybe.map (\r -> { r | addExample = state })) model.rules }
 
 
-sendUpdateCard : Flags -> CardId -> String -> String
-sendUpdateCard flags id text =
-    Enc.encode 0 <|
-        Enc.object
-            [ ( "type", Enc.string "update_card" )
-            , ( "id", Enc.string id )
-            , ( "text", Enc.string text )
-            ]
+focusCardInput : String -> Cmd Msg
+focusCardInput id =
+    Task.attempt (always Noop) (Dom.focus <| "card-input-" ++ id)
 
 
 subscriptions : Model -> Sub Msg
@@ -103,71 +111,27 @@ subscriptions model =
     WebSocket.listen model.flags.backendUrl UpdateModel
 
 
-updateCard : CardState -> String -> Card -> Card
-updateCard state text card =
-    { card | state = state, text = text }
-
-
 updateCardState : Model -> CardId -> CardState -> Model
 updateCardState model id state =
     { model
-        | cards = Dict.update id (Maybe.map (\card -> { card | state = state })) model.cards
+        | cards =
+            Dict.update
+                id
+                (Maybe.map (\card -> { card | state = state }))
+                model.cards
     }
 
 
 updateModel : Model -> String -> Model
 updateModel model update =
-    case (Dec.decodeString (modelDecoder model.flags) update) of
+    case (decodeString (modelDecoder model.flags) update) of
         Ok m ->
-            m
+            { model
+                | cards = m.cards
+                , storyCard = m.storyCard
+                , rules = m.rules
+                , questions = m.questions
+            }
 
         Err msg ->
             { model | error = Just msg }
-
-
-modelDecoder : Flags -> Dec.Decoder Model
-modelDecoder flags =
-    Dec.field "state" <|
-        Dec.map6 Model
-            (Dec.field "cards" <| Dec.dict card)
-            (Dec.field "story_card" Dec.string)
-            (Dec.field "rules" <| Dec.list rule)
-            (Dec.field "questions" <| Dec.list Dec.string)
-            (Dec.succeed Nothing)
-            (Dec.succeed flags)
-
-
-rule : Dec.Decoder Rule
-rule =
-    Dec.map2 Rule
-        (Dec.field "rule_card" Dec.string)
-        (Dec.field "examples" <| Dec.list Dec.string)
-
-
-card : Dec.Decoder Card
-card =
-    Dec.map3 Card
-        (Dec.field "id" Dec.string)
-        (Dec.field "state" cardState)
-        (Dec.field "text" Dec.string)
-
-
-cardState : Dec.Decoder CardState
-cardState =
-    Dec.map stringToCardState Dec.string
-
-
-stringToCardState : String -> CardState
-stringToCardState s =
-    case s of
-        "editing" ->
-            Editing
-
-        "locked" ->
-            Locked
-
-        "saving" ->
-            Saving
-
-        _ ->
-            Saved

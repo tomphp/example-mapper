@@ -49,15 +49,15 @@ module ExampleMapper
 
             when 'add_question'
               id = SecureRandom.uuid
-              @storage.add_question(story_id, id, '')
+              @storage.add_question(story_id, id, data['text'])
 
             when 'add_rule'
               id = SecureRandom.uuid
-              @storage.add_rule(story_id, id, '')
+              @storage.add_rule(story_id, id, data['text'])
 
             when 'add_example'
               id = SecureRandom.uuid
-              @storage.add_example(story_id, data['rule_id'], id, '')
+              @storage.add_example(story_id, data['rule_id'], id, data['text'])
             end
 
             @connections.for(story_id).each do |socket|
