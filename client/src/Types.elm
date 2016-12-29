@@ -43,6 +43,7 @@ type alias Card =
 
 type alias Rule =
     { ruleCard : CardId
+    , position : Int
     , examples : List CardId
     , addExample : AddButtonState
     }

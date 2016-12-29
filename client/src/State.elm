@@ -31,7 +31,7 @@ init flags =
 -- init =
 --     let
 --         flags =
---             { backendUrl = "ws://localhost:9000/workspace/626e107c-9ca7-4a2a-b1d1-10b076df7cc6" }
+--             { backendUrl = "ws://localhost:9000/workspace/8f0d042c-96e9-496b-8d26-2d6c63b14663" }
 --     in
 --         ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
 
@@ -74,7 +74,7 @@ update msg model =
                 )
 
             AddQuestion ->
-                ( { model | addQuestion = Preparing }, focusCardInput "new-rule" )
+                ( { model | addQuestion = Preparing }, focusCardInput "new-question" )
 
             AddRule ->
                 ( { model | addRule = Preparing }, focusCardInput "new-rule" )

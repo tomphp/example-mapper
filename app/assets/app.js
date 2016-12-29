@@ -9910,9 +9910,9 @@ var _user$project$Types$Card = F3(
 	function (a, b, c) {
 		return {id: a, state: b, text: c};
 	});
-var _user$project$Types$Rule = F3(
-	function (a, b, c) {
-		return {ruleCard: a, examples: b, addExample: c};
+var _user$project$Types$Rule = F4(
+	function (a, b, c, d) {
+		return {ruleCard: a, position: b, examples: c, addExample: d};
 	});
 var _user$project$Types$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
@@ -10088,10 +10088,11 @@ var _user$project$StateDecoder$card = A4(
 	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$StateDecoder$cardState),
 	A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string));
-var _user$project$StateDecoder$rule = A4(
-	_elm_lang$core$Json_Decode$map3,
+var _user$project$StateDecoder$rule = A5(
+	_elm_lang$core$Json_Decode$map4,
 	_user$project$Types$Rule,
 	A2(_elm_lang$core$Json_Decode$field, 'rule_card', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
 	A2(
 		_elm_lang$core$Json_Decode$field,
 		'examples',
@@ -10231,7 +10232,7 @@ var _user$project$State$update = F2(
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{addQuestion: _user$project$Types$Preparing}),
-					_1: _user$project$State$focusCardInput('new-rule')
+					_1: _user$project$State$focusCardInput('new-question')
 				};
 			case 'AddRule':
 				return {
@@ -10772,7 +10773,12 @@ var _user$project$View$rules = function (model) {
 			A2(
 				_elm_lang$core$List$map,
 				_user$project$View$rule(model),
-				_elm_lang$core$Dict$values(model.rules)),
+				A2(
+					_elm_lang$core$List$sortBy,
+					function (_) {
+						return _.position;
+					},
+					_elm_lang$core$Dict$values(model.rules))),
 			{
 				ctor: '::',
 				_0: A2(

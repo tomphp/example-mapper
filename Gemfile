@@ -10,6 +10,7 @@ gem 'sinatra'
 
 group :development do
   gem 'rerun'
+  gem 'standalone_migrations'
 end
 
 group :test do

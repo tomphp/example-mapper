@@ -46,6 +46,7 @@ module ExampleMapper
         result[:rules] = fetch_rules(story_id).map do |row|
           {
             rule_card: row['card_id'],
+            position: row['position'],
             examples: fetch_examples(row['card_id']).map do |r|
               r['card_id']
             end
@@ -77,9 +78,19 @@ module ExampleMapper
       end
 
       def add_rule(story_id, card_id, text)
-        add_card(card_id, story_id, text, 'saved')
-        query('INSERT INTO rules (story_id,card_id,created) '\
-              "VALUES('#{e(story_id)}','#{e(card_id)}',NOW())")
+        transaction do
+          add_card(card_id, story_id, text, 'saved')
+          max_pos = query('SELECT MAX(position) AS position '\
+                          "FROM rules WHERE story_id = '#{e(story_id)}'")
+                    .first['position']
+
+          max_pos = max_pos.nil? ? 0 : max_pos
+
+          query('INSERT INTO rules (story_id,card_id,position) '\
+                "VALUES('#{e(story_id)}','#{e(card_id)}',#{max_pos + 1})")
+        end
+      rescue => e
+        puts e.inspect
       end
 
       def add_example(story_id, rule_card_id, card_id, text)
@@ -89,6 +100,18 @@ module ExampleMapper
       end
 
       private
+
+      def transaction
+        raise ArgumentError, 'No block was given' unless block_given?
+
+        begin
+          query('BEGIN')
+          yield
+          query('COMMIT')
+        rescue
+          query('ROLLBACK')
+        end
+      end
 
       def add_card(card_id, story_id, text, state)
         query('INSERT INTO cards '\
@@ -116,7 +139,7 @@ module ExampleMapper
 
       def fetch_rules(story_id)
         query('SELECT * FROM rules '\
-              "WHERE story_id = '#{e(story_id)}' ORDER BY created ASC")
+              "WHERE story_id = '#{e(story_id)}' ORDER BY position ASC")
       end
 
       def fetch_examples(rule_card_id)

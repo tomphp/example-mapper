@@ -1,3 +1,6 @@
+require 'standalone_migrations'
+StandaloneMigrations::Tasks.load_tasks
+
 namespace :tests do
   begin
     require 'rubocop/rake_task'

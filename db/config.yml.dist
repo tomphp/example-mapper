@@ -1,0 +1,16 @@
+development: &development
+  adapter: mysql2
+  encoding: utf8
+  reconnect: false
+  pool: 5
+  database: mapper
+  host: 127.0.0.1
+  username: user
+  password: userpw
+
+production:
+  <<: *development
+  database: ???
+  host: ???
+  username: ???
+  password: ???

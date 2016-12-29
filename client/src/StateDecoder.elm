@@ -45,8 +45,9 @@ rulePair rule =
 
 rule : Decoder Rule
 rule =
-    map3 Rule
+    map4 Rule
         (field "rule_card" string)
+        (field "position" int)
         (field "examples" <| list string)
         (succeed Button)
 

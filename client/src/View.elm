@@ -37,7 +37,7 @@ rules : Model -> Html Msg
 rules model =
     div [ class "rules" ] <|
         List.append
-            (List.map (rule model) (Dict.values model.rules))
+            (List.map (rule model) (Dict.values model.rules |> List.sortBy .position))
             [ div [] [ addButton NewRuleCard model.addRule AddRule "new-rule" "card--rule" "Add Rule" ]
             , div [] [ div [ class "rule-padding" ] [] ]
             ]
@@ -66,7 +66,14 @@ questions model =
             (List.concat
                 [ [ h2 [] [ text "Questions" ] ]
                 , (List.map question cards)
-                , [ addButton NewQuestionCard model.addQuestion AddQuestion "new-question" "card--question" "Add Question" ]
+                , [ addButton
+                        NewQuestionCard
+                        model.addQuestion
+                        AddQuestion
+                        "new-question"
+                        "card--question"
+                        "Add Question"
+                  ]
                 ]
             )
 
