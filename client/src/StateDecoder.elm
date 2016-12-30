@@ -21,7 +21,7 @@ modelDecoder flags =
             (field "cards" <| dict card)
             (maybe <| field "story_card" card)
             (field "rules" <| rules)
-            (field "questions" <| list string)
+            (field "questions" <| dict card)
             (succeed Nothing)
             (succeed flags)
             (succeed Button)

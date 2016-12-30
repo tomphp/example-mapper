@@ -10153,7 +10153,7 @@ var _user$project$StateDecoder$modelDecoder = function (flags) {
 			A2(
 				_elm_lang$core$Json_Decode$field,
 				'questions',
-				_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)),
+				_elm_lang$core$Json_Decode$dict(_user$project$StateDecoder$card)),
 			_elm_lang$core$Json_Decode$succeed(_elm_lang$core$Maybe$Nothing),
 			_elm_lang$core$Json_Decode$succeed(flags),
 			_elm_lang$core$Json_Decode$succeed(_user$project$Types$Button),
@@ -10301,7 +10301,20 @@ var _user$project$State$update = F2(
 				var _p8 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p8, _user$project$Types$Editing),
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							questions: A3(
+								_elm_lang$core$Dict$update,
+								_p8,
+								_elm_lang$core$Maybe$map(
+									function (c) {
+										return _elm_lang$core$Native_Utils.update(
+											c,
+											{state: _user$project$Types$Editing});
+									}),
+								model.questions)
+						}),
 					_1: _user$project$State$focusCardInput(_p8)
 				};
 			case 'SaveQuestion':
@@ -10363,25 +10376,15 @@ var _user$project$State$update = F2(
 		}
 	});
 var _user$project$State$initialModel = function (flags) {
-	return {
-		cards: _elm_lang$core$Dict$empty,
-		storyCard: _elm_lang$core$Maybe$Nothing,
-		rules: _elm_lang$core$Dict$empty,
-		questions: {ctor: '[]'},
-		error: _elm_lang$core$Maybe$Nothing,
-		flags: flags,
-		addRule: _user$project$Types$Button,
-		addQuestion: _user$project$Types$Button
-	};
+	return {cards: _elm_lang$core$Dict$empty, storyCard: _elm_lang$core$Maybe$Nothing, rules: _elm_lang$core$Dict$empty, questions: _elm_lang$core$Dict$empty, error: _elm_lang$core$Maybe$Nothing, flags: flags, addRule: _user$project$Types$Button, addQuestion: _user$project$Types$Button};
 };
-var _user$project$State$init = function () {
-	var flags = {backendUrl: 'ws://localhost:9000/workspace/8f0d042c-96e9-496b-8d26-2d6c63b14663'};
+var _user$project$State$init = function (flags) {
 	return {
 		ctor: '_Tuple2',
 		_0: _user$project$State$initialModel(flags),
 		_1: A2(_elm_lang$websocket$WebSocket$send, flags.backendUrl, _user$project$Requests$refresh)
 	};
-}();
+};
 
 var _user$project$CardView$divisibleBy = F2(
 	function (divisor, number) {
@@ -10811,7 +10814,6 @@ var _user$project$View$addButton = function (model) {
 	};
 };
 var _user$project$View$questions = function (model) {
-	var cards = A2(_user$project$View$cardList, model.cards, model.questions);
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -10836,7 +10838,10 @@ var _user$project$View$questions = function (model) {
 				},
 				_1: {
 					ctor: '::',
-					_0: A2(_elm_lang$core$List$map, _user$project$View$question, cards),
+					_0: A2(
+						_elm_lang$core$List$map,
+						_user$project$View$question,
+						_elm_lang$core$Dict$values(model.questions)),
 					_1: {
 						ctor: '::',
 						_0: {
@@ -10994,8 +10999,15 @@ var _user$project$View$AddButton = F6(
 		return {state: a, action: b, id: c, cssClass: d, label: e, cardType: f};
 	});
 
-var _user$project$App$main = _elm_lang$html$Html$program(
-	{init: _user$project$State$init, view: _user$project$View$view, update: _user$project$State$update, subscriptions: _user$project$State$subscriptions})();
+var _user$project$App$main = _elm_lang$html$Html$programWithFlags(
+	{init: _user$project$State$init, view: _user$project$View$view, update: _user$project$State$update, subscriptions: _user$project$State$subscriptions})(
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		function (backendUrl) {
+			return _elm_lang$core$Json_Decode$succeed(
+				{backendUrl: backendUrl});
+		},
+		A2(_elm_lang$core$Json_Decode$field, 'backendUrl', _elm_lang$core$Json_Decode$string)));
 
 var Elm = {};
 Elm['App'] = Elm['App'] || {};

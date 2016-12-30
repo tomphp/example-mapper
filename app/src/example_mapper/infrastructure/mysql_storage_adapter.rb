@@ -26,7 +26,7 @@ module ExampleMapper
         result = {
           cards: {},
           rules: [],
-          questions: []
+          questions: {}
         }
         fetch_cards(story_id).each do |row|
           result[:cards][row['card_id']] = {
@@ -36,11 +36,12 @@ module ExampleMapper
           }
         end
 
-        row = fetch_story_record(story_id).first
-        result[:story_card] = result[:cards][row['story_id']]
+        fetch_story_record(story_id).first.tap do |row|
+          result[:story_card] = result[:cards][row['story_id']]
+        end
 
-        result[:questions] = fetch_questions(story_id).map do |row|
-          row['card_id']
+        fetch_questions(story_id).each do |row|
+          result[:questions][row['card_id']] = result[:cards][row['card_id']]
         end
 
         result[:rules] = fetch_rules(story_id).map do |row|

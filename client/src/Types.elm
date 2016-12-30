@@ -64,7 +64,7 @@ type alias Model =
     { cards : Dict CardId Card
     , storyCard : Maybe Card
     , rules : Dict CardId Rule
-    , questions : List CardId
+    , questions : Dict CardId Card
     , error : Maybe String
     , flags : Flags
     , addRule : AddButtonState

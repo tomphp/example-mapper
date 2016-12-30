@@ -21,18 +21,19 @@ import Task
 import WebSocket
 
 
--- init : Flags -> ( Model, Cmd Msg )
--- init flags =
---     ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
+init : Flags -> ( Model, Cmd Msg )
+init flags =
+    ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
 
 
-init : ( Model, Cmd Msg )
-init =
-    let
-        flags =
-            { backendUrl = "ws://localhost:9000/workspace/8f0d042c-96e9-496b-8d26-2d6c63b14663" }
-    in
-        ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
+
+-- init : ( Model, Cmd Msg )
+-- init =
+--     let
+--         flags =
+--             { backendUrl = "ws://localhost:9000/workspace/8f0d042c-96e9-496b-8d26-2d6c63b14663" }
+--     in
+--         ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
 
 
 initialModel : Flags -> Model
@@ -40,7 +41,7 @@ initialModel flags =
     { cards = Dict.empty
     , storyCard = Nothing
     , rules = Dict.empty
-    , questions = []
+    , questions = Dict.empty
     , error = Nothing
     , flags = flags
     , addRule = Button
@@ -91,7 +92,9 @@ update msg model =
                 )
 
             EditQuestion id ->
-                ( updateCardState model id Editing, focusCardInput id )
+                ( { model | questions = Dict.update id (Maybe.map (\c -> { c | state = Editing })) model.questions }
+                , focusCardInput id
+                )
 
             SaveQuestion id text ->
                 ( updateCardState model id Saving

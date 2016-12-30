@@ -131,17 +131,13 @@ theCard cards id =
 
 questions : Model -> Html Msg
 questions model =
-    let
-        cards =
-            cardList model.cards model.questions
-    in
-        div [ class "questions" ]
-            (List.concat
-                [ [ h2 [] [ text "Questions" ] ]
-                , (List.map question cards)
-                , [ addButton model NewQuestionCard ]
-                ]
-            )
+    div [ class "questions" ]
+        (List.concat
+            [ [ h2 [] [ text "Questions" ] ]
+            , Dict.values model.questions |> List.map question
+            , [ addButton model NewQuestionCard ]
+            ]
+        )
 
 
 rule : Model -> Rule -> Html Msg
