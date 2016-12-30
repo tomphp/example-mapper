@@ -10147,7 +10147,8 @@ var _user$project$StateDecoder$modelDecoder = function (flags) {
 				_elm_lang$core$Json_Decode$field,
 				'cards',
 				_elm_lang$core$Json_Decode$dict(_user$project$StateDecoder$card)),
-			A2(_elm_lang$core$Json_Decode$field, 'story_card', _elm_lang$core$Json_Decode$string),
+			_elm_lang$core$Json_Decode$maybe(
+				A2(_elm_lang$core$Json_Decode$field, 'story_card', _elm_lang$core$Json_Decode$string)),
 			A2(_elm_lang$core$Json_Decode$field, 'rules', _user$project$StateDecoder$rules),
 			A2(
 				_elm_lang$core$Json_Decode$field,
@@ -10354,7 +10355,7 @@ var _user$project$State$update = F2(
 var _user$project$State$initialModel = function (flags) {
 	return {
 		cards: _elm_lang$core$Dict$empty,
-		storyId: '',
+		storyId: _elm_lang$core$Maybe$Nothing,
 		rules: _elm_lang$core$Dict$empty,
 		questions: {ctor: '[]'},
 		error: _elm_lang$core$Maybe$Nothing,
@@ -10713,14 +10714,7 @@ var _user$project$View$example = function (e) {
 };
 var _user$project$View$theCard = F2(
 	function (cards, id) {
-		return A2(
-			_elm_lang$core$Maybe$withDefault,
-			{
-				id: A2(_elm_lang$core$Basics_ops['++'], 'error', id),
-				text: 'Loading...',
-				state: _user$project$Types$Saving
-			},
-			A2(_elm_lang$core$Dict$get, id, cards));
+		return A2(_elm_lang$core$Dict$get, id, cards);
 	});
 var _user$project$View$cardList = F2(
 	function (cards, ids) {
@@ -10877,9 +10871,12 @@ var _user$project$View$rule = F2(
 			{
 				ctor: '::',
 				_0: A2(
-					_user$project$CardView$card,
-					_user$project$Types$RuleCard,
-					A2(_user$project$View$theCard, model.cards, r.ruleCard)),
+					_elm_lang$core$Maybe$withDefault,
+					_elm_lang$html$Html$text('Error'),
+					A2(
+						_elm_lang$core$Maybe$map,
+						_user$project$CardView$card(_user$project$Types$RuleCard),
+						A2(_user$project$View$theCard, model.cards, r.ruleCard))),
 				_1: {
 					ctor: '::',
 					_0: A3(
@@ -10963,9 +10960,15 @@ var _user$project$View$view = function (model) {
 			_1: {
 				ctor: '::',
 				_0: A2(
-					_user$project$CardView$card,
-					_user$project$Types$StoryCard,
-					A2(_user$project$View$theCard, model.cards, model.storyId)),
+					_elm_lang$core$Maybe$withDefault,
+					_elm_lang$html$Html$text('Error'),
+					A2(
+						_elm_lang$core$Maybe$map,
+						_user$project$CardView$card(_user$project$Types$StoryCard),
+						A2(
+							_elm_lang$core$Maybe$andThen,
+							_user$project$View$theCard(model.cards),
+							model.storyId))),
 				_1: {
 					ctor: '::',
 					_0: _user$project$View$rules(model),

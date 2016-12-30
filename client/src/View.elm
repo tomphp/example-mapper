@@ -91,7 +91,10 @@ view : Model -> Html Msg
 view model =
     div [ class "workspace" ]
         [ p [] [ text <| Maybe.withDefault "" model.error ]
-        , card StoryCard <| theCard model.cards model.storyId
+        , model.storyId
+            |> Maybe.andThen (theCard model.cards)
+            |> Maybe.map (card StoryCard)
+            |> Maybe.withDefault (text "Error")
         , rules model
         , questions model
         ]
@@ -114,14 +117,17 @@ cardList cards ids =
         |> List.filterMap identity
 
 
-theCard : Dict CardId Card -> CardId -> Card
+theCard : Dict CardId Card -> CardId -> Maybe Card
 theCard cards id =
     Dict.get id cards
-        |> Maybe.withDefault
-            { id = "error" ++ id
-            , text = "Loading..."
-            , state = Saving
-            }
+
+
+
+-- |> Maybe.withDefault
+--     { id = "error" ++ id
+--     , text = "Loading..."
+--     , state = Saving
+--     }
 
 
 questions : Model -> Html Msg
@@ -142,7 +148,9 @@ questions model =
 rule : Model -> Rule -> Html Msg
 rule model r =
     div [ class "rule" ]
-        [ card RuleCard <| theCard model.cards r.ruleCard
+        [ theCard model.cards r.ruleCard
+            |> Maybe.map (card RuleCard)
+            |> Maybe.withDefault (text "Error")
         , examples model r <| cardList model.cards r.examples
         ]
 

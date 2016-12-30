@@ -39,7 +39,7 @@ init flags =
 initialModel : Flags -> Model
 initialModel flags =
     { cards = Dict.empty
-    , storyId = ""
+    , storyId = Nothing
     , rules = Dict.empty
     , questions = []
     , error = Nothing

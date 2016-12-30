@@ -62,7 +62,7 @@ type alias Rule =
 
 type alias Model =
     { cards : Dict CardId Card
-    , storyId : CardId
+    , storyId : Maybe CardId
     , rules : Dict CardId Rule
     , questions : List CardId
     , error : Maybe String
