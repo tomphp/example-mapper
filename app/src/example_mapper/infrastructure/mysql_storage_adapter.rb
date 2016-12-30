@@ -37,7 +37,7 @@ module ExampleMapper
         end
 
         row = fetch_story_record(story_id).first
-        result[:story_card] = row['story_id']
+        result[:story_card] = result[:cards][row['story_id']]
 
         result[:questions] = fetch_questions(story_id).map do |row|
           row['card_id']

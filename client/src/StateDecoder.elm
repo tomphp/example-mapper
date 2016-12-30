@@ -19,7 +19,7 @@ modelDecoder flags =
     field "state" <|
         map8 Model
             (field "cards" <| dict card)
-            (maybe <| field "story_card" string)
+            (maybe <| field "story_card" card)
             (field "rules" <| rules)
             (field "questions" <| list string)
             (succeed Nothing)

@@ -6,21 +6,20 @@ import Html
 import Types
 
 
-main : Program Types.Flags Types.Model Types.Msg
-main =
-    Html.programWithFlags
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
-
-
-
+-- main : Program Types.Flags Types.Model Types.Msg
 -- main =
---     Html.program
+--     Html.programWithFlags
 --         { init = init
 --         , view = view
 --         , update = update
 --         , subscriptions = subscriptions
 --         }
+
+
+main =
+    Html.program
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        }

@@ -91,8 +91,7 @@ view : Model -> Html Msg
 view model =
     div [ class "workspace" ]
         [ p [] [ text <| Maybe.withDefault "" model.error ]
-        , model.storyId
-            |> Maybe.andThen (theCard model.cards)
+        , model.storyCard
             |> Maybe.map (card StoryCard)
             |> Maybe.withDefault (text "Error")
         , rules model

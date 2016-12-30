@@ -9916,7 +9916,7 @@ var _user$project$Types$Rule = F4(
 	});
 var _user$project$Types$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
-		return {cards: a, storyId: b, rules: c, questions: d, error: e, flags: f, addRule: g, addQuestion: h};
+		return {cards: a, storyCard: b, rules: c, questions: d, error: e, flags: f, addRule: g, addQuestion: h};
 	});
 var _user$project$Types$NewQuestionCard = {ctor: 'NewQuestionCard'};
 var _user$project$Types$NewExampleCard = function (a) {
@@ -10148,7 +10148,7 @@ var _user$project$StateDecoder$modelDecoder = function (flags) {
 				'cards',
 				_elm_lang$core$Json_Decode$dict(_user$project$StateDecoder$card)),
 			_elm_lang$core$Json_Decode$maybe(
-				A2(_elm_lang$core$Json_Decode$field, 'story_card', _elm_lang$core$Json_Decode$string)),
+				A2(_elm_lang$core$Json_Decode$field, 'story_card', _user$project$StateDecoder$card)),
 			A2(_elm_lang$core$Json_Decode$field, 'rules', _user$project$StateDecoder$rules),
 			A2(
 				_elm_lang$core$Json_Decode$field,
@@ -10170,7 +10170,7 @@ var _user$project$State$updateModel = F2(
 			var _p1 = _p0._0;
 			return _elm_lang$core$Native_Utils.update(
 				model,
-				{cards: _p1.cards, storyId: _p1.storyId, rules: _p1.rules, questions: _p1.questions});
+				{cards: _p1.cards, storyCard: _p1.storyCard, rules: _p1.rules, questions: _p1.questions});
 		} else {
 			return _elm_lang$core$Native_Utils.update(
 				model,
@@ -10243,64 +10243,74 @@ var _user$project$State$update = F2(
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'EditStory':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							storyCard: A2(
+								_elm_lang$core$Maybe$map,
+								function (c) {
+									return _elm_lang$core$Native_Utils.update(
+										c,
+										{state: _user$project$Types$Editing});
+								},
+								model.storyCard)
+						}),
+					_1: _user$project$State$focusCardInput(_p2._0)
+				};
+			case 'SaveStory':
 				var _p3 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p3, _user$project$Types$Editing),
-					_1: _user$project$State$focusCardInput(_p3)
+					_0: A3(_user$project$State$updateCardState, model, _p3, _user$project$Types$Saving),
+					_1: send(
+						A2(_user$project$Requests$updateCard, _p3, _p2._1))
 				};
-			case 'SaveStory':
+			case 'EditRule':
 				var _p4 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p4, _user$project$Types$Saving),
-					_1: send(
-						A2(_user$project$Requests$updateCard, _p4, _p2._1))
+					_0: A3(_user$project$State$updateCardState, model, _p4, _user$project$Types$Editing),
+					_1: _user$project$State$focusCardInput(_p4)
 				};
-			case 'EditRule':
+			case 'SaveRule':
 				var _p5 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p5, _user$project$Types$Editing),
-					_1: _user$project$State$focusCardInput(_p5)
+					_0: A3(_user$project$State$updateCardState, model, _p5, _user$project$Types$Saving),
+					_1: send(
+						A2(_user$project$Requests$updateCard, _p5, _p2._1))
 				};
-			case 'SaveRule':
+			case 'EditExample':
 				var _p6 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p6, _user$project$Types$Saving),
-					_1: send(
-						A2(_user$project$Requests$updateCard, _p6, _p2._1))
+					_0: A3(_user$project$State$updateCardState, model, _p6, _user$project$Types$Editing),
+					_1: _user$project$State$focusCardInput(_p6)
 				};
-			case 'EditExample':
+			case 'SaveExample':
 				var _p7 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p7, _user$project$Types$Editing),
-					_1: _user$project$State$focusCardInput(_p7)
+					_0: A3(_user$project$State$updateCardState, model, _p7, _user$project$Types$Saving),
+					_1: send(
+						A2(_user$project$Requests$updateCard, _p7, _p2._1))
 				};
-			case 'SaveExample':
+			case 'EditQuestion':
 				var _p8 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p8, _user$project$Types$Saving),
-					_1: send(
-						A2(_user$project$Requests$updateCard, _p8, _p2._1))
+					_0: A3(_user$project$State$updateCardState, model, _p8, _user$project$Types$Editing),
+					_1: _user$project$State$focusCardInput(_p8)
 				};
-			case 'EditQuestion':
+			case 'SaveQuestion':
 				var _p9 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p9, _user$project$Types$Editing),
-					_1: _user$project$State$focusCardInput(_p9)
-				};
-			case 'SaveQuestion':
-				var _p10 = _p2._0;
-				return {
-					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateCardState, model, _p10, _user$project$Types$Saving),
+					_0: A3(_user$project$State$updateCardState, model, _p9, _user$project$Types$Saving),
 					_1: send(
-						A2(_user$project$Requests$updateCard, _p10, _p2._1))
+						A2(_user$project$Requests$updateCard, _p9, _p2._1))
 				};
 			case 'AddQuestion':
 				return {
@@ -10343,19 +10353,19 @@ var _user$project$State$update = F2(
 						_user$project$Requests$addRule(_p2._0))
 				};
 			default:
-				var _p11 = _p2._0;
+				var _p10 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateAddExampleState, model, _p11, _user$project$Types$Button),
+					_0: A3(_user$project$State$updateAddExampleState, model, _p10, _user$project$Types$Button),
 					_1: send(
-						A2(_user$project$Requests$addExample, _p11, _p2._1))
+						A2(_user$project$Requests$addExample, _p10, _p2._1))
 				};
 		}
 	});
 var _user$project$State$initialModel = function (flags) {
 	return {
 		cards: _elm_lang$core$Dict$empty,
-		storyId: _elm_lang$core$Maybe$Nothing,
+		storyCard: _elm_lang$core$Maybe$Nothing,
 		rules: _elm_lang$core$Dict$empty,
 		questions: {ctor: '[]'},
 		error: _elm_lang$core$Maybe$Nothing,
@@ -10364,13 +10374,14 @@ var _user$project$State$initialModel = function (flags) {
 		addQuestion: _user$project$Types$Button
 	};
 };
-var _user$project$State$init = function (flags) {
+var _user$project$State$init = function () {
+	var flags = {backendUrl: 'ws://localhost:9000/workspace/8f0d042c-96e9-496b-8d26-2d6c63b14663'};
 	return {
 		ctor: '_Tuple2',
 		_0: _user$project$State$initialModel(flags),
 		_1: A2(_elm_lang$websocket$WebSocket$send, flags.backendUrl, _user$project$Requests$refresh)
 	};
-};
+}();
 
 var _user$project$CardView$divisibleBy = F2(
 	function (divisor, number) {
@@ -10965,10 +10976,7 @@ var _user$project$View$view = function (model) {
 					A2(
 						_elm_lang$core$Maybe$map,
 						_user$project$CardView$card(_user$project$Types$StoryCard),
-						A2(
-							_elm_lang$core$Maybe$andThen,
-							_user$project$View$theCard(model.cards),
-							model.storyId))),
+						model.storyCard)),
 				_1: {
 					ctor: '::',
 					_0: _user$project$View$rules(model),
@@ -10986,15 +10994,8 @@ var _user$project$View$AddButton = F6(
 		return {state: a, action: b, id: c, cssClass: d, label: e, cardType: f};
 	});
 
-var _user$project$App$main = _elm_lang$html$Html$programWithFlags(
-	{init: _user$project$State$init, view: _user$project$View$view, update: _user$project$State$update, subscriptions: _user$project$State$subscriptions})(
-	A2(
-		_elm_lang$core$Json_Decode$andThen,
-		function (backendUrl) {
-			return _elm_lang$core$Json_Decode$succeed(
-				{backendUrl: backendUrl});
-		},
-		A2(_elm_lang$core$Json_Decode$field, 'backendUrl', _elm_lang$core$Json_Decode$string)));
+var _user$project$App$main = _elm_lang$html$Html$program(
+	{init: _user$project$State$init, view: _user$project$View$view, update: _user$project$State$update, subscriptions: _user$project$State$subscriptions})();
 
 var Elm = {};
 Elm['App'] = Elm['App'] || {};
