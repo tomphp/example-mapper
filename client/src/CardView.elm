@@ -73,7 +73,7 @@ cardTypeClass cardType =
         RuleCard ->
             " card--rule"
 
-        ExampleCard ->
+        ExampleCard _ ->
             " card--example"
 
         QuestionCard ->
@@ -178,8 +178,8 @@ editAction cardType =
         RuleCard ->
             EditRule
 
-        ExampleCard ->
-            EditExample
+        ExampleCard ruleId ->
+            EditExample ruleId
 
         QuestionCard ->
             EditQuestion
@@ -206,8 +206,8 @@ saveAction cardType card =
         RuleCard ->
             SaveRule card.id
 
-        ExampleCard ->
-            SaveExample card.id
+        ExampleCard ruleId ->
+            SaveExample ruleId card.id
 
         QuestionCard ->
             SaveQuestion card.id

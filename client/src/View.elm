@@ -109,13 +109,6 @@ rules model =
             ]
 
 
-cardList : Dict CardId Card -> List CardId -> List Card
-cardList cards ids =
-    ids
-        |> List.map (\id -> Dict.get id cards)
-        |> List.filterMap identity
-
-
 theCard : Dict CardId Card -> CardId -> Maybe Card
 theCard cards id =
     Dict.get id cards
@@ -143,10 +136,8 @@ questions model =
 rule : Model -> Rule -> Html Msg
 rule model r =
     div [ class "rule" ]
-        [ theCard model.cards r.ruleCard
-            |> Maybe.map (card RuleCard)
-            |> Maybe.withDefault (text "Error")
-        , examples model r <| cardList model.cards r.examples
+        [ card RuleCard r.card
+        , examples model r (Dict.values r.examples)
         ]
 
 
@@ -154,14 +145,14 @@ examples : Model -> Rule -> List Card -> Html Msg
 examples model rule es =
     div [ class "examples" ]
         (List.append
-            (List.map example es)
-            [ addButton model (NewExampleCard rule.ruleCard) ]
+            (List.map (example rule.card.id) es)
+            [ addButton model (NewExampleCard rule.card.id) ]
         )
 
 
-example : Card -> Html Msg
-example e =
-    div [] [ card ExampleCard e ]
+example : CardId -> Card -> Html Msg
+example ruleId e =
+    div [] [ card (ExampleCard ruleId) e ]
 
 
 question : Card -> Html Msg

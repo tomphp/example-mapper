@@ -17,10 +17,10 @@ import Dict exposing (Dict)
 type CardType
     = StoryCard
     | RuleCard
-    | ExampleCard
+    | ExampleCard CardId
     | QuestionCard
     | NewRuleCard
-    | NewExampleCard String
+    | NewExampleCard CardId
     | NewQuestionCard
 
 
@@ -53,16 +53,15 @@ type alias Card =
 
 
 type alias Rule =
-    { ruleCard : CardId
+    { card : Card
     , position : Int
-    , examples : List CardId
+    , examples : Dict CardId Card
     , addExample : AddButtonState
     }
 
 
 type alias Model =
-    { cards : Dict CardId Card
-    , storyCard : Maybe Card
+    { storyCard : Maybe Card
     , rules : Dict CardId Rule
     , questions : Dict CardId Card
     , error : Maybe String
@@ -80,8 +79,8 @@ type Msg
     | SaveStory CardId String
     | EditRule CardId
     | SaveRule CardId String
-    | EditExample CardId
-    | SaveExample CardId String
+    | EditExample CardId CardId
+    | SaveExample CardId CardId String
     | EditQuestion CardId
     | SaveQuestion CardId String
     | AddQuestion

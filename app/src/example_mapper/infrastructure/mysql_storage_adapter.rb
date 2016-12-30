@@ -24,12 +24,13 @@ module ExampleMapper
 
       def fetch_story(story_id)
         result = {
-          cards: {},
           rules: [],
           questions: {}
         }
+
+        cards = {}
         fetch_cards(story_id).each do |row|
-          result[:cards][row['card_id']] = {
+          cards[row['card_id']] = {
             id: row['card_id'],
             text: row['text'],
             state: row['state'].to_sym
@@ -37,19 +38,19 @@ module ExampleMapper
         end
 
         fetch_story_record(story_id).first.tap do |row|
-          result[:story_card] = result[:cards][row['story_id']]
+          result[:story_card] = cards[row['story_id']]
         end
 
         fetch_questions(story_id).each do |row|
-          result[:questions][row['card_id']] = result[:cards][row['card_id']]
+          result[:questions][row['card_id']] = cards[row['card_id']]
         end
 
         result[:rules] = fetch_rules(story_id).map do |row|
           {
-            rule_card: row['card_id'],
+            rule_card: cards[row['card_id']],
             position: row['position'],
-            examples: fetch_examples(row['card_id']).map do |r|
-              r['card_id']
+            examples: fetch_examples(row['card_id']).each_with_object({}) do |r, hash|
+              hash[r['card_id']] = cards[r['card_id']]
             end
           }
         end

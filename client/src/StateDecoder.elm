@@ -17,8 +17,7 @@ import Types
 modelDecoder : Flags -> Decoder Model
 modelDecoder flags =
     field "state" <|
-        map8 Model
-            (field "cards" <| dict card)
+        map7 Model
             (maybe <| field "story_card" card)
             (field "rules" <| rules)
             (field "questions" <| dict card)
@@ -40,15 +39,15 @@ rulePairs =
 
 rulePair : Rule -> ( CardId, Rule )
 rulePair rule =
-    ( rule.ruleCard, rule )
+    ( rule.card.id, rule )
 
 
 rule : Decoder Rule
 rule =
     map4 Rule
-        (field "rule_card" string)
+        (field "rule_card" card)
         (field "position" int)
-        (field "examples" <| list string)
+        (field "examples" <| dict card)
         (succeed Button)
 
 

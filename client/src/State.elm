@@ -12,6 +12,7 @@ import Types
         ( Model
         , Msg(..)
         , Rule
+        , Card
         , CardState(..)
         , AddButtonState(..)
         , CardId
@@ -38,8 +39,7 @@ init flags =
 
 initialModel : Flags -> Model
 initialModel flags =
-    { cards = Dict.empty
-    , storyCard = Nothing
+    { storyCard = Nothing
     , rules = Dict.empty
     , questions = Dict.empty
     , error = Nothing
@@ -47,6 +47,36 @@ initialModel flags =
     , addRule = Button
     , addQuestion = Button
     }
+
+
+newCardState : CardState -> Card -> Card
+newCardState state card =
+    { card | state = state }
+
+
+updateRuleCard : (Card -> Card) -> Rule -> Rule
+updateRuleCard update rule =
+    { rule | card = update rule.card }
+
+
+updateQuestionCard : (Card -> Card) -> CardId -> Model -> Model
+updateQuestionCard update id model =
+    { model | questions = Dict.update id (Maybe.map update) model.questions }
+
+
+updateStoryCard : (Card -> Card) -> Model -> Model
+updateStoryCard update model =
+    { model | storyCard = Maybe.map update model.storyCard }
+
+
+updateExampleCard : (Card -> Card) -> CardId -> Rule -> Rule
+updateExampleCard update id rule =
+    { rule | examples = Dict.update id (Maybe.map update) rule.examples }
+
+
+updateRule : (Rule -> Rule) -> CardId -> Model -> Model
+updateRule update ruleId model =
+    { model | rules = Dict.update ruleId (Maybe.map update) model.rules }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -66,38 +96,42 @@ update msg model =
                 ( updateModel model update, Cmd.none )
 
             EditStory id ->
-                ( { model | storyCard = Maybe.map (\c -> { c | state = Editing }) model.storyCard }
+                ( updateStoryCard (newCardState Editing) model
                 , focusCardInput id
                 )
 
             SaveStory id text ->
-                ( updateCardState model id Saving
+                ( updateStoryCard (newCardState Saving) model
                 , Requests.updateCard id text |> send
                 )
 
             EditRule id ->
-                ( updateCardState model id Editing, focusCardInput id )
+                ( updateRule (updateRuleCard <| newCardState Editing) id model
+                , focusCardInput id
+                )
 
             SaveRule id text ->
-                ( updateCardState model id Saving
+                ( updateRule (updateRuleCard <| newCardState Saving) id model
                 , Requests.updateCard id text |> send
                 )
 
-            EditExample id ->
-                ( updateCardState model id Editing, focusCardInput id )
+            EditExample ruleId id ->
+                ( updateRule (updateExampleCard (newCardState Editing) id) ruleId model
+                , focusCardInput id
+                )
 
-            SaveExample id text ->
-                ( updateCardState model id Saving
+            SaveExample ruleId id text ->
+                ( updateRule (updateExampleCard (newCardState Saving) id) ruleId model
                 , Requests.updateCard id text |> send
                 )
 
             EditQuestion id ->
-                ( { model | questions = Dict.update id (Maybe.map (\c -> { c | state = Editing })) model.questions }
+                ( updateQuestionCard (newCardState Editing) id model
                 , focusCardInput id
                 )
 
             SaveQuestion id text ->
-                ( updateCardState model id Saving
+                ( updateQuestionCard (newCardState Saving) id model
                 , Requests.updateCard id text |> send
                 )
 
@@ -139,24 +173,12 @@ subscriptions model =
     WebSocket.listen model.flags.backendUrl UpdateModel
 
 
-updateCardState : Model -> CardId -> CardState -> Model
-updateCardState model id state =
-    { model
-        | cards =
-            Dict.update
-                id
-                (Maybe.map (\card -> { card | state = state }))
-                model.cards
-    }
-
-
 updateModel : Model -> String -> Model
 updateModel model update =
     case (decodeString (modelDecoder model.flags) update) of
         Ok m ->
             { model
-                | cards = m.cards
-                , storyCard = m.storyCard
+                | storyCard = m.storyCard
                 , rules = m.rules
                 , questions = m.questions
             }
