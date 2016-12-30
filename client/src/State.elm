@@ -65,10 +65,34 @@ update msg model =
             UpdateModel update ->
                 ( updateModel model update, Cmd.none )
 
-            EditCard id ->
+            EditStory id ->
                 ( updateCardState model id Editing, focusCardInput id )
 
-            SaveCard id text ->
+            SaveStory id text ->
+                ( updateCardState model id Saving
+                , Requests.updateCard id text |> send
+                )
+
+            EditRule id ->
+                ( updateCardState model id Editing, focusCardInput id )
+
+            SaveRule id text ->
+                ( updateCardState model id Saving
+                , Requests.updateCard id text |> send
+                )
+
+            EditExample id ->
+                ( updateCardState model id Editing, focusCardInput id )
+
+            SaveExample id text ->
+                ( updateCardState model id Saving
+                , Requests.updateCard id text |> send
+                )
+
+            EditQuestion id ->
+                ( updateCardState model id Editing, focusCardInput id )
+
+            SaveQuestion id text ->
                 ( updateCardState model id Saving
                 , Requests.updateCard id text |> send
                 )

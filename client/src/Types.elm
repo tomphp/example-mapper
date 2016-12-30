@@ -76,8 +76,14 @@ type Msg
     = GetUpdate
     | Noop
     | UpdateModel String
-    | EditCard String
-    | SaveCard CardId String
+    | EditStory CardId
+    | SaveStory CardId String
+    | EditRule CardId
+    | SaveRule CardId String
+    | EditExample CardId
+    | SaveExample CardId String
+    | EditQuestion CardId
+    | SaveQuestion CardId String
     | AddQuestion
     | AddRule
     | AddExample String

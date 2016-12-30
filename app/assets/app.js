@@ -9949,12 +9949,33 @@ var _user$project$Types$AddExample = function (a) {
 };
 var _user$project$Types$AddRule = {ctor: 'AddRule'};
 var _user$project$Types$AddQuestion = {ctor: 'AddQuestion'};
-var _user$project$Types$SaveCard = F2(
+var _user$project$Types$SaveQuestion = F2(
 	function (a, b) {
-		return {ctor: 'SaveCard', _0: a, _1: b};
+		return {ctor: 'SaveQuestion', _0: a, _1: b};
 	});
-var _user$project$Types$EditCard = function (a) {
-	return {ctor: 'EditCard', _0: a};
+var _user$project$Types$EditQuestion = function (a) {
+	return {ctor: 'EditQuestion', _0: a};
+};
+var _user$project$Types$SaveExample = F2(
+	function (a, b) {
+		return {ctor: 'SaveExample', _0: a, _1: b};
+	});
+var _user$project$Types$EditExample = function (a) {
+	return {ctor: 'EditExample', _0: a};
+};
+var _user$project$Types$SaveRule = F2(
+	function (a, b) {
+		return {ctor: 'SaveRule', _0: a, _1: b};
+	});
+var _user$project$Types$EditRule = function (a) {
+	return {ctor: 'EditRule', _0: a};
+};
+var _user$project$Types$SaveStory = F2(
+	function (a, b) {
+		return {ctor: 'SaveStory', _0: a, _1: b};
+	});
+var _user$project$Types$EditStory = function (a) {
+	return {ctor: 'EditStory', _0: a};
 };
 var _user$project$Types$UpdateModel = function (a) {
 	return {ctor: 'UpdateModel', _0: a};
@@ -10220,20 +10241,65 @@ var _user$project$State$update = F2(
 					_0: A2(_user$project$State$updateModel, model, _p2._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'EditCard':
+			case 'EditStory':
 				var _p3 = _p2._0;
 				return {
 					ctor: '_Tuple2',
 					_0: A3(_user$project$State$updateCardState, model, _p3, _user$project$Types$Editing),
 					_1: _user$project$State$focusCardInput(_p3)
 				};
-			case 'SaveCard':
+			case 'SaveStory':
 				var _p4 = _p2._0;
 				return {
 					ctor: '_Tuple2',
 					_0: A3(_user$project$State$updateCardState, model, _p4, _user$project$Types$Saving),
 					_1: send(
 						A2(_user$project$Requests$updateCard, _p4, _p2._1))
+				};
+			case 'EditRule':
+				var _p5 = _p2._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(_user$project$State$updateCardState, model, _p5, _user$project$Types$Editing),
+					_1: _user$project$State$focusCardInput(_p5)
+				};
+			case 'SaveRule':
+				var _p6 = _p2._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(_user$project$State$updateCardState, model, _p6, _user$project$Types$Saving),
+					_1: send(
+						A2(_user$project$Requests$updateCard, _p6, _p2._1))
+				};
+			case 'EditExample':
+				var _p7 = _p2._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(_user$project$State$updateCardState, model, _p7, _user$project$Types$Editing),
+					_1: _user$project$State$focusCardInput(_p7)
+				};
+			case 'SaveExample':
+				var _p8 = _p2._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(_user$project$State$updateCardState, model, _p8, _user$project$Types$Saving),
+					_1: send(
+						A2(_user$project$Requests$updateCard, _p8, _p2._1))
+				};
+			case 'EditQuestion':
+				var _p9 = _p2._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(_user$project$State$updateCardState, model, _p9, _user$project$Types$Editing),
+					_1: _user$project$State$focusCardInput(_p9)
+				};
+			case 'SaveQuestion':
+				var _p10 = _p2._0;
+				return {
+					ctor: '_Tuple2',
+					_0: A3(_user$project$State$updateCardState, model, _p10, _user$project$Types$Saving),
+					_1: send(
+						A2(_user$project$Requests$updateCard, _p10, _p2._1))
 				};
 			case 'AddQuestion':
 				return {
@@ -10276,12 +10342,12 @@ var _user$project$State$update = F2(
 						_user$project$Requests$addRule(_p2._0))
 				};
 			default:
-				var _p5 = _p2._0;
+				var _p11 = _p2._0;
 				return {
 					ctor: '_Tuple2',
-					_0: A3(_user$project$State$updateAddExampleState, model, _p5, _user$project$Types$Button),
+					_0: A3(_user$project$State$updateAddExampleState, model, _p11, _user$project$Types$Button),
 					_1: send(
-						A2(_user$project$Requests$addExample, _p5, _p2._1))
+						A2(_user$project$Requests$addExample, _p11, _p2._1))
 				};
 		}
 	});
@@ -10333,10 +10399,31 @@ var _user$project$CardView$saveAction = F2(
 				return _user$project$Types$SendNewQuestion;
 			case 'NewExampleCard':
 				return _user$project$Types$SendNewExample(_p0._0);
+			case 'StoryCard':
+				return _user$project$Types$SaveStory(card.id);
+			case 'RuleCard':
+				return _user$project$Types$SaveRule(card.id);
+			case 'ExampleCard':
+				return _user$project$Types$SaveExample(card.id);
 			default:
-				return _user$project$Types$SaveCard(card.id);
+				return _user$project$Types$SaveQuestion(card.id);
 		}
 	});
+var _user$project$CardView$editAction = function (cardType) {
+	var _p1 = cardType;
+	switch (_p1.ctor) {
+		case 'StoryCard':
+			return _user$project$Types$EditStory;
+		case 'RuleCard':
+			return _user$project$Types$EditRule;
+		case 'ExampleCard':
+			return _user$project$Types$EditExample;
+		case 'QuestionCard':
+			return _user$project$Types$EditQuestion;
+		default:
+			return _elm_lang$core$Basics$always(_user$project$Types$Noop);
+	}
+};
 var _user$project$CardView$cardInput = F2(
 	function (cardType, card) {
 		return {
@@ -10398,8 +10485,8 @@ var _user$project$CardView$cardText = function (text) {
 	};
 };
 var _user$project$CardView$cardStateClass = function (state) {
-	var _p1 = state;
-	switch (_p1.ctor) {
+	var _p2 = state;
+	switch (_p2.ctor) {
 		case 'Editing':
 			return ' card--editing';
 		case 'Saving':
@@ -10409,8 +10496,8 @@ var _user$project$CardView$cardStateClass = function (state) {
 	}
 };
 var _user$project$CardView$cardTypeClass = function (cardType) {
-	var _p2 = cardType;
-	switch (_p2.ctor) {
+	var _p3 = cardType;
+	switch (_p3.ctor) {
 		case 'StoryCard':
 			return ' card--story';
 		case 'RuleCard':
@@ -10550,8 +10637,8 @@ var _user$project$CardView$cardContent = F2(
 				}
 			},
 			function () {
-				var _p3 = card.state;
-				if (_p3.ctor === 'Editing') {
+				var _p4 = card.state;
+				if (_p4.ctor === 'Editing') {
 					return A2(_user$project$CardView$cardInput, cardType, card);
 				} else {
 					return _user$project$CardView$cardText(card.text);
@@ -10565,7 +10652,7 @@ var _user$project$CardView$card = F2(
 			{
 				ctor: '::',
 				_0: _elm_lang$html$Html_Events$onClick(
-					_user$project$Types$EditCard(card.id)),
+					A2(_user$project$CardView$editAction, cardType, card.id)),
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$html$Html_Attributes$class(
