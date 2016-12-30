@@ -29,7 +29,7 @@ textOffset =
 card : CardType -> Card -> Html.Html Msg
 card cardType card =
     Html.div
-        [ Html.Events.onClick <| editAction cardType <| card.id
+        [ Html.Events.onClick <| EditCard cardType card.id
         , Html.Attributes.class <| cardClass cardType card.state
         ]
         [ svg
@@ -169,25 +169,6 @@ cardInput cardType card =
     ]
 
 
-editAction : CardType -> (String -> Msg)
-editAction cardType =
-    case cardType of
-        StoryCard ->
-            EditStory
-
-        RuleCard ->
-            EditRule
-
-        ExampleCard ruleId ->
-            EditExample ruleId
-
-        QuestionCard ->
-            EditQuestion
-
-        _ ->
-            always Noop
-
-
 saveAction : CardType -> Card -> (String -> Msg)
 saveAction cardType card =
     case cardType of
@@ -201,16 +182,16 @@ saveAction cardType card =
             SendNewExample id
 
         StoryCard ->
-            SaveStory card.id
+            SaveCard cardType card.id
 
         RuleCard ->
-            SaveRule card.id
+            SaveCard cardType card.id
 
         ExampleCard ruleId ->
-            SaveExample ruleId card.id
+            SaveCard cardType card.id
 
         QuestionCard ->
-            SaveQuestion card.id
+            SaveCard cardType card.id
 
 
 inputValue : Json.Decoder String

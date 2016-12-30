@@ -17,10 +17,10 @@ import Dict exposing (Dict)
 type CardType
     = StoryCard
     | RuleCard
-    | ExampleCard CardId
+    | ExampleCard RuleId
     | QuestionCard
     | NewRuleCard
-    | NewExampleCard CardId
+    | NewExampleCard RuleId
     | NewQuestionCard
 
 
@@ -43,6 +43,10 @@ type alias Flags =
 
 type alias CardId =
     String
+
+
+type alias RuleId =
+    CardId
 
 
 type alias Card =
@@ -75,14 +79,8 @@ type Msg
     = GetUpdate
     | Noop
     | UpdateModel String
-    | EditStory CardId
-    | SaveStory CardId String
-    | EditRule CardId
-    | SaveRule CardId String
-    | EditExample CardId CardId
-    | SaveExample CardId CardId String
-    | EditQuestion CardId
-    | SaveQuestion CardId String
+    | EditCard CardType CardId
+    | SaveCard CardType CardId String
     | AddQuestion
     | AddRule
     | AddExample String

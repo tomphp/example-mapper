@@ -17,6 +17,7 @@ import Types
         , AddButtonState(..)
         , CardId
         , Flags
+        , CardType(..)
         )
 import Task
 import WebSocket
@@ -79,6 +80,56 @@ updateRule update ruleId model =
     { model | rules = Dict.update ruleId (Maybe.map update) model.rules }
 
 
+editCard : Model -> CardType -> CardId -> Model
+editCard model cardType id =
+    case cardType of
+        StoryCard ->
+            updateStoryCard (newCardState Editing) model
+
+        RuleCard ->
+            updateRule (updateRuleCard <| newCardState Editing) id model
+
+        ExampleCard ruleId ->
+            updateRule (updateExampleCard (newCardState Editing) id) ruleId model
+
+        QuestionCard ->
+            updateQuestionCard (newCardState Editing) id model
+
+        _ ->
+            model
+
+
+saveCard : Model -> CardType -> CardId -> String -> ( Model, Cmd Msg )
+saveCard model cardType id text =
+    let
+        send =
+            WebSocket.send model.flags.backendUrl
+    in
+        case cardType of
+            StoryCard ->
+                ( updateStoryCard (newCardState Saving) model
+                , Requests.updateCard id text |> send
+                )
+
+            RuleCard ->
+                ( updateRule (updateRuleCard <| newCardState Saving) id model
+                , Requests.updateCard id text |> send
+                )
+
+            ExampleCard ruleId ->
+                ( updateRule (updateExampleCard (newCardState Saving) id) ruleId model
+                , Requests.updateCard id text |> send
+                )
+
+            QuestionCard ->
+                ( updateQuestionCard (newCardState Saving) id model
+                , Requests.updateCard id text |> send
+                )
+
+            _ ->
+                ( model, Cmd.none )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -95,45 +146,11 @@ update msg model =
             UpdateModel update ->
                 ( updateModel model update, Cmd.none )
 
-            EditStory id ->
-                ( updateStoryCard (newCardState Editing) model
-                , focusCardInput id
-                )
+            EditCard cardType cardId ->
+                ( editCard model cardType cardId, focusCardInput cardId )
 
-            SaveStory id text ->
-                ( updateStoryCard (newCardState Saving) model
-                , Requests.updateCard id text |> send
-                )
-
-            EditRule id ->
-                ( updateRule (updateRuleCard <| newCardState Editing) id model
-                , focusCardInput id
-                )
-
-            SaveRule id text ->
-                ( updateRule (updateRuleCard <| newCardState Saving) id model
-                , Requests.updateCard id text |> send
-                )
-
-            EditExample ruleId id ->
-                ( updateRule (updateExampleCard (newCardState Editing) id) ruleId model
-                , focusCardInput id
-                )
-
-            SaveExample ruleId id text ->
-                ( updateRule (updateExampleCard (newCardState Saving) id) ruleId model
-                , Requests.updateCard id text |> send
-                )
-
-            EditQuestion id ->
-                ( updateQuestionCard (newCardState Editing) id model
-                , focusCardInput id
-                )
-
-            SaveQuestion id text ->
-                ( updateQuestionCard (newCardState Saving) id model
-                , Requests.updateCard id text |> send
-                )
+            SaveCard cardType cardId text ->
+                saveCard model cardType cardId text
 
             AddQuestion ->
                 ( { model | addQuestion = Preparing }, focusCardInput "new-question" )
