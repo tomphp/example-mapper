@@ -7,10 +7,21 @@ module Types
         , Card
         , Rule
         , CardId
+        , CardType(..)
         , Flags
         )
 
 import Dict exposing (Dict)
+
+
+type CardType
+    = StoryCard
+    | RuleCard
+    | ExampleCard
+    | QuestionCard
+    | NewRuleCard
+    | NewExampleCard String
+    | NewQuestionCard
 
 
 type CardState

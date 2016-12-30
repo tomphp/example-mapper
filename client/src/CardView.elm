@@ -1,4 +1,4 @@
-module CardView exposing (card, CardType(..))
+module CardView exposing (card)
 
 import Html
 import Html.Attributes
@@ -6,18 +6,8 @@ import Html.Events
 import List
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Types exposing (CardState(..), Msg(..), Card)
+import Types exposing (CardState(..), Msg(..), Card, CardType(..))
 import Json.Decode as Json
-
-
-type CardType
-    = StoryCard
-    | RuleCard
-    | ExampleCard
-    | QuestionCard
-    | NewRuleCard
-    | NewExampleCard String
-    | NewQuestionCard
 
 
 cardWidth =

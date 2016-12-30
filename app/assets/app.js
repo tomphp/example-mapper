@@ -9918,6 +9918,15 @@ var _user$project$Types$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
 		return {cards: a, storyCard: b, rules: c, questions: d, error: e, flags: f, addRule: g, addQuestion: h};
 	});
+var _user$project$Types$NewQuestionCard = {ctor: 'NewQuestionCard'};
+var _user$project$Types$NewExampleCard = function (a) {
+	return {ctor: 'NewExampleCard', _0: a};
+};
+var _user$project$Types$NewRuleCard = {ctor: 'NewRuleCard'};
+var _user$project$Types$QuestionCard = {ctor: 'QuestionCard'};
+var _user$project$Types$ExampleCard = {ctor: 'ExampleCard'};
+var _user$project$Types$RuleCard = {ctor: 'RuleCard'};
+var _user$project$Types$StoryCard = {ctor: 'StoryCard'};
 var _user$project$Types$Saved = {ctor: 'Saved'};
 var _user$project$Types$Saving = {ctor: 'Saving'};
 var _user$project$Types$Locked = {ctor: 'Locked'};
@@ -10590,15 +10599,6 @@ var _user$project$CardView$card = F2(
 				_1: {ctor: '[]'}
 			});
 	});
-var _user$project$CardView$NewQuestionCard = {ctor: 'NewQuestionCard'};
-var _user$project$CardView$NewExampleCard = function (a) {
-	return {ctor: 'NewExampleCard', _0: a};
-};
-var _user$project$CardView$NewRuleCard = {ctor: 'NewRuleCard'};
-var _user$project$CardView$QuestionCard = {ctor: 'QuestionCard'};
-var _user$project$CardView$ExampleCard = {ctor: 'ExampleCard'};
-var _user$project$CardView$RuleCard = {ctor: 'RuleCard'};
-var _user$project$CardView$StoryCard = {ctor: 'StoryCard'};
 
 var _user$project$View$question = function (q) {
 	return A2(
@@ -10610,7 +10610,7 @@ var _user$project$View$question = function (q) {
 		},
 		{
 			ctor: '::',
-			_0: A2(_user$project$CardView$card, _user$project$CardView$QuestionCard, q),
+			_0: A2(_user$project$CardView$card, _user$project$Types$QuestionCard, q),
 			_1: {ctor: '[]'}
 		});
 };
@@ -10620,7 +10620,7 @@ var _user$project$View$example = function (e) {
 		{ctor: '[]'},
 		{
 			ctor: '::',
-			_0: A2(_user$project$CardView$card, _user$project$CardView$ExampleCard, e),
+			_0: A2(_user$project$CardView$card, _user$project$Types$ExampleCard, e),
 			_1: {ctor: '[]'}
 		});
 };
@@ -10749,7 +10749,7 @@ var _user$project$View$questions = function (model) {
 						ctor: '::',
 						_0: {
 							ctor: '::',
-							_0: A2(_user$project$View$addButton, model, _user$project$CardView$NewQuestionCard),
+							_0: A2(_user$project$View$addButton, model, _user$project$Types$NewQuestionCard),
 							_1: {ctor: '[]'}
 						},
 						_1: {ctor: '[]'}
@@ -10774,7 +10774,7 @@ var _user$project$View$examples = F3(
 					_0: A2(
 						_user$project$View$addButton,
 						model,
-						_user$project$CardView$NewExampleCard(rule.ruleCard)),
+						_user$project$Types$NewExampleCard(rule.ruleCard)),
 					_1: {ctor: '[]'}
 				}));
 	});
@@ -10791,7 +10791,7 @@ var _user$project$View$rule = F2(
 				ctor: '::',
 				_0: A2(
 					_user$project$CardView$card,
-					_user$project$CardView$RuleCard,
+					_user$project$Types$RuleCard,
 					A2(_user$project$View$theCard, model.cards, r.ruleCard)),
 				_1: {
 					ctor: '::',
@@ -10830,7 +10830,7 @@ var _user$project$View$rules = function (model) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: A2(_user$project$View$addButton, model, _user$project$CardView$NewRuleCard),
+						_0: A2(_user$project$View$addButton, model, _user$project$Types$NewRuleCard),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -10877,7 +10877,7 @@ var _user$project$View$view = function (model) {
 				ctor: '::',
 				_0: A2(
 					_user$project$CardView$card,
-					_user$project$CardView$StoryCard,
+					_user$project$Types$StoryCard,
 					A2(_user$project$View$theCard, model.cards, model.storyCard)),
 				_1: {
 					ctor: '::',

@@ -1,11 +1,21 @@
 module View exposing (view)
 
 import Dict exposing (Dict)
-import Types exposing (Model, Msg(..), Card, Rule, CardState(..), CardId, AddButtonState(..))
+import Types
+    exposing
+        ( Model
+        , Msg(..)
+        , Card
+        , Rule
+        , CardState(..)
+        , CardId
+        , AddButtonState(..)
+        , CardType(..)
+        )
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import CardView exposing (card, CardType(..))
+import CardView exposing (card)
 
 
 type alias AddButton =
