@@ -9906,9 +9906,9 @@ _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/web
 var _user$project$Types$Flags = function (a) {
 	return {backendUrl: a};
 };
-var _user$project$Types$Card = F3(
-	function (a, b, c) {
-		return {id: a, state: b, text: c};
+var _user$project$Types$Card = F4(
+	function (a, b, c, d) {
+		return {id: a, state: b, text: c, cardType: d};
 	});
 var _user$project$Types$Rule = F4(
 	function (a, b, c, d) {
@@ -10094,12 +10094,31 @@ var _user$project$StateDecoder$stringToCardState = function (s) {
 	}
 };
 var _user$project$StateDecoder$cardState = A2(_elm_lang$core$Json_Decode$map, _user$project$StateDecoder$stringToCardState, _elm_lang$core$Json_Decode$string);
-var _user$project$StateDecoder$card = A4(
-	_elm_lang$core$Json_Decode$map3,
-	_user$project$Types$Card,
-	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$StateDecoder$cardState),
-	A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string));
+var _user$project$StateDecoder$card = function (cardType) {
+	return A5(
+		_elm_lang$core$Json_Decode$map4,
+		_user$project$Types$Card,
+		A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string),
+		A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$StateDecoder$cardState),
+		A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string),
+		_elm_lang$core$Json_Decode$succeed(cardType));
+};
+var _user$project$StateDecoder$exampleCardType = A2(
+	_elm_lang$core$Json_Decode$map,
+	_user$project$Types$ExampleCard,
+	A2(
+		_elm_lang$core$Json_Decode$at,
+		{
+			ctor: '::',
+			_0: 'rule_card',
+			_1: {
+				ctor: '::',
+				_0: 'id',
+				_1: {ctor: '[]'}
+			}
+		},
+		_elm_lang$core$Json_Decode$string));
+var _user$project$StateDecoder$exampleCard = A2(_elm_lang$core$Json_Decode$andThen, _user$project$StateDecoder$card, _user$project$StateDecoder$exampleCardType);
 var _user$project$StateDecoder$dictKeyedBy = function (f) {
 	return function (_p1) {
 		return _elm_lang$core$Dict$fromList(
@@ -10115,22 +10134,44 @@ var _user$project$StateDecoder$dictKeyedBy = function (f) {
 				_p1));
 	};
 };
-var _user$project$StateDecoder$rule = A5(
-	_elm_lang$core$Json_Decode$map4,
-	_user$project$Types$Rule,
-	A2(_elm_lang$core$Json_Decode$field, 'rule_card', _user$project$StateDecoder$card),
-	A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
-	A2(
-		_elm_lang$core$Json_Decode$field,
-		'examples',
+var _user$project$StateDecoder$ruleWithId = function (ruleId) {
+	return A5(
+		_elm_lang$core$Json_Decode$map4,
+		_user$project$Types$Rule,
 		A2(
-			_elm_lang$core$Json_Decode$map,
-			_user$project$StateDecoder$dictKeyedBy(
-				function (_) {
-					return _.id;
-				}),
-			_elm_lang$core$Json_Decode$list(_user$project$StateDecoder$card))),
-	_elm_lang$core$Json_Decode$succeed(_user$project$Types$Button));
+			_elm_lang$core$Json_Decode$field,
+			'rule_card',
+			_user$project$StateDecoder$card(_user$project$Types$RuleCard)),
+		A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
+		A2(
+			_elm_lang$core$Json_Decode$field,
+			'examples',
+			A2(
+				_elm_lang$core$Json_Decode$map,
+				_user$project$StateDecoder$dictKeyedBy(
+					function (_) {
+						return _.id;
+					}),
+				_elm_lang$core$Json_Decode$list(
+					_user$project$StateDecoder$card(
+						_user$project$Types$ExampleCard(ruleId))))),
+		_elm_lang$core$Json_Decode$succeed(_user$project$Types$Button));
+};
+var _user$project$StateDecoder$rule = A2(
+	_elm_lang$core$Json_Decode$andThen,
+	_user$project$StateDecoder$ruleWithId,
+	A2(
+		_elm_lang$core$Json_Decode$at,
+		{
+			ctor: '::',
+			_0: 'rule_card',
+			_1: {
+				ctor: '::',
+				_0: 'id',
+				_1: {ctor: '[]'}
+			}
+		},
+		_elm_lang$core$Json_Decode$string));
 var _user$project$StateDecoder$rules = A2(
 	_elm_lang$core$Json_Decode$map,
 	_user$project$StateDecoder$dictKeyedBy(
@@ -10151,7 +10192,10 @@ var _user$project$StateDecoder$modelDecoder = function (flags) {
 			_elm_lang$core$Json_Decode$map7,
 			_user$project$Types$Model,
 			_elm_lang$core$Json_Decode$maybe(
-				A2(_elm_lang$core$Json_Decode$field, 'story_card', _user$project$StateDecoder$card)),
+				A2(
+					_elm_lang$core$Json_Decode$field,
+					'story_card',
+					_user$project$StateDecoder$card(_user$project$Types$StoryCard))),
 			A2(_elm_lang$core$Json_Decode$field, 'rules', _user$project$StateDecoder$rules),
 			A2(
 				_elm_lang$core$Json_Decode$field,
@@ -10162,7 +10206,8 @@ var _user$project$StateDecoder$modelDecoder = function (flags) {
 						function (_) {
 							return _.id;
 						}),
-					_elm_lang$core$Json_Decode$list(_user$project$StateDecoder$card))),
+					_elm_lang$core$Json_Decode$list(
+						_user$project$StateDecoder$card(_user$project$Types$QuestionCard)))),
 			_elm_lang$core$Json_Decode$succeed(_elm_lang$core$Maybe$Nothing),
 			_elm_lang$core$Json_Decode$succeed(flags),
 			_elm_lang$core$Json_Decode$succeed(_user$project$Types$Button),
@@ -10471,60 +10516,58 @@ var _user$project$View_Card$inputValue = A2(
 		}
 	},
 	_elm_lang$core$Json_Decode$string);
-var _user$project$View_Card$saveAction = F2(
-	function (cardType, card) {
-		var _p0 = cardType;
-		switch (_p0.ctor) {
-			case 'NewRuleCard':
-				return _user$project$Types$SendNewRule;
-			case 'NewQuestionCard':
-				return _user$project$Types$SendNewQuestion;
-			case 'NewExampleCard':
-				return _user$project$Types$SendNewExample(_p0._0);
-			case 'StoryCard':
-				return A2(_user$project$Types$SaveCard, cardType, card.id);
-			case 'RuleCard':
-				return A2(_user$project$Types$SaveCard, cardType, card.id);
-			case 'ExampleCard':
-				return A2(_user$project$Types$SaveCard, cardType, card.id);
-			default:
-				return A2(_user$project$Types$SaveCard, cardType, card.id);
-		}
-	});
-var _user$project$View_Card$cardInput = F2(
-	function (cardType, card) {
-		return {
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$textarea,
-				{
+var _user$project$View_Card$saveAction = function (card) {
+	var _p0 = card.cardType;
+	switch (_p0.ctor) {
+		case 'NewRuleCard':
+			return _user$project$Types$SendNewRule;
+		case 'NewQuestionCard':
+			return _user$project$Types$SendNewQuestion;
+		case 'NewExampleCard':
+			return _user$project$Types$SendNewExample(_p0._0);
+		case 'StoryCard':
+			return A2(_user$project$Types$SaveCard, card.cardType, card.id);
+		case 'RuleCard':
+			return A2(_user$project$Types$SaveCard, card.cardType, card.id);
+		case 'ExampleCard':
+			return A2(_user$project$Types$SaveCard, card.cardType, card.id);
+		default:
+			return A2(_user$project$Types$SaveCard, card.cardType, card.id);
+	}
+};
+var _user$project$View_Card$cardInput = function (card) {
+	return {
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$textarea,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$id(
+					A2(_elm_lang$core$Basics_ops['++'], 'card-input-', card.id)),
+				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$id(
-						A2(_elm_lang$core$Basics_ops['++'], 'card-input-', card.id)),
+					_0: _elm_lang$html$Html_Attributes$class('card__input'),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('card__input'),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html_Events$on,
-								'blur',
-								A2(
-									_elm_lang$core$Json_Decode$map,
-									A2(_user$project$View_Card$saveAction, cardType, card),
-									_user$project$View_Card$inputValue)),
-							_1: {ctor: '[]'}
-						}
+						_0: A2(
+							_elm_lang$html$Html_Events$on,
+							'blur',
+							A2(
+								_elm_lang$core$Json_Decode$map,
+								_user$project$View_Card$saveAction(card),
+								_user$project$View_Card$inputValue)),
+						_1: {ctor: '[]'}
 					}
-				},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(card.text),
-					_1: {ctor: '[]'}
-				}),
-			_1: {ctor: '[]'}
-		};
-	});
+				}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(card.text),
+				_1: {ctor: '[]'}
+			}),
+		_1: {ctor: '[]'}
+	};
+};
 var _user$project$View_Card$nl2br = function (text) {
 	return A2(
 		_elm_lang$core$List$intersperse,
@@ -10678,81 +10721,79 @@ var _user$project$View_Card$cardBackground = function () {
 		},
 		_user$project$View_Card$lines);
 }();
-var _user$project$View_Card$cardContent = F2(
-	function (cardType, card) {
-		return A2(
-			_elm_lang$svg$Svg$foreignObject,
-			{
+var _user$project$View_Card$cardContent = function (card) {
+	return A2(
+		_elm_lang$svg$Svg$foreignObject,
+		{
+			ctor: '::',
+			_0: _elm_lang$svg$Svg_Attributes$x(
+				_elm_lang$core$Basics$toString(_user$project$View_Card$lineHeight)),
+			_1: {
 				ctor: '::',
-				_0: _elm_lang$svg$Svg_Attributes$x(
-					_elm_lang$core$Basics$toString(_user$project$View_Card$lineHeight)),
+				_0: _elm_lang$svg$Svg_Attributes$y(
+					_elm_lang$core$Basics$toString(_user$project$View_Card$textOffset)),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$svg$Svg_Attributes$y(
-						_elm_lang$core$Basics$toString(_user$project$View_Card$textOffset)),
+					_0: _elm_lang$svg$Svg_Attributes$width(
+						_elm_lang$core$Basics$toString(_user$project$View_Card$cardWidth - (2 * _user$project$View_Card$lineHeight))),
 					_1: {
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$width(
-							_elm_lang$core$Basics$toString(_user$project$View_Card$cardWidth - (2 * _user$project$View_Card$lineHeight))),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(_user$project$View_Card$cardHeight - (2 * _user$project$View_Card$lineHeight))),
-							_1: {ctor: '[]'}
-						}
+						_0: _elm_lang$svg$Svg_Attributes$height(
+							_elm_lang$core$Basics$toString(_user$project$View_Card$cardHeight - (2 * _user$project$View_Card$lineHeight))),
+						_1: {ctor: '[]'}
 					}
 				}
-			},
-			function () {
-				var _p3 = card.state;
-				if (_p3.ctor === 'Editing') {
-					return A2(_user$project$View_Card$cardInput, cardType, card);
-				} else {
-					return _user$project$View_Card$cardText(card.text);
-				}
-			}());
-	});
-var _user$project$View_Card$card = F2(
-	function (cardType, card) {
-		return A2(
-			_elm_lang$html$Html$div,
-			{
+			}
+		},
+		function () {
+			var _p3 = card.state;
+			if (_p3.ctor === 'Editing') {
+				return _user$project$View_Card$cardInput(card);
+			} else {
+				return _user$project$View_Card$cardText(card.text);
+			}
+		}());
+};
+var _user$project$View_Card$card = function (card) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Events$onClick(
+				A2(_user$project$Types$EditCard, card.cardType, card.id)),
+			_1: {
 				ctor: '::',
-				_0: _elm_lang$html$Html_Events$onClick(
-					A2(_user$project$Types$EditCard, cardType, card.id)),
-				_1: {
+				_0: _elm_lang$html$Html_Attributes$class(
+					A2(_user$project$View_Card$cardClass, card.cardType, card.state)),
+				_1: {ctor: '[]'}
+			}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$svg$Svg$svg,
+				{
 					ctor: '::',
-					_0: _elm_lang$html$Html_Attributes$class(
-						A2(_user$project$View_Card$cardClass, cardType, card.state)),
-					_1: {ctor: '[]'}
-				}
-			},
-			{
-				ctor: '::',
-				_0: A2(
-					_elm_lang$svg$Svg$svg,
+					_0: _elm_lang$svg$Svg_Attributes$width(
+						_elm_lang$core$Basics$toString(_user$project$View_Card$cardWidth)),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$svg$Svg_Attributes$height(
+							_elm_lang$core$Basics$toString(_user$project$View_Card$cardHeight)),
+						_1: {ctor: '[]'}
+					}
+				},
+				A2(
+					_elm_lang$core$List$append,
+					_user$project$View_Card$cardBackground,
 					{
 						ctor: '::',
-						_0: _elm_lang$svg$Svg_Attributes$width(
-							_elm_lang$core$Basics$toString(_user$project$View_Card$cardWidth)),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(_user$project$View_Card$cardHeight)),
-							_1: {ctor: '[]'}
-						}
-					},
-					A2(
-						_elm_lang$core$List$append,
-						_user$project$View_Card$cardBackground,
-						{
-							ctor: '::',
-							_0: A2(_user$project$View_Card$cardContent, cardType, card),
-							_1: {ctor: '[]'}
-						})),
-				_1: {ctor: '[]'}
-			});
-	});
+						_0: _user$project$View_Card$cardContent(card),
+						_1: {ctor: '[]'}
+					})),
+			_1: {ctor: '[]'}
+		});
+};
 
 var _user$project$View$question = function (q) {
 	return A2(
@@ -10764,7 +10805,7 @@ var _user$project$View$question = function (q) {
 		},
 		{
 			ctor: '::',
-			_0: A2(_user$project$View_Card$card, _user$project$Types$QuestionCard, q),
+			_0: _user$project$View_Card$card(q),
 			_1: {ctor: '[]'}
 		});
 };
@@ -10775,10 +10816,7 @@ var _user$project$View$example = F2(
 			{ctor: '[]'},
 			{
 				ctor: '::',
-				_0: A2(
-					_user$project$View_Card$card,
-					_user$project$Types$ExampleCard(ruleId),
-					e),
+				_0: _user$project$View_Card$card(e),
 				_1: {ctor: '[]'}
 			});
 	});
@@ -10789,10 +10827,8 @@ var _user$project$View$theCard = F2(
 var _user$project$View$displayButton = function (b) {
 	var _p0 = b.state;
 	if (_p0.ctor === 'Preparing') {
-		return A2(
-			_user$project$View_Card$card,
-			b.cardType,
-			{id: b.id, state: _user$project$Types$Editing, text: ''});
+		return _user$project$View_Card$card(
+			{id: b.id, state: _user$project$Types$Editing, text: '', cardType: b.cardType});
 	} else {
 		return A2(
 			_elm_lang$html$Html$button,
@@ -10933,7 +10969,7 @@ var _user$project$View$rule = F2(
 			},
 			{
 				ctor: '::',
-				_0: A2(_user$project$View_Card$card, _user$project$Types$RuleCard, r.card),
+				_0: _user$project$View_Card$card(r.card),
 				_1: {
 					ctor: '::',
 					_0: A3(
@@ -11019,10 +11055,7 @@ var _user$project$View$view = function (model) {
 				_0: A2(
 					_elm_lang$core$Maybe$withDefault,
 					_elm_lang$html$Html$text('Error'),
-					A2(
-						_elm_lang$core$Maybe$map,
-						_user$project$View_Card$card(_user$project$Types$StoryCard),
-						model.storyCard)),
+					A2(_elm_lang$core$Maybe$map, _user$project$View_Card$card, model.storyCard)),
 				_1: {
 					ctor: '::',
 					_0: _user$project$View$rules(model),

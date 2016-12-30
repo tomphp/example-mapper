@@ -26,17 +26,17 @@ textOffset =
     17
 
 
-card : CardType -> Card -> Html.Html Msg
-card cardType card =
+card : Card -> Html.Html Msg
+card card =
     Html.div
-        [ Html.Events.onClick <| EditCard cardType card.id
-        , Html.Attributes.class <| cardClass cardType card.state
+        [ Html.Events.onClick <| EditCard card.cardType card.id
+        , Html.Attributes.class <| cardClass card.cardType card.state
         ]
         [ svg
             [ width <| toString cardWidth
             , height <| toString cardHeight
             ]
-            (List.append cardBackground [ cardContent cardType card ])
+            (List.append cardBackground [ cardContent card ])
         ]
 
 
@@ -129,8 +129,8 @@ lines =
             lines
 
 
-cardContent : CardType -> Card -> Svg Msg
-cardContent cardType card =
+cardContent : Card -> Svg Msg
+cardContent card =
     foreignObject
         [ x <| toString lineHeight
         , y <| toString textOffset
@@ -139,7 +139,7 @@ cardContent cardType card =
         ]
         (case card.state of
             Editing ->
-                cardInput cardType card
+                cardInput card
 
             _ ->
                 cardText card.text
@@ -158,20 +158,20 @@ nl2br text =
         |> List.intersperse (Html.br [] [])
 
 
-cardInput : CardType -> Card -> List (Html.Html Msg)
-cardInput cardType card =
+cardInput : Card -> List (Html.Html Msg)
+cardInput card =
     [ Html.textarea
         [ Html.Attributes.id ("card-input-" ++ card.id)
         , Html.Attributes.class "card__input"
-        , Html.Events.on "blur" (Json.map (saveAction cardType card) inputValue)
+        , Html.Events.on "blur" (Json.map (saveAction card) inputValue)
         ]
         [ Html.text card.text ]
     ]
 
 
-saveAction : CardType -> Card -> (String -> Msg)
-saveAction cardType card =
-    case cardType of
+saveAction : Card -> (String -> Msg)
+saveAction card =
+    case card.cardType of
         NewRuleCard ->
             SendNewRule
 
@@ -182,16 +182,16 @@ saveAction cardType card =
             SendNewExample id
 
         StoryCard ->
-            SaveCard cardType card.id
+            SaveCard card.cardType card.id
 
         RuleCard ->
-            SaveCard cardType card.id
+            SaveCard card.cardType card.id
 
         ExampleCard ruleId ->
-            SaveCard cardType card.id
+            SaveCard card.cardType card.id
 
         QuestionCard ->
-            SaveCard cardType card.id
+            SaveCard card.cardType card.id
 
 
 inputValue : Json.Decoder String

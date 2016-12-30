@@ -70,10 +70,10 @@ displayButton b =
     case b.state of
         Preparing ->
             card
-                b.cardType
                 { id = b.id
                 , state = Editing
                 , text = ""
+                , cardType = b.cardType
                 }
 
         _ ->
@@ -92,7 +92,7 @@ view model =
     div [ class "workspace" ]
         [ p [] [ text <| Maybe.withDefault "" model.error ]
         , model.storyCard
-            |> Maybe.map (card StoryCard)
+            |> Maybe.map card
             |> Maybe.withDefault (text "Error")
         , rules model
         , questions model
@@ -136,7 +136,7 @@ questions model =
 rule : Model -> Rule -> Html Msg
 rule model r =
     div [ class "rule" ]
-        [ card RuleCard r.card
+        [ card r.card
         , examples model r (Dict.values r.examples)
         ]
 
@@ -152,9 +152,9 @@ examples model rule es =
 
 example : CardId -> Card -> Html Msg
 example ruleId e =
-    div [] [ card (ExampleCard ruleId) e ]
+    div [] [ card e ]
 
 
 question : Card -> Html Msg
 question q =
-    div [ class "colum" ] [ card QuestionCard q ]
+    div [ class "colum" ] [ card q ]

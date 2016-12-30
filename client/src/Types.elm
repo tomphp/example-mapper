@@ -6,6 +6,7 @@ module Types
         , AddButtonState(..)
         , Card
         , Rule
+        , RuleId
         , CardId
         , CardType(..)
         , Flags
@@ -53,6 +54,7 @@ type alias Card =
     { id : CardId
     , state : CardState
     , text : String
+    , cardType : CardType
     }
 
 

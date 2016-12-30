@@ -7,10 +7,12 @@ import Types
         ( Model
         , Card
         , CardId
+        , RuleId
         , Rule
         , CardState(..)
         , AddButtonState(..)
         , Flags
+        , CardType(..)
         )
 
 
@@ -18,9 +20,9 @@ modelDecoder : Flags -> Decoder Model
 modelDecoder flags =
     field "state" <|
         map7 Model
-            (maybe <| field "story_card" card)
+            (maybe <| field "story_card" (card StoryCard))
             (field "rules" <| rules)
-            (field "questions" <| map (dictKeyedBy .id) <| list card)
+            (field "questions" <| map (dictKeyedBy .id) <| list (card QuestionCard))
             (succeed Nothing)
             (succeed flags)
             (succeed Button)
@@ -39,19 +41,41 @@ dictKeyedBy f =
 
 rule : Decoder Rule
 rule =
+    (at [ "rule_card", "id" ] string)
+        |> andThen ruleWithId
+
+
+ruleWithId : RuleId -> Decoder Rule
+ruleWithId ruleId =
     map4 Rule
-        (field "rule_card" card)
+        (field "rule_card" (card RuleCard))
         (field "position" int)
-        (field "examples" <| map (dictKeyedBy .id) <| list card)
+        (field "examples" <|
+            map (dictKeyedBy .id) <|
+                list <|
+                    card <|
+                        ExampleCard ruleId
+        )
         (succeed Button)
 
 
-card : Decoder Card
-card =
-    map3 Card
+exampleCard : Decoder Card
+exampleCard =
+    andThen card exampleCardType
+
+
+exampleCardType : Decoder CardType
+exampleCardType =
+    map ExampleCard (at [ "rule_card", "id" ] string)
+
+
+card : CardType -> Decoder Card
+card cardType =
+    map4 Card
         (field "id" string)
         (field "state" cardState)
         (field "text" string)
+        (succeed cardType)
 
 
 cardState : Decoder CardState
