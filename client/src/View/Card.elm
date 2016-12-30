@@ -1,4 +1,4 @@
-module CardView exposing (card)
+module View.Card exposing (card)
 
 import Html
 import Html.Attributes

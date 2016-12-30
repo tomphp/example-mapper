@@ -10439,13 +10439,13 @@ var _user$project$State$init = function (flags) {
 	};
 };
 
-var _user$project$CardView$divisibleBy = F2(
+var _user$project$View_Card$divisibleBy = F2(
 	function (divisor, number) {
 		return _elm_lang$core$Native_Utils.eq(
 			A2(_elm_lang$core$Basics_ops['%'], number, divisor),
 			0);
 	});
-var _user$project$CardView$inputValue = A2(
+var _user$project$View_Card$inputValue = A2(
 	_elm_lang$core$Json_Decode$at,
 	{
 		ctor: '::',
@@ -10457,7 +10457,7 @@ var _user$project$CardView$inputValue = A2(
 		}
 	},
 	_elm_lang$core$Json_Decode$string);
-var _user$project$CardView$saveAction = F2(
+var _user$project$View_Card$saveAction = F2(
 	function (cardType, card) {
 		var _p0 = cardType;
 		switch (_p0.ctor) {
@@ -10477,7 +10477,7 @@ var _user$project$CardView$saveAction = F2(
 				return _user$project$Types$SaveQuestion(card.id);
 		}
 	});
-var _user$project$CardView$editAction = function (cardType) {
+var _user$project$View_Card$editAction = function (cardType) {
 	var _p1 = cardType;
 	switch (_p1.ctor) {
 		case 'StoryCard':
@@ -10492,7 +10492,7 @@ var _user$project$CardView$editAction = function (cardType) {
 			return _elm_lang$core$Basics$always(_user$project$Types$Noop);
 	}
 };
-var _user$project$CardView$cardInput = F2(
+var _user$project$View_Card$cardInput = F2(
 	function (cardType, card) {
 		return {
 			ctor: '::',
@@ -10512,8 +10512,8 @@ var _user$project$CardView$cardInput = F2(
 								'blur',
 								A2(
 									_elm_lang$core$Json_Decode$map,
-									A2(_user$project$CardView$saveAction, cardType, card),
-									_user$project$CardView$inputValue)),
+									A2(_user$project$View_Card$saveAction, cardType, card),
+									_user$project$View_Card$inputValue)),
 							_1: {ctor: '[]'}
 						}
 					}
@@ -10526,7 +10526,7 @@ var _user$project$CardView$cardInput = F2(
 			_1: {ctor: '[]'}
 		};
 	});
-var _user$project$CardView$nl2br = function (text) {
+var _user$project$View_Card$nl2br = function (text) {
 	return A2(
 		_elm_lang$core$List$intersperse,
 		A2(
@@ -10538,7 +10538,7 @@ var _user$project$CardView$nl2br = function (text) {
 			_elm_lang$html$Html$text,
 			A2(_elm_lang$core$String$split, '\n', text)));
 };
-var _user$project$CardView$cardText = function (text) {
+var _user$project$View_Card$cardText = function (text) {
 	return {
 		ctor: '::',
 		_0: A2(
@@ -10548,11 +10548,11 @@ var _user$project$CardView$cardText = function (text) {
 				_0: _elm_lang$svg$Svg_Attributes$class('card__text'),
 				_1: {ctor: '[]'}
 			},
-			_user$project$CardView$nl2br(text)),
+			_user$project$View_Card$nl2br(text)),
 		_1: {ctor: '[]'}
 	};
 };
-var _user$project$CardView$cardStateClass = function (state) {
+var _user$project$View_Card$cardStateClass = function (state) {
 	var _p2 = state;
 	switch (_p2.ctor) {
 		case 'Editing':
@@ -10563,7 +10563,7 @@ var _user$project$CardView$cardStateClass = function (state) {
 			return '';
 	}
 };
-var _user$project$CardView$cardTypeClass = function (cardType) {
+var _user$project$View_Card$cardTypeClass = function (cardType) {
 	var _p3 = cardType;
 	switch (_p3.ctor) {
 		case 'StoryCard':
@@ -10582,7 +10582,7 @@ var _user$project$CardView$cardTypeClass = function (cardType) {
 			return ' card--question';
 	}
 };
-var _user$project$CardView$cardClass = F2(
+var _user$project$View_Card$cardClass = F2(
 	function (cardType, cardState) {
 		return _elm_lang$core$String$concat(
 			{
@@ -10590,28 +10590,28 @@ var _user$project$CardView$cardClass = F2(
 				_0: 'card',
 				_1: {
 					ctor: '::',
-					_0: _user$project$CardView$cardTypeClass(cardType),
+					_0: _user$project$View_Card$cardTypeClass(cardType),
 					_1: {
 						ctor: '::',
-						_0: _user$project$CardView$cardStateClass(cardState),
+						_0: _user$project$View_Card$cardStateClass(cardState),
 						_1: {ctor: '[]'}
 					}
 				}
 			});
 	});
-var _user$project$CardView$textOffset = 17;
-var _user$project$CardView$lineHeight = 12;
-var _user$project$CardView$cardHeight = 156;
-var _user$project$CardView$cardWidth = 254;
-var _user$project$CardView$lines = function () {
-	var end = _user$project$CardView$cardHeight;
-	var start = 3 * _user$project$CardView$lineHeight;
+var _user$project$View_Card$textOffset = 17;
+var _user$project$View_Card$lineHeight = 12;
+var _user$project$View_Card$cardHeight = 156;
+var _user$project$View_Card$cardWidth = 254;
+var _user$project$View_Card$lines = function () {
+	var end = _user$project$View_Card$cardHeight;
+	var start = 3 * _user$project$View_Card$lineHeight;
 	var lines = A2(
 		_elm_lang$core$List$map,
 		_elm_lang$core$Basics$toString,
 		A2(
 			_elm_lang$core$List$filter,
-			_user$project$CardView$divisibleBy(_user$project$CardView$lineHeight),
+			_user$project$View_Card$divisibleBy(_user$project$View_Card$lineHeight),
 			A2(_elm_lang$core$List$range, start, end)));
 	return A2(
 		_elm_lang$core$List$map,
@@ -10627,7 +10627,7 @@ var _user$project$CardView$lines = function () {
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$x2(
-								_elm_lang$core$Basics$toString(_user$project$CardView$cardWidth)),
+								_elm_lang$core$Basics$toString(_user$project$View_Card$cardWidth)),
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$svg$Svg_Attributes$y2(y),
@@ -10644,8 +10644,8 @@ var _user$project$CardView$lines = function () {
 		},
 		lines);
 }();
-var _user$project$CardView$cardBackground = function () {
-	var headLine = _elm_lang$core$Basics$toString(2 * _user$project$CardView$lineHeight);
+var _user$project$View_Card$cardBackground = function () {
+	var headLine = _elm_lang$core$Basics$toString(2 * _user$project$View_Card$lineHeight);
 	return A2(
 		_elm_lang$core$List$append,
 		{
@@ -10661,7 +10661,7 @@ var _user$project$CardView$cardBackground = function () {
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$x2(
-								_elm_lang$core$Basics$toString(_user$project$CardView$cardWidth)),
+								_elm_lang$core$Basics$toString(_user$project$View_Card$cardWidth)),
 							_1: {
 								ctor: '::',
 								_0: _elm_lang$svg$Svg_Attributes$y2(headLine),
@@ -10677,28 +10677,28 @@ var _user$project$CardView$cardBackground = function () {
 				{ctor: '[]'}),
 			_1: {ctor: '[]'}
 		},
-		_user$project$CardView$lines);
+		_user$project$View_Card$lines);
 }();
-var _user$project$CardView$cardContent = F2(
+var _user$project$View_Card$cardContent = F2(
 	function (cardType, card) {
 		return A2(
 			_elm_lang$svg$Svg$foreignObject,
 			{
 				ctor: '::',
 				_0: _elm_lang$svg$Svg_Attributes$x(
-					_elm_lang$core$Basics$toString(_user$project$CardView$lineHeight)),
+					_elm_lang$core$Basics$toString(_user$project$View_Card$lineHeight)),
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$svg$Svg_Attributes$y(
-						_elm_lang$core$Basics$toString(_user$project$CardView$textOffset)),
+						_elm_lang$core$Basics$toString(_user$project$View_Card$textOffset)),
 					_1: {
 						ctor: '::',
 						_0: _elm_lang$svg$Svg_Attributes$width(
-							_elm_lang$core$Basics$toString(_user$project$CardView$cardWidth - (2 * _user$project$CardView$lineHeight))),
+							_elm_lang$core$Basics$toString(_user$project$View_Card$cardWidth - (2 * _user$project$View_Card$lineHeight))),
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(_user$project$CardView$cardHeight - (2 * _user$project$CardView$lineHeight))),
+								_elm_lang$core$Basics$toString(_user$project$View_Card$cardHeight - (2 * _user$project$View_Card$lineHeight))),
 							_1: {ctor: '[]'}
 						}
 					}
@@ -10707,24 +10707,24 @@ var _user$project$CardView$cardContent = F2(
 			function () {
 				var _p4 = card.state;
 				if (_p4.ctor === 'Editing') {
-					return A2(_user$project$CardView$cardInput, cardType, card);
+					return A2(_user$project$View_Card$cardInput, cardType, card);
 				} else {
-					return _user$project$CardView$cardText(card.text);
+					return _user$project$View_Card$cardText(card.text);
 				}
 			}());
 	});
-var _user$project$CardView$card = F2(
+var _user$project$View_Card$card = F2(
 	function (cardType, card) {
 		return A2(
 			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
 				_0: _elm_lang$html$Html_Events$onClick(
-					A2(_user$project$CardView$editAction, cardType, card.id)),
+					A2(_user$project$View_Card$editAction, cardType, card.id)),
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$html$Html_Attributes$class(
-						A2(_user$project$CardView$cardClass, cardType, card.state)),
+						A2(_user$project$View_Card$cardClass, cardType, card.state)),
 					_1: {ctor: '[]'}
 				}
 			},
@@ -10735,20 +10735,20 @@ var _user$project$CardView$card = F2(
 					{
 						ctor: '::',
 						_0: _elm_lang$svg$Svg_Attributes$width(
-							_elm_lang$core$Basics$toString(_user$project$CardView$cardWidth)),
+							_elm_lang$core$Basics$toString(_user$project$View_Card$cardWidth)),
 						_1: {
 							ctor: '::',
 							_0: _elm_lang$svg$Svg_Attributes$height(
-								_elm_lang$core$Basics$toString(_user$project$CardView$cardHeight)),
+								_elm_lang$core$Basics$toString(_user$project$View_Card$cardHeight)),
 							_1: {ctor: '[]'}
 						}
 					},
 					A2(
 						_elm_lang$core$List$append,
-						_user$project$CardView$cardBackground,
+						_user$project$View_Card$cardBackground,
 						{
 							ctor: '::',
-							_0: A2(_user$project$CardView$cardContent, cardType, card),
+							_0: A2(_user$project$View_Card$cardContent, cardType, card),
 							_1: {ctor: '[]'}
 						})),
 				_1: {ctor: '[]'}
@@ -10765,7 +10765,7 @@ var _user$project$View$question = function (q) {
 		},
 		{
 			ctor: '::',
-			_0: A2(_user$project$CardView$card, _user$project$Types$QuestionCard, q),
+			_0: A2(_user$project$View_Card$card, _user$project$Types$QuestionCard, q),
 			_1: {ctor: '[]'}
 		});
 };
@@ -10777,7 +10777,7 @@ var _user$project$View$example = F2(
 			{
 				ctor: '::',
 				_0: A2(
-					_user$project$CardView$card,
+					_user$project$View_Card$card,
 					_user$project$Types$ExampleCard(ruleId),
 					e),
 				_1: {ctor: '[]'}
@@ -10791,7 +10791,7 @@ var _user$project$View$displayButton = function (b) {
 	var _p0 = b.state;
 	if (_p0.ctor === 'Preparing') {
 		return A2(
-			_user$project$CardView$card,
+			_user$project$View_Card$card,
 			b.cardType,
 			{id: b.id, state: _user$project$Types$Editing, text: ''});
 	} else {
@@ -10934,7 +10934,7 @@ var _user$project$View$rule = F2(
 			},
 			{
 				ctor: '::',
-				_0: A2(_user$project$CardView$card, _user$project$Types$RuleCard, r.card),
+				_0: A2(_user$project$View_Card$card, _user$project$Types$RuleCard, r.card),
 				_1: {
 					ctor: '::',
 					_0: A3(
@@ -11022,7 +11022,7 @@ var _user$project$View$view = function (model) {
 					_elm_lang$html$Html$text('Error'),
 					A2(
 						_elm_lang$core$Maybe$map,
-						_user$project$CardView$card(_user$project$Types$StoryCard),
+						_user$project$View_Card$card(_user$project$Types$StoryCard),
 						model.storyCard)),
 				_1: {
 					ctor: '::',

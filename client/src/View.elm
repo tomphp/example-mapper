@@ -15,7 +15,7 @@ import Types
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import CardView exposing (card)
+import View.Card exposing (card)
 
 
 type alias AddButton =
