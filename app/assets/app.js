@@ -10625,54 +10625,101 @@ var _user$project$View$example = function (e) {
 		});
 };
 var _user$project$View$theCard = F2(
-	function (model, id) {
+	function (cards, id) {
 		return A2(
 			_elm_lang$core$Maybe$withDefault,
-			{id: 'error', text: 'Loading...', state: _user$project$Types$Saving},
-			A2(_elm_lang$core$Dict$get, id, model.cards));
+			{
+				id: A2(_elm_lang$core$Basics_ops['++'], 'error', id),
+				text: 'Loading...',
+				state: _user$project$Types$Saving
+			},
+			A2(_elm_lang$core$Dict$get, id, cards));
 	});
 var _user$project$View$cardList = F2(
-	function (model, ids) {
+	function (cards, ids) {
 		return A2(
 			_elm_lang$core$List$filterMap,
 			_elm_lang$core$Basics$identity,
 			A2(
 				_elm_lang$core$List$map,
 				function (id) {
-					return A2(_elm_lang$core$Dict$get, id, model.cards);
+					return A2(_elm_lang$core$Dict$get, id, cards);
 				},
 				ids));
 	});
-var _user$project$View$addButton = F6(
-	function (cardType, state, action, id, cssClass, label) {
-		var _p0 = state;
-		if (_p0.ctor === 'Preparing') {
-			return A2(
-				_user$project$CardView$card,
-				cardType,
-				{id: id, state: _user$project$Types$Editing, text: ''});
-		} else {
-			return A2(
-				_elm_lang$html$Html$button,
-				{
+var _user$project$View$displayButton = function (b) {
+	var _p0 = b.state;
+	if (_p0.ctor === 'Preparing') {
+		return A2(
+			_user$project$CardView$card,
+			b.cardType,
+			{id: b.id, state: _user$project$Types$Editing, text: ''});
+	} else {
+		return A2(
+			_elm_lang$html$Html$button,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Events$onClick(b.action),
+				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html_Events$onClick(action),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class(
-							A2(_elm_lang$core$Basics_ops['++'], 'card ', cssClass)),
-						_1: {ctor: '[]'}
-					}
-				},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(label),
+					_0: _elm_lang$html$Html_Attributes$class(
+						A2(_elm_lang$core$Basics_ops['++'], 'card ', b.cssClass)),
 					_1: {ctor: '[]'}
-				});
+				}
+			},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(b.label),
+				_1: {ctor: '[]'}
+			});
+	}
+};
+var _user$project$View$addButtonParams = F2(
+	function (model, t) {
+		var _p1 = t;
+		switch (_p1.ctor) {
+			case 'NewRuleCard':
+				return _elm_lang$core$Maybe$Just(
+					{state: model.addRule, action: _user$project$Types$AddRule, id: 'new-rule', cssClass: 'card--rule', label: 'Add Rule', cardType: t});
+			case 'NewExampleCard':
+				var _p2 = _p1._0;
+				return _elm_lang$core$Maybe$Just(
+					{
+						state: A2(
+							_elm_lang$core$Maybe$withDefault,
+							_user$project$Types$Button,
+							A2(
+								_elm_lang$core$Maybe$map,
+								function (_) {
+									return _.addExample;
+								},
+								A2(_elm_lang$core$Dict$get, _p2, model.rules))),
+						action: _user$project$Types$AddExample(_p2),
+						id: 'new-example',
+						cssClass: 'card--example',
+						label: 'Add Example',
+						cardType: t
+					});
+			case 'NewQuestionCard':
+				return _elm_lang$core$Maybe$Just(
+					{state: model.addQuestion, action: _user$project$Types$AddQuestion, id: 'new-question', cssClass: 'card--question', label: 'Add Question', cardType: t});
+			default:
+				return _elm_lang$core$Maybe$Nothing;
 		}
 	});
+var _user$project$View$addButton = function (model) {
+	return function (_p3) {
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			_elm_lang$html$Html$text('Error'),
+			A2(
+				_elm_lang$core$Maybe$map,
+				_user$project$View$displayButton,
+				A2(_user$project$View$addButtonParams, model, _p3)));
+	};
+};
 var _user$project$View$questions = function (model) {
-	var cards = A2(_user$project$View$cardList, model, model.questions);
+	var cards = A2(_user$project$View$cardList, model.cards, model.questions);
 	return A2(
 		_elm_lang$html$Html$div,
 		{
@@ -10702,7 +10749,7 @@ var _user$project$View$questions = function (model) {
 						ctor: '::',
 						_0: {
 							ctor: '::',
-							_0: A6(_user$project$View$addButton, _user$project$CardView$NewQuestionCard, model.addQuestion, _user$project$Types$AddQuestion, 'new-question', 'card--question', 'Add Question'),
+							_0: A2(_user$project$View$addButton, model, _user$project$CardView$NewQuestionCard),
 							_1: {ctor: '[]'}
 						},
 						_1: {ctor: '[]'}
@@ -10710,8 +10757,8 @@ var _user$project$View$questions = function (model) {
 				}
 			}));
 };
-var _user$project$View$examples = F2(
-	function (rule, es) {
+var _user$project$View$examples = F3(
+	function (model, rule, es) {
 		return A2(
 			_elm_lang$html$Html$div,
 			{
@@ -10724,14 +10771,10 @@ var _user$project$View$examples = F2(
 				A2(_elm_lang$core$List$map, _user$project$View$example, es),
 				{
 					ctor: '::',
-					_0: A6(
+					_0: A2(
 						_user$project$View$addButton,
-						_user$project$CardView$NewExampleCard(rule.ruleCard),
-						rule.addExample,
-						_user$project$Types$AddExample(rule.ruleCard),
-						'new-example',
-						'card--example',
-						'Add Example'),
+						model,
+						_user$project$CardView$NewExampleCard(rule.ruleCard)),
 					_1: {ctor: '[]'}
 				}));
 	});
@@ -10749,13 +10792,14 @@ var _user$project$View$rule = F2(
 				_0: A2(
 					_user$project$CardView$card,
 					_user$project$CardView$RuleCard,
-					A2(_user$project$View$theCard, model, r.ruleCard)),
+					A2(_user$project$View$theCard, model.cards, r.ruleCard)),
 				_1: {
 					ctor: '::',
-					_0: A2(
+					_0: A3(
 						_user$project$View$examples,
+						model,
 						r,
-						A2(_user$project$View$cardList, model, r.examples)),
+						A2(_user$project$View$cardList, model.cards, r.examples)),
 					_1: {ctor: '[]'}
 				}
 			});
@@ -10786,7 +10830,7 @@ var _user$project$View$rules = function (model) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: A6(_user$project$View$addButton, _user$project$CardView$NewRuleCard, model.addRule, _user$project$Types$AddRule, 'new-rule', 'card--rule', 'Add Rule'),
+						_0: A2(_user$project$View$addButton, model, _user$project$CardView$NewRuleCard),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -10834,7 +10878,7 @@ var _user$project$View$view = function (model) {
 				_0: A2(
 					_user$project$CardView$card,
 					_user$project$CardView$StoryCard,
-					A2(_user$project$View$theCard, model, model.storyCard)),
+					A2(_user$project$View$theCard, model.cards, model.storyCard)),
 				_1: {
 					ctor: '::',
 					_0: _user$project$View$rules(model),
@@ -10847,6 +10891,10 @@ var _user$project$View$view = function (model) {
 			}
 		});
 };
+var _user$project$View$AddButton = F6(
+	function (a, b, c, d, e, f) {
+		return {state: a, action: b, id: c, cssClass: d, label: e, cardType: f};
+	});
 
 var _user$project$App$main = _elm_lang$html$Html$programWithFlags(
 	{init: _user$project$State$init, view: _user$project$View$view, update: _user$project$State$update, subscriptions: _user$project$State$subscriptions})(
