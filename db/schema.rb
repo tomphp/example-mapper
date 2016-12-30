@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161229191807) do
+ActiveRecord::Schema.define(version: 20161230094920) do
 
   create_table "cards", primary_key: "card_id", force: :cascade do |t|
     t.string "story_id", limit: 100,  default: "", null: false
@@ -37,9 +37,7 @@ ActiveRecord::Schema.define(version: 20161229191807) do
     t.integer "position", limit: 4,   default: 0,  null: false
   end
 
-  create_table "stories", id: false, force: :cascade do |t|
-    t.string "story_id",   limit: 100, default: "", null: false
-    t.string "story_card", limit: 100, default: "", null: false
+  create_table "stories", primary_key: "story_id", force: :cascade do |t|
   end
 
 end

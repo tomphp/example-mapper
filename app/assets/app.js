@@ -9916,7 +9916,7 @@ var _user$project$Types$Rule = F4(
 	});
 var _user$project$Types$Model = F8(
 	function (a, b, c, d, e, f, g, h) {
-		return {cards: a, storyCard: b, rules: c, questions: d, error: e, flags: f, addRule: g, addQuestion: h};
+		return {cards: a, storyId: b, rules: c, questions: d, error: e, flags: f, addRule: g, addQuestion: h};
 	});
 var _user$project$Types$NewQuestionCard = {ctor: 'NewQuestionCard'};
 var _user$project$Types$NewExampleCard = function (a) {
@@ -10148,7 +10148,7 @@ var _user$project$State$updateModel = F2(
 			var _p1 = _p0._0;
 			return _elm_lang$core$Native_Utils.update(
 				model,
-				{cards: _p1.cards, storyCard: _p1.storyCard, rules: _p1.rules, questions: _p1.questions});
+				{cards: _p1.cards, storyId: _p1.storyId, rules: _p1.rules, questions: _p1.questions});
 		} else {
 			return _elm_lang$core$Native_Utils.update(
 				model,
@@ -10288,7 +10288,7 @@ var _user$project$State$update = F2(
 var _user$project$State$initialModel = function (flags) {
 	return {
 		cards: _elm_lang$core$Dict$empty,
-		storyCard: '',
+		storyId: '',
 		rules: _elm_lang$core$Dict$empty,
 		questions: {ctor: '[]'},
 		error: _elm_lang$core$Maybe$Nothing,
@@ -10878,7 +10878,7 @@ var _user$project$View$view = function (model) {
 				_0: A2(
 					_user$project$CardView$card,
 					_user$project$Types$StoryCard,
-					A2(_user$project$View$theCard, model.cards, model.storyCard)),
+					A2(_user$project$View$theCard, model.cards, model.storyId)),
 				_1: {
 					ctor: '::',
 					_0: _user$project$View$rules(model),

@@ -30,10 +30,9 @@ module ExampleMapper
 
     post '/' do
       story_id = SecureRandom.uuid
-      card_id = SecureRandom.uuid
       text = params[:story]
 
-      storage.add_story(story_id, card_id, text)
+      storage.add_story(story_id, text)
 
       redirect "/workspace/#{story_id}"
     end

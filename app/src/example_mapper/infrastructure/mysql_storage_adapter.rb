@@ -37,7 +37,7 @@ module ExampleMapper
         end
 
         row = fetch_story_record(story_id).first
-        result[:story_card] = row['story_card']
+        result[:story_card] = row['story_id']
 
         result[:questions] = fetch_questions(story_id).map do |row|
           row['card_id']
@@ -65,10 +65,9 @@ module ExampleMapper
               "SET text = '#{e(text)}' WHERE card_id = '#{e(card_id)}'")
       end
 
-      def add_story(story_id, card_id, text)
-        add_card(card_id, story_id, text, 'saved')
-        query('INSERT INTO stories (story_id,story_card) '\
-              "VALUES('#{e(story_id)}', '#{e(card_id)}')")
+      def add_story(story_id, text)
+        add_card(story_id, story_id, text, 'saved')
+        query("INSERT INTO stories (story_id) VALUES('#{e(story_id)}')")
       end
 
       def add_question(story_id, card_id, text)

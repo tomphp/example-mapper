@@ -39,7 +39,7 @@ init flags =
 initialModel : Flags -> Model
 initialModel flags =
     { cards = Dict.empty
-    , storyCard = ""
+    , storyId = ""
     , rules = Dict.empty
     , questions = []
     , error = Nothing
@@ -128,7 +128,7 @@ updateModel model update =
         Ok m ->
             { model
                 | cards = m.cards
-                , storyCard = m.storyCard
+                , storyId = m.storyId
                 , rules = m.rules
                 , questions = m.questions
             }
