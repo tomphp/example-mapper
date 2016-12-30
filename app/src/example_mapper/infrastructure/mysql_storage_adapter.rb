@@ -25,7 +25,7 @@ module ExampleMapper
       def fetch_story(story_id)
         result = {
           rules: [],
-          questions: {}
+          questions: []
         }
 
         cards = {}
@@ -42,15 +42,15 @@ module ExampleMapper
         end
 
         fetch_questions(story_id).each do |row|
-          result[:questions][row['card_id']] = cards[row['card_id']]
+          result[:questions] << cards[row['card_id']]
         end
 
         result[:rules] = fetch_rules(story_id).map do |row|
           {
             rule_card: cards[row['card_id']],
             position: row['position'],
-            examples: fetch_examples(row['card_id']).each_with_object({}) do |r, hash|
-              hash[r['card_id']] = cards[r['card_id']]
+            examples: fetch_examples(row['card_id']).map do |r|
+              cards[r['card_id']]
             end
           }
         end

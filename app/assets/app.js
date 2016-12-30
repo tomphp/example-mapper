@@ -10100,6 +10100,21 @@ var _user$project$StateDecoder$card = A4(
 	A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$StateDecoder$cardState),
 	A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string));
+var _user$project$StateDecoder$dictKeyedBy = function (f) {
+	return function (_p1) {
+		return _elm_lang$core$Dict$fromList(
+			A2(
+				_elm_lang$core$List$map,
+				function (x) {
+					return {
+						ctor: '_Tuple2',
+						_0: f(x),
+						_1: x
+					};
+				},
+				_p1));
+	};
+};
 var _user$project$StateDecoder$rule = A5(
 	_elm_lang$core$Json_Decode$map4,
 	_user$project$Types$Rule,
@@ -10108,16 +10123,26 @@ var _user$project$StateDecoder$rule = A5(
 	A2(
 		_elm_lang$core$Json_Decode$field,
 		'examples',
-		_elm_lang$core$Json_Decode$dict(_user$project$StateDecoder$card)),
+		A2(
+			_elm_lang$core$Json_Decode$map,
+			_user$project$StateDecoder$dictKeyedBy(
+				function (_) {
+					return _.id;
+				}),
+			_elm_lang$core$Json_Decode$list(_user$project$StateDecoder$card))),
 	_elm_lang$core$Json_Decode$succeed(_user$project$Types$Button));
-var _user$project$StateDecoder$rulePair = function (rule) {
-	return {ctor: '_Tuple2', _0: rule.card.id, _1: rule};
-};
-var _user$project$StateDecoder$rulePairs = A2(
+var _user$project$StateDecoder$rules = A2(
 	_elm_lang$core$Json_Decode$map,
-	_elm_lang$core$List$map(_user$project$StateDecoder$rulePair),
+	_user$project$StateDecoder$dictKeyedBy(
+		function (_p2) {
+			return function (_) {
+				return _.id;
+			}(
+				function (_) {
+					return _.card;
+				}(_p2));
+		}),
 	_elm_lang$core$Json_Decode$list(_user$project$StateDecoder$rule));
-var _user$project$StateDecoder$rules = A2(_elm_lang$core$Json_Decode$map, _elm_lang$core$Dict$fromList, _user$project$StateDecoder$rulePairs);
 var _user$project$StateDecoder$modelDecoder = function (flags) {
 	return A2(
 		_elm_lang$core$Json_Decode$field,
@@ -10131,7 +10156,13 @@ var _user$project$StateDecoder$modelDecoder = function (flags) {
 			A2(
 				_elm_lang$core$Json_Decode$field,
 				'questions',
-				_elm_lang$core$Json_Decode$dict(_user$project$StateDecoder$card)),
+				A2(
+					_elm_lang$core$Json_Decode$map,
+					_user$project$StateDecoder$dictKeyedBy(
+						function (_) {
+							return _.id;
+						}),
+					_elm_lang$core$Json_Decode$list(_user$project$StateDecoder$card))),
 			_elm_lang$core$Json_Decode$succeed(_elm_lang$core$Maybe$Nothing),
 			_elm_lang$core$Json_Decode$succeed(flags),
 			_elm_lang$core$Json_Decode$succeed(_user$project$Types$Button),

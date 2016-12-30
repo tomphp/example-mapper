@@ -20,7 +20,7 @@ modelDecoder flags =
         map7 Model
             (maybe <| field "story_card" card)
             (field "rules" <| rules)
-            (field "questions" <| dict card)
+            (field "questions" <| map (dictKeyedBy .id) <| list card)
             (succeed Nothing)
             (succeed flags)
             (succeed Button)
@@ -29,17 +29,12 @@ modelDecoder flags =
 
 rules : Decoder (Dict CardId Rule)
 rules =
-    map Dict.fromList rulePairs
+    map (dictKeyedBy (.card >> .id)) (list rule)
 
 
-rulePairs : Decoder (List ( CardId, Rule ))
-rulePairs =
-    map (List.map rulePair) (list rule)
-
-
-rulePair : Rule -> ( CardId, Rule )
-rulePair rule =
-    ( rule.card.id, rule )
+dictKeyedBy : (a -> comparable) -> List a -> Dict comparable a
+dictKeyedBy f =
+    List.map (\x -> ( f x, x )) >> Dict.fromList
 
 
 rule : Decoder Rule
@@ -47,7 +42,7 @@ rule =
     map4 Rule
         (field "rule_card" card)
         (field "position" int)
-        (field "examples" <| dict card)
+        (field "examples" <| map (dictKeyedBy .id) <| list card)
         (succeed Button)
 
 
