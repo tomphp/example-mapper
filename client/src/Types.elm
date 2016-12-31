@@ -80,6 +80,4 @@ type Msg
     | UpdateCardInModel Card
     | SaveCard Card
     | CreateCard CardType
-    | SendNewQuestion String
-    | SendNewRule String
-    | SendNewExample String String
+    | SaveNewCard CardType String

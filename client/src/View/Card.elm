@@ -26,22 +26,6 @@ textOffset =
     17
 
 
-newSaveAction : Card -> String -> Msg
-newSaveAction card text =
-    case card.cardType of
-        RuleCard ->
-            SendNewRule text
-
-        QuestionCard ->
-            SendNewQuestion text
-
-        ExampleCard id ->
-            SendNewExample id text
-
-        _ ->
-            Noop
-
-
 newCard : Card -> Html.Html Msg
 newCard card =
     Html.div
@@ -54,7 +38,7 @@ newCard card =
             ]
           <|
             cardBackground
-                ++ [ cardContent (newSaveAction card) card ]
+                ++ [ cardContent (SaveNewCard card.cardType) card ]
         ]
 
 

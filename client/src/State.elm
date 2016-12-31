@@ -52,36 +52,46 @@ initialModel flags =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
+    case msg of
+        Noop ->
+            ( model, Cmd.none )
+
+        UpdateModel update ->
+            ( updateModel model update, Cmd.none )
+
+        UpdateCardInModel card ->
+            ( replaceCard model card, focusCardInput card.id )
+
+        SaveCard card ->
+            saveCard model card
+
+        CreateCard cardType ->
+            createCard model cardType
+
+        SaveNewCard cardType text ->
+            saveNewCard model cardType text
+
+
+saveNewCard : Model -> CardType -> String -> ( Model, Cmd Msg )
+saveNewCard model cardType text =
     let
         send =
             WebSocket.send model.flags.backendUrl
     in
-        case msg of
-            Noop ->
-                ( model, Cmd.none )
-
-            UpdateModel update ->
-                ( updateModel model update, Cmd.none )
-
-            UpdateCardInModel card ->
-                ( replaceCard model card, focusCardInput card.id )
-
-            SaveCard card ->
-                saveCard model card
-
-            CreateCard cardType ->
-                createCard model cardType
-
-            SendNewQuestion text ->
+        case cardType of
+            QuestionCard ->
                 ( { model | addQuestion = Button }, Requests.addQuestion text |> send )
 
-            SendNewRule text ->
+            RuleCard ->
                 ( { model | addRule = Button }, Requests.addRule text |> send )
 
-            SendNewExample ruleId text ->
+            ExampleCard ruleId ->
                 ( updateAddExampleState model ruleId Button
                 , Requests.addExample ruleId text |> send
                 )
+
+            _ ->
+                ( model, Cmd.none )
 
 
 createCard : Model -> CardType -> ( Model, Cmd Msg )
