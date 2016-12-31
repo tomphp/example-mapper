@@ -5,6 +5,9 @@ volumes:
   gems:
 
 services:
+  queue:
+    image: redis
+
   db:
     image: mariadb
     volumes:
@@ -24,6 +27,7 @@ services:
     - 9000:9000
     links:
     - db
+    - queue
     volumes:
     - gems:/usr/local/bundle
     - .:/usr/src/app
@@ -31,6 +35,8 @@ services:
     command: "sh -c 'bundle install && bundle exec rerun --background --dir app -- bundle exec rackup --host 0.0.0.0 -p 9000'"
     environment:
       CLEARDB_DATABASE_URL: mysql://user:userpw@db/mapper?reconnect=true
+      REDIS_URL: redis://queue
     depends_on:
     - db
+    - queue
 

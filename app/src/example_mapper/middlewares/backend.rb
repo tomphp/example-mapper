@@ -3,11 +3,14 @@ require 'json'
 require 'example_mapper/infrastructure/mysql_storage_adapter'
 require 'example_mapper/infrastructure/websocket_connections'
 require 'securerandom'
+require 'redis'
 
 module ExampleMapper
   module Middlewares
     class Backend
       KEEPALIVE_TIME = 15
+
+      CHANNEL = 'message-queue'.freeze
 
       def initialize(app)
         puts 'Creating the Middleware'
@@ -16,6 +19,24 @@ module ExampleMapper
         @clients     = {}
         @connections = Infrastructure::WebsocketConnections.new
         @storage     = Infrastructure::MysqlStorageAdapter.new
+
+        uri    = URI.parse(ENV['REDIS_URL'])
+        @redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
+
+        Thread.new do
+          redis_sub = Redis.new(host: uri.host, port: uri.port, password: uri.password)
+          redis_sub.subscribe(CHANNEL) do |on|
+            on.message do |_channel, msg|
+              with_error_handling do
+                story_id = JSON.parse(msg)['story_id']
+
+                @connections.for(story_id).each do |socket|
+                  socket.send(msg)
+                end
+              end
+            end
+          end
+        end
       end
 
       def with_error_handling
@@ -60,12 +81,11 @@ module ExampleMapper
               @storage.add_example(story_id, data['rule_id'], id, data['text'])
             end
 
-            @connections.for(story_id).each do |socket|
-              socket.send({
-                type: :update_state,
-                state: @storage.fetch_story(story_id)
-              }.to_json)
-            end
+            @redis.publish(CHANNEL, {
+              story_id: story_id,
+              type: :update_state,
+              state: @storage.fetch_story(story_id)
+            }.to_json)
           end
         end
 

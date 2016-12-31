@@ -6,6 +6,7 @@ gem 'faye-websocket'
 gem 'mysql2'
 gem 'puma'
 gem 'rake'
+gem 'redis'
 gem 'sinatra'
 
 group :development do
