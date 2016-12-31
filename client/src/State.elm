@@ -69,16 +69,8 @@ update msg model =
             SaveCard card ->
                 saveCard model card
 
-            AddQuestion ->
-                ( { model | addQuestion = Preparing }, focusCardInput "new-question" )
-
-            AddRule ->
-                ( { model | addRule = Preparing }, focusCardInput "new-rule" )
-
-            AddExample ruleId ->
-                ( updateAddExampleState model ruleId Preparing
-                , focusCardInput "new-example"
-                )
+            CreateCard cardType ->
+                createCard model cardType
 
             SendNewQuestion text ->
                 ( { model | addQuestion = Button }, Requests.addQuestion text |> send )
@@ -90,6 +82,24 @@ update msg model =
                 ( updateAddExampleState model ruleId Button
                 , Requests.addExample ruleId text |> send
                 )
+
+
+createCard : Model -> CardType -> ( Model, Cmd Msg )
+createCard model cardType =
+    case cardType of
+        QuestionCard ->
+            ( { model | addQuestion = Preparing }, focusCardInput "new-question" )
+
+        RuleCard ->
+            ( { model | addRule = Preparing }, focusCardInput "new-rule" )
+
+        ExampleCard ruleId ->
+            ( updateAddExampleState model ruleId Preparing
+            , focusCardInput "new-example"
+            )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 replaceCard : Model -> Card -> Model
@@ -106,9 +116,6 @@ replaceCard model card =
 
         QuestionCard ->
             replaceQuestionCard card model
-
-        _ ->
-            model
 
 
 updateRule : (Rule -> Rule) -> CardId -> Model -> Model

@@ -20,9 +20,6 @@ type CardType
     | RuleCard
     | ExampleCard RuleId
     | QuestionCard
-    | NewRuleCard
-    | NewExampleCard RuleId
-    | NewQuestionCard
 
 
 type CardState
@@ -82,9 +79,7 @@ type Msg
     | UpdateModel String
     | UpdateCardInModel Card
     | SaveCard Card
-    | AddQuestion
-    | AddRule
-    | AddExample String
+    | CreateCard CardType
     | SendNewQuestion String
     | SendNewRule String
     | SendNewExample String String

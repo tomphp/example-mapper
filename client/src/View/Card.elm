@@ -1,4 +1,4 @@
-module View.Card exposing (card)
+module View.Card exposing (existingCard, newCard)
 
 import Html
 import Html.Attributes
@@ -26,8 +26,24 @@ textOffset =
     17
 
 
-card : Card -> Html.Html Msg
-card card =
+newSaveAction : Card -> String -> Msg
+newSaveAction card text =
+    case card.cardType of
+        RuleCard ->
+            SendNewRule text
+
+        QuestionCard ->
+            SendNewQuestion text
+
+        ExampleCard id ->
+            SendNewExample id text
+
+        _ ->
+            Noop
+
+
+newCard : Card -> Html.Html Msg
+newCard card =
     Html.div
         [ Html.Events.onClick <| UpdateCardInModel { card | state = Editing }
         , Html.Attributes.class <| cardClass card.cardType card.state
@@ -36,8 +52,30 @@ card card =
             [ width <| toString cardWidth
             , height <| toString cardHeight
             ]
-            (List.append cardBackground [ cardContent card ])
+          <|
+            cardBackground
+                ++ [ cardContent (newSaveAction card) card ]
         ]
+
+
+existingCard : Card -> Html.Html Msg
+existingCard card =
+    let
+        saveAction =
+            \text -> SaveCard { card | text = text }
+    in
+        Html.div
+            [ Html.Events.onClick <| UpdateCardInModel { card | state = Editing }
+            , Html.Attributes.class <| cardClass card.cardType card.state
+            ]
+            [ svg
+                [ width <| toString cardWidth
+                , height <| toString cardHeight
+                ]
+              <|
+                cardBackground
+                    ++ [ cardContent saveAction card ]
+            ]
 
 
 cardBackground : List (Svg Msg)
@@ -77,15 +115,6 @@ cardTypeClass cardType =
             " card--example"
 
         QuestionCard ->
-            " card--question"
-
-        NewRuleCard ->
-            " card--rule"
-
-        NewExampleCard _ ->
-            " card--example"
-
-        NewQuestionCard ->
             " card--question"
 
 
@@ -129,8 +158,8 @@ lines =
             lines
 
 
-cardContent : Card -> Svg Msg
-cardContent card =
+cardContent : (String -> Msg) -> Card -> Svg Msg
+cardContent save card =
     foreignObject
         [ x <| toString lineHeight
         , y <| toString textOffset
@@ -139,7 +168,7 @@ cardContent card =
         ]
         (case card.state of
             Editing ->
-                cardInput card
+                cardInput save card
 
             _ ->
                 cardText card.text
@@ -158,40 +187,15 @@ nl2br text =
         |> List.intersperse (Html.br [] [])
 
 
-cardInput : Card -> List (Html.Html Msg)
-cardInput card =
+cardInput : (String -> Msg) -> Card -> List (Html.Html Msg)
+cardInput save card =
     [ Html.textarea
         [ Html.Attributes.id ("card-input-" ++ card.id)
         , Html.Attributes.class "card__input"
-        , Html.Events.on "blur" (Json.map (saveAction card) inputValue)
+        , Html.Events.on "blur" (Json.map save inputValue)
         ]
         [ Html.text card.text ]
     ]
-
-
-saveAction : Card -> String -> Msg
-saveAction card text =
-    case card.cardType of
-        NewRuleCard ->
-            SendNewRule text
-
-        NewQuestionCard ->
-            SendNewQuestion text
-
-        NewExampleCard id ->
-            SendNewExample id text
-
-        StoryCard ->
-            SaveCard { card | text = text }
-
-        RuleCard ->
-            SaveCard { card | text = text }
-
-        ExampleCard ruleId ->
-            SaveCard { card | text = text }
-
-        QuestionCard ->
-            SaveCard { card | text = text }
 
 
 inputValue : Json.Decoder String
