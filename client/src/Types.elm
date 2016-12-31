@@ -78,11 +78,10 @@ type alias Model =
 
 
 type Msg
-    = GetUpdate
-    | Noop
+    = Noop
     | UpdateModel String
-    | EditCard CardType CardId
-    | SaveCard CardType CardId String
+    | UpdateCardInModel Card
+    | SaveCard Card
     | AddQuestion
     | AddRule
     | AddExample String

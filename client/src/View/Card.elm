@@ -29,7 +29,7 @@ textOffset =
 card : Card -> Html.Html Msg
 card card =
     Html.div
-        [ Html.Events.onClick <| EditCard card.cardType card.id
+        [ Html.Events.onClick <| UpdateCardInModel { card | state = Editing }
         , Html.Attributes.class <| cardClass card.cardType card.state
         ]
         [ svg
@@ -169,29 +169,29 @@ cardInput card =
     ]
 
 
-saveAction : Card -> (String -> Msg)
-saveAction card =
+saveAction : Card -> String -> Msg
+saveAction card text =
     case card.cardType of
         NewRuleCard ->
-            SendNewRule
+            SendNewRule text
 
         NewQuestionCard ->
-            SendNewQuestion
+            SendNewQuestion text
 
         NewExampleCard id ->
-            SendNewExample id
+            SendNewExample id text
 
         StoryCard ->
-            SaveCard card.cardType card.id
+            SaveCard { card | text = text }
 
         RuleCard ->
-            SaveCard card.cardType card.id
+            SaveCard { card | text = text }
 
         ExampleCard ruleId ->
-            SaveCard card.cardType card.id
+            SaveCard { card | text = text }
 
         QuestionCard ->
-            SaveCard card.cardType card.id
+            SaveCard { card | text = text }
 
 
 inputValue : Json.Decoder String

@@ -50,86 +50,6 @@ initialModel flags =
     }
 
 
-newCardState : CardState -> Card -> Card
-newCardState state card =
-    { card | state = state }
-
-
-updateRuleCard : (Card -> Card) -> Rule -> Rule
-updateRuleCard update rule =
-    { rule | card = update rule.card }
-
-
-updateQuestionCard : (Card -> Card) -> CardId -> Model -> Model
-updateQuestionCard update id model =
-    { model | questions = Dict.update id (Maybe.map update) model.questions }
-
-
-updateStoryCard : (Card -> Card) -> Model -> Model
-updateStoryCard update model =
-    { model | storyCard = Maybe.map update model.storyCard }
-
-
-updateExampleCard : (Card -> Card) -> CardId -> Rule -> Rule
-updateExampleCard update id rule =
-    { rule | examples = Dict.update id (Maybe.map update) rule.examples }
-
-
-updateRule : (Rule -> Rule) -> CardId -> Model -> Model
-updateRule update ruleId model =
-    { model | rules = Dict.update ruleId (Maybe.map update) model.rules }
-
-
-editCard : Model -> CardType -> CardId -> Model
-editCard model cardType id =
-    case cardType of
-        StoryCard ->
-            updateStoryCard (newCardState Editing) model
-
-        RuleCard ->
-            updateRule (updateRuleCard <| newCardState Editing) id model
-
-        ExampleCard ruleId ->
-            updateRule (updateExampleCard (newCardState Editing) id) ruleId model
-
-        QuestionCard ->
-            updateQuestionCard (newCardState Editing) id model
-
-        _ ->
-            model
-
-
-saveCard : Model -> CardType -> CardId -> String -> ( Model, Cmd Msg )
-saveCard model cardType id text =
-    let
-        send =
-            WebSocket.send model.flags.backendUrl
-    in
-        case cardType of
-            StoryCard ->
-                ( updateStoryCard (newCardState Saving) model
-                , Requests.updateCard id text |> send
-                )
-
-            RuleCard ->
-                ( updateRule (updateRuleCard <| newCardState Saving) id model
-                , Requests.updateCard id text |> send
-                )
-
-            ExampleCard ruleId ->
-                ( updateRule (updateExampleCard (newCardState Saving) id) ruleId model
-                , Requests.updateCard id text |> send
-                )
-
-            QuestionCard ->
-                ( updateQuestionCard (newCardState Saving) id model
-                , Requests.updateCard id text |> send
-                )
-
-            _ ->
-                ( model, Cmd.none )
-
-
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -140,17 +60,14 @@ update msg model =
             Noop ->
                 ( model, Cmd.none )
 
-            GetUpdate ->
-                ( model, Requests.refresh |> send )
-
             UpdateModel update ->
                 ( updateModel model update, Cmd.none )
 
-            EditCard cardType cardId ->
-                ( editCard model cardType cardId, focusCardInput cardId )
+            UpdateCardInModel card ->
+                ( replaceCard model card, focusCardInput card.id )
 
-            SaveCard cardType cardId text ->
-                saveCard model cardType cardId text
+            SaveCard card ->
+                saveCard model card
 
             AddQuestion ->
                 ( { model | addQuestion = Preparing }, focusCardInput "new-question" )
@@ -173,6 +90,57 @@ update msg model =
                 ( updateAddExampleState model ruleId Button
                 , Requests.addExample ruleId text |> send
                 )
+
+
+replaceCard : Model -> Card -> Model
+replaceCard model card =
+    case card.cardType of
+        StoryCard ->
+            { model | storyCard = Just card }
+
+        RuleCard ->
+            updateRule (replaceRuleCard card) card.id model
+
+        ExampleCard ruleId ->
+            updateRule (replaceExampleCard card) ruleId model
+
+        QuestionCard ->
+            replaceQuestionCard card model
+
+        _ ->
+            model
+
+
+updateRule : (Rule -> Rule) -> CardId -> Model -> Model
+updateRule update ruleId model =
+    { model | rules = Dict.update ruleId (Maybe.map update) model.rules }
+
+
+replaceRuleCard : Card -> Rule -> Rule
+replaceRuleCard card rule =
+    { rule | card = card }
+
+
+replaceQuestionCard : Card -> Model -> Model
+replaceQuestionCard card model =
+    { model | questions = Dict.update card.id (always <| Just card) model.questions }
+
+
+replaceExampleCard : Card -> Rule -> Rule
+replaceExampleCard card rule =
+    { rule | examples = Dict.update card.id (always <| Just card) rule.examples }
+
+
+saveCard : Model -> Card -> ( Model, Cmd Msg )
+saveCard model theCard =
+    let
+        send =
+            WebSocket.send model.flags.backendUrl
+
+        card =
+            { theCard | state = Saving }
+    in
+        ( replaceCard model card, Requests.updateCard card |> send )
 
 
 updateAddExampleState : Model -> CardId -> AddButtonState -> Model

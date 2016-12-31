@@ -8,7 +8,7 @@ module Requests
         )
 
 import Json.Encode exposing (..)
-import Types exposing (CardId)
+import Types exposing (Card)
 
 
 refresh : String
@@ -41,12 +41,12 @@ addExample ruleId text =
         ]
 
 
-updateCard : CardId -> String -> String
-updateCard id text =
+updateCard : Card -> String
+updateCard card =
     encodeObject
         [ ( "type", string "update_card" )
-        , ( "id", string id )
-        , ( "text", string text )
+        , ( "id", string card.id )
+        , ( "text", string card.text )
         ]
 
 
