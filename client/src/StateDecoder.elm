@@ -47,9 +47,8 @@ rule =
 
 ruleWithId : RuleId -> Decoder Rule
 ruleWithId ruleId =
-    map4 Rule
+    map3 Rule
         (field "rule_card" (card RuleCard))
-        (field "position" int)
         (field "examples" <|
             map (dictKeyedBy .id) <|
                 list <|
@@ -71,11 +70,12 @@ exampleCardType =
 
 card : CardType -> Decoder Card
 card cardType =
-    map4 Card
+    map5 Card
         (field "id" string)
         (field "state" cardState)
         (field "text" string)
         (succeed cardType)
+        (field "position" int)
 
 
 cardState : Decoder CardState

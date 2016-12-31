@@ -69,6 +69,7 @@ displayButton state b =
                 , state = Editing
                 , text = ""
                 , cardType = b.cardType
+                , position = 999999999
                 }
 
         _ ->

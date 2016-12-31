@@ -9906,13 +9906,13 @@ _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/web
 var _user$project$Types$Flags = function (a) {
 	return {backendUrl: a};
 };
-var _user$project$Types$Card = F4(
-	function (a, b, c, d) {
-		return {id: a, state: b, text: c, cardType: d};
+var _user$project$Types$Card = F5(
+	function (a, b, c, d, e) {
+		return {id: a, state: b, text: c, cardType: d, position: e};
 	});
-var _user$project$Types$Rule = F4(
-	function (a, b, c, d) {
-		return {card: a, position: b, examples: c, addExample: d};
+var _user$project$Types$Rule = F3(
+	function (a, b, c) {
+		return {card: a, examples: b, addExample: c};
 	});
 var _user$project$Types$Model = F7(
 	function (a, b, c, d, e, f, g) {
@@ -10078,13 +10078,14 @@ var _user$project$StateDecoder$stringToCardState = function (s) {
 };
 var _user$project$StateDecoder$cardState = A2(_elm_lang$core$Json_Decode$map, _user$project$StateDecoder$stringToCardState, _elm_lang$core$Json_Decode$string);
 var _user$project$StateDecoder$card = function (cardType) {
-	return A5(
-		_elm_lang$core$Json_Decode$map4,
+	return A6(
+		_elm_lang$core$Json_Decode$map5,
 		_user$project$Types$Card,
 		A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string),
 		A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$StateDecoder$cardState),
 		A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string),
-		_elm_lang$core$Json_Decode$succeed(cardType));
+		_elm_lang$core$Json_Decode$succeed(cardType),
+		A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int));
 };
 var _user$project$StateDecoder$exampleCardType = A2(
 	_elm_lang$core$Json_Decode$map,
@@ -10118,14 +10119,13 @@ var _user$project$StateDecoder$dictKeyedBy = function (f) {
 	};
 };
 var _user$project$StateDecoder$ruleWithId = function (ruleId) {
-	return A5(
-		_elm_lang$core$Json_Decode$map4,
+	return A4(
+		_elm_lang$core$Json_Decode$map3,
 		_user$project$Types$Rule,
 		A2(
 			_elm_lang$core$Json_Decode$field,
 			'rule_card',
 			_user$project$StateDecoder$card(_user$project$Types$RuleCard)),
-		A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
 		A2(
 			_elm_lang$core$Json_Decode$field,
 			'examples',
@@ -10760,7 +10760,7 @@ var _user$project$View_AddButton$displayButton = F2(
 		var _p0 = state;
 		if (_p0.ctor === 'Preparing') {
 			return _user$project$View_Card$newCard(
-				{id: b.id, state: _user$project$Types$Editing, text: '', cardType: b.cardType});
+				{id: b.id, state: _user$project$Types$Editing, text: '', cardType: b.cardType, position: 999999999});
 		} else {
 			return A2(
 				_elm_lang$html$Html$button,
@@ -10835,7 +10835,15 @@ var _user$project$View$examples = F3(
 			},
 			A2(
 				_elm_lang$core$List$append,
-				A2(_elm_lang$core$List$map, _user$project$View$divCard, es),
+				A2(
+					_elm_lang$core$List$map,
+					_user$project$View$divCard,
+					A2(
+						_elm_lang$core$List$sortBy,
+						function (_) {
+							return _.position;
+						},
+						es)),
 				{
 					ctor: '::',
 					_0: A2(
@@ -10904,7 +10912,12 @@ var _user$project$View$questions = function (model) {
 					_0: A2(
 						_elm_lang$core$List$map,
 						_user$project$View$divCard,
-						_elm_lang$core$Dict$values(model.questions)),
+						A2(
+							_elm_lang$core$List$sortBy,
+							function (_) {
+								return _.position;
+							},
+							_elm_lang$core$Dict$values(model.questions))),
 					_1: {
 						ctor: '::',
 						_0: {
@@ -10932,8 +10945,13 @@ var _user$project$View$rules = function (model) {
 				_user$project$View$rule(model),
 				A2(
 					_elm_lang$core$List$sortBy,
-					function (_) {
-						return _.position;
+					function (_p0) {
+						return function (_) {
+							return _.position;
+						}(
+							function (_) {
+								return _.card;
+							}(_p0));
 					},
 					_elm_lang$core$Dict$values(model.rules))),
 			{

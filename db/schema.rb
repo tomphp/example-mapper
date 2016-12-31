@@ -11,33 +11,19 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161230094920) do
+ActiveRecord::Schema.define(version: 20161231131707) do
 
   create_table "cards", primary_key: "card_id", force: :cascade do |t|
-    t.string "story_id", limit: 100,  default: "", null: false
-    t.string "text",     limit: 2000, default: "", null: false
-    t.string "state",    limit: 20,   default: "", null: false
+    t.string  "story_id", limit: 100,  default: "", null: false
+    t.string  "type",     limit: 8
+    t.string  "text",     limit: 2000, default: "", null: false
+    t.string  "state",    limit: 20,   default: "", null: false
+    t.integer "position", limit: 4,    default: 0,  null: false
   end
 
   create_table "examples", id: false, force: :cascade do |t|
-    t.string   "rule_card_id", limit: 100, default: "", null: false
-    t.string   "card_id",      limit: 100, default: "", null: false
-    t.datetime "created",                               null: false
-  end
-
-  create_table "questions", id: false, force: :cascade do |t|
-    t.string   "story_id", limit: 100, default: "", null: false
-    t.string   "card_id",  limit: 100, default: "", null: false
-    t.datetime "created",                           null: false
-  end
-
-  create_table "rules", id: false, force: :cascade do |t|
-    t.string  "story_id", limit: 100, default: "", null: false
-    t.string  "card_id",  limit: 100, default: "", null: false
-    t.integer "position", limit: 4,   default: 0,  null: false
-  end
-
-  create_table "stories", primary_key: "story_id", force: :cascade do |t|
+    t.string "rule_card_id", limit: 100, default: "", null: false
+    t.string "card_id",      limit: 100, default: "", null: false
   end
 
 end

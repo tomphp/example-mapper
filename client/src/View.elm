@@ -35,7 +35,7 @@ rules : Model -> Html Msg
 rules model =
     div [ class "rules" ] <|
         List.append
-            (List.map (rule model) (Dict.values model.rules |> List.sortBy .position))
+            (List.map (rule model) (Dict.values model.rules |> List.sortBy (.card >> .position)))
             [ div [] [ addButton model.addRule RuleCard ]
             , div [] [ div [ class "rule-padding" ] [] ]
             ]
@@ -46,7 +46,7 @@ questions model =
     div [ class "questions" ]
         (List.concat
             [ [ h2 [] [ text "Questions" ] ]
-            , Dict.values model.questions |> List.map divCard
+            , Dict.values model.questions |> List.sortBy .position |> List.map divCard
             , [ addButton model.addQuestion QuestionCard ]
             ]
         )
@@ -64,7 +64,7 @@ examples : Model -> Rule -> List Card -> Html Msg
 examples model rule es =
     div [ class "examples" ]
         (List.append
-            (List.map divCard es)
+            (List.sortBy .position es |> List.map divCard)
             [ addButton
                 (Dict.get rule.card.id model.rules
                     |> Maybe.map .addExample

@@ -52,12 +52,12 @@ type alias Card =
     , state : CardState
     , text : String
     , cardType : CardType
+    , position : Int
     }
 
 
 type alias Rule =
     { card : Card
-    , position : Int
     , examples : Dict CardId Card
     , addExample : AddButtonState
     }
