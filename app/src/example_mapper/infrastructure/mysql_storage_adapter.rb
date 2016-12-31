@@ -20,40 +20,18 @@ module ExampleMapper
 
       def fetch_story(story_id)
         result = {
-          rules: [],
-          questions: []
+          story_card: format_card(fetch_story_record(story_id).first),
+          rules: fetch_rules(story_id).map do |row|
+            {
+              rule_card: format_card(row),
+              examples: fetch_examples(row['card_id']).map { |r| format_card(r) }
+            }
+          end,
+          questions: fetch_questions(story_id).map { |row| format_card(row) }
         }
 
-        cards = {}
-        fetch_cards(story_id).each do |row|
-          cards[row['card_id']] = {
-            id: row['card_id'],
-            text: row['text'],
-            state: row['state'].to_sym,
-            position: row['position']
-          }
-        end
 
-        fetch_story_record(story_id).first.tap do |row|
-          result[:story_card] = cards[row['story_id']]
-        end
-
-        fetch_questions(story_id).each do |row|
-          result[:questions] << cards[row['card_id']]
-        end
-
-        result[:rules] = fetch_rules(story_id).map do |row|
-          {
-            rule_card: cards[row['card_id']],
-            examples: fetch_examples(row['card_id']).map do |r|
-              cards[r['card_id']]
-            end
-          }
-        end
-
-        puts result.inspect
-
-        result
+        result.tap { |r| puts r.inspect }
       rescue => e
         puts e.inspect
       end
@@ -93,6 +71,15 @@ module ExampleMapper
       end
 
       private
+
+      def format_card(row)
+        {
+          id: row['card_id'],
+          text: row['text'],
+          state: row['state'].to_sym,
+          position: row['position']
+        }
+      end
 
       def transaction
         raise ArgumentError, 'No block was given' unless block_given?
