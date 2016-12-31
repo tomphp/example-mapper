@@ -36,6 +36,8 @@ services:
     environment:
       CLEARDB_DATABASE_URL: mysql://user:userpw@db/mapper?reconnect=true
       REDIS_URL: redis://queue
+      DYNO: dev.0
+      LOG_LEVEL: DEBUG
     depends_on:
     - db
     - queue

@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 
 gem 'compass'
 gem 'faye-websocket'
+gem 'log4r'
 gem 'mysql2'
 gem 'puma'
 gem 'rake'

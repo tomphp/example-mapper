@@ -3,7 +3,9 @@ require 'mysql2'
 module ExampleMapper
   module Infrastructure
     class MysqlStorageAdapter
-      def initialize
+      def initialize(logger)
+        @logger = logger
+
         config = URI.parse(ENV['CLEARDB_DATABASE_URL'])
         query = Rack::Utils.parse_nested_query(config.query)
 
@@ -14,7 +16,7 @@ module ExampleMapper
           database: File.basename(config.path),
           reconnect: query['reconnect'] == 'true'
         ).tap do |_c|
-          puts 'Connected to MySQL database'
+          @logger.info 'Connected to MySQL database'
         end
       end
 
@@ -30,10 +32,9 @@ module ExampleMapper
           questions: fetch_questions(story_id).map { |row| format_card(row) }
         }
 
-
-        result.tap { |r| puts r.inspect }
+        result.tap { |r| @logger.debug "Response: #{r.inspect}" }
       rescue => e
-        puts e.inspect
+        @logger.error e.inspect
       end
 
       def update_card(text, card_id)
@@ -58,7 +59,7 @@ module ExampleMapper
           add_card(card_id, story_id, 'rule', text, 'saved', position)
         end
       rescue => e
-        puts e.inspect
+        @logger.error e.inspect
       end
 
       def add_example(story_id, rule_card_id, card_id, text)
@@ -76,7 +77,7 @@ module ExampleMapper
         {
           id: row['card_id'],
           text: row['text'],
-          state: row['state'].to_sym,
+          state: row['state'],
           position: row['position']
         }
       end
@@ -90,7 +91,7 @@ module ExampleMapper
           query('COMMIT')
         rescue => e
           query('ROLLBACK')
-          puts "Transaction failed: #{e.inspect}"
+          @logger.error "MySQL transaction failed: #{e.inspect}"
         end
       end
 
@@ -130,7 +131,7 @@ module ExampleMapper
       end
 
       def fetch_examples(rule_card_id)
-        query('SELECT * FROM examples '\
+        query('SELECT cards.* FROM examples INNER JOIN cards USING (card_id) '\
               "WHERE rule_card_id = '#{e(rule_card_id)}'")
       end
 
@@ -141,12 +142,11 @@ module ExampleMapper
           WHERE story_id = '#{e(story_id)}' AND type = '#{e(type)}'
         )).first['position']
 
-        puts "POSITION: #{max_pos.inspect}"
-
         max_pos.nil? ? 0 : (max_pos + 1)
       end
 
       def query(sql)
+        @logger.debug "MySQL Query: #{sql}"
         @client.query(sql)
       end
 

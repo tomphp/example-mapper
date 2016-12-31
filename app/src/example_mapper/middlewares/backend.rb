@@ -1,24 +1,31 @@
-require 'faye/websocket'
-require 'json'
 require 'example_mapper/infrastructure/mysql_storage_adapter'
 require 'example_mapper/infrastructure/websocket_connections'
-require 'securerandom'
+require 'faye/websocket'
+require 'json'
+require 'log4r'
 require 'redis'
+require 'securerandom'
 
 module ExampleMapper
   module Middlewares
     class Backend
+      include Log4r
+
       KEEPALIVE_TIME = 15
 
       CHANNEL = 'message-queue'.freeze
 
       def initialize(app)
-        puts 'Creating the Middleware'
+        @logger = Logger.new(ENV['DYNO'])
+        @logger.outputters = Outputter.stdout
+        @logger.level = Object.const_get("Log4r::#{ENV['LOG_LEVEL']}")
+
+        @logger.info 'Initialising instance'
 
         @app         = app
         @clients     = {}
         @connections = Infrastructure::WebsocketConnections.new
-        @storage     = Infrastructure::MysqlStorageAdapter.new
+        @storage     = Infrastructure::MysqlStorageAdapter.new(@logger)
 
         uri    = URI.parse(ENV['REDIS_URL'])
         @redis = Redis.new(host: uri.host, port: uri.port, password: uri.password)
@@ -39,67 +46,67 @@ module ExampleMapper
         end
       end
 
+      def call(env)
+        with_error_handling do
+          return @app.call(env.merge(storage: @storage)) unless Faye::WebSocket.websocket?(env)
+
+          ws = Faye::WebSocket.new(env)
+          story_id = File.basename(env['REQUEST_PATH'])
+
+          ws.on :open do |_event|
+            with_error_handling do
+              @connections.register(story_id, ws)
+              @logger.debug "WebSocket :open, object_id=#{ws.object_id}, story_id=#{story_id}"
+            end
+          end
+
+          ws.on :message do |event|
+            with_error_handling do
+              data = JSON.parse(event.data)
+              @logger.debug "WebSocket :message, type=#{data['type']}, story_id=#{story_id} -> #{data.inspect}"
+
+              case data['type']
+              when 'update_card'
+                @storage.update_card(data['text'], data['id'])
+
+              when 'add_question'
+                id = SecureRandom.uuid
+                @storage.add_question(story_id, id, data['text'])
+
+              when 'add_rule'
+                id = SecureRandom.uuid
+                @storage.add_rule(story_id, id, data['text'])
+
+              when 'add_example'
+                id = SecureRandom.uuid
+                @storage.add_example(story_id, data['rule_id'], id, data['text'])
+              end
+
+              @redis.publish(CHANNEL, {
+                story_id: story_id,
+                type: :update_state,
+                state: @storage.fetch_story(story_id)
+              }.to_json)
+            end
+          end
+
+          ws.on :close do |event|
+            with_error_handling do
+              @logger.debug "WebSocket :close, event.code=#{event.code}, event.reason=#{event.reason}, story_id=#{story_id}"
+              @connections.release(story_id, ws)
+              ws = nil
+            end
+          end
+
+          ws.rack_response
+        end
+      end
+
       def with_error_handling
         yield
       rescue => e
-        puts e.inspect
+        @logger.error e.inspect
         raise e
-      end
-
-      def call(env)
-        return @app.call(env.merge(storage: @storage)) unless Faye::WebSocket.websocket?(env)
-
-        ws = Faye::WebSocket.new(env)
-        story_id = File.basename(env['REQUEST_PATH'])
-
-        ws.on :open do |_event|
-          with_error_handling do
-            @connections.register(story_id, ws)
-            p [:open, ws.object_id, story_id]
-          end
-        end
-
-        ws.on :message do |event|
-          with_error_handling do
-            data = JSON.parse(event.data)
-            p [:message, data['type'], story_id, data.inspect]
-
-            case data['type']
-            when 'update_card'
-              @storage.update_card(data['text'], data['id'])
-
-            when 'add_question'
-              id = SecureRandom.uuid
-              @storage.add_question(story_id, id, data['text'])
-
-            when 'add_rule'
-              id = SecureRandom.uuid
-              @storage.add_rule(story_id, id, data['text'])
-
-            when 'add_example'
-              id = SecureRandom.uuid
-              @storage.add_example(story_id, data['rule_id'], id, data['text'])
-            end
-
-            @redis.publish(CHANNEL, {
-              story_id: story_id,
-              type: :update_state,
-              state: @storage.fetch_story(story_id)
-            }.to_json)
-          end
-        end
-
-        ws.on :close do |event|
-          with_error_handling do
-            p [:close, event.code, event.reason, story_id]
-            @connections.release(story_id, ws)
-            ws = nil
-          end
-        end
-
-        ws.rack_response
-      rescue => e
-        puts e.inspect
       end
     end
   end
