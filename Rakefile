@@ -36,8 +36,25 @@ namespace :tests do
   end
 end
 
-task :build do
-  sh 'cd client; elm-make src/App.elm --output ../app/assets/app.js; cd ..'
+namespace :client do
+  namespace :tests do
+    task :unit do
+      sh 'cd client && elm-test && cd ..'
+    end
+
+    task :functional do
+      sh 'cd client && casperjs test $(pwd)/test/casper.js && cd ..'
+    end
+  end
+
+  task tests: [
+    'client:tests:unit',
+    'client:tests:functional'
+  ]
+
+  task :build do
+    sh 'cd client && elm-make src/App.elm --output ../app/assets/app.js && cd ..'
+  end
 end
 
 desc 'Run all tests'
