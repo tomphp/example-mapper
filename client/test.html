@@ -1,0 +1,31 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Client Test</title>
+</head>
+<body>
+  <div id="app"></div>
+
+  <ul id="messages"></ul>
+
+  <script src="app.js"></script>
+  <script>
+var messages = [];
+
+var app = Elm.App.embed(
+  document.getElementById('app'),
+  { backendUrl: null }
+);
+
+app.ports.socketOut.subscribe(function(msg) {
+  var li = document.createElement('li');
+  li.innerHTML = msg;
+  document.getElementById('messages').appendChild(li);
+});
+
+function sendMessage(message) {
+  app.ports.socketIn.send(JSON.stringify(message));
+}
+  </script>
+</body>
+</html>
