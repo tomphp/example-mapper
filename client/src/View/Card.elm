@@ -31,6 +31,7 @@ newCard card =
     Html.div
         [ Html.Events.onClick <| UpdateCardInModel { card | state = Editing }
         , Html.Attributes.class <| cardClass card.cardType card.state
+        , Html.Attributes.id card.id
         ]
         [ svg
             [ width <| toString cardWidth
@@ -51,6 +52,7 @@ existingCard card =
         Html.div
             [ Html.Events.onClick <| UpdateCardInModel { card | state = Editing }
             , Html.Attributes.class <| cardClass card.cardType card.state
+            , Html.Attributes.id <| "card-" ++ card.id
             ]
             [ svg
                 [ width <| toString cardWidth

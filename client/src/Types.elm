@@ -36,7 +36,7 @@ type AddButtonState
 
 
 type alias Flags =
-    { backendUrl : String }
+    { backendUrl : Maybe String }
 
 
 type alias CardId =

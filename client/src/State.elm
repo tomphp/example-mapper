@@ -5,6 +5,7 @@ import Dom
 import Json.Decode exposing (decodeString)
 import List
 import Maybe.Extra
+import Ports
 import Requests
 import StateDecoder exposing (..)
 import Types
@@ -23,9 +24,19 @@ import Task
 import WebSocket
 
 
+send : Maybe String -> String -> Cmd Msg
+send url =
+    case url of
+        Just u ->
+            WebSocket.send u
+
+        Nothing ->
+            Ports.socketOut
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
+    ( initialModel flags, Requests.refresh |> send flags.backendUrl )
 
 
 
@@ -75,19 +86,19 @@ update msg model =
 saveNewCard : Model -> CardType -> String -> ( Model, Cmd Msg )
 saveNewCard model cardType text =
     let
-        send =
-            WebSocket.send model.flags.backendUrl
+        wsSend =
+            send model.flags.backendUrl
     in
         case cardType of
             QuestionCard ->
-                ( { model | addQuestion = Button }, Requests.addQuestion text |> send )
+                ( { model | addQuestion = Button }, Requests.addQuestion text |> wsSend )
 
             RuleCard ->
-                ( { model | addRule = Button }, Requests.addRule text |> send )
+                ( { model | addRule = Button }, Requests.addRule text |> wsSend )
 
             ExampleCard ruleId ->
                 ( updateAddExampleState model ruleId Button
-                , Requests.addExample ruleId text |> send
+                , Requests.addExample ruleId text |> wsSend
                 )
 
             _ ->
@@ -151,13 +162,10 @@ replaceExampleCard card rule =
 saveCard : Model -> Card -> ( Model, Cmd Msg )
 saveCard model theCard =
     let
-        send =
-            WebSocket.send model.flags.backendUrl
-
         card =
             { theCard | state = Saving }
     in
-        ( replaceCard model card, Requests.updateCard card |> send )
+        ( replaceCard model card, Requests.updateCard card |> send model.flags.backendUrl )
 
 
 updateAddExampleState : Model -> CardId -> AddButtonState -> Model
@@ -172,7 +180,12 @@ focusCardInput id =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    WebSocket.listen model.flags.backendUrl UpdateModel
+    case model.flags.backendUrl of
+        Just url ->
+            WebSocket.listen url UpdateModel
+
+        Nothing ->
+            Ports.socketIn UpdateModel
 
 
 updateModel : Model -> String -> Model

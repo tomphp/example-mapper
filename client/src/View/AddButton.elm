@@ -76,5 +76,6 @@ displayButton state b =
             button
                 [ onClick (CreateCard b.cardType)
                 , class ("card " ++ b.cssClass)
+                , id b.id
                 ]
                 [ text b.label ]
