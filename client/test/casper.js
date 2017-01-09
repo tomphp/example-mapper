@@ -1,21 +1,28 @@
 var system = require('system')
+console.log('Test file: ' + system.args[system.args.length-1]);
 var dir = dirname(dirname(system.args[system.args.length-1]));
 var app = 'file://' + dir + '/test.html';
+
+console.log('Loading ' + app);
 
 function dirname(path) {
   return path.replace(/\\/g,'/').replace(/\/[^\/]*$/, '');;
 }
 
 function assertMessage(context, test, num, expected, description) {
-  var selector = '#messages li:nth-child(' + num + ')';
+  function getMessage(num) {
+    return context.evaluate(function(num) {
+      return messages[num];
+    }, num);
+  }
 
   context.waitFor(
     function check() {
-      return context.exists(selector);
+      return getMessage(num);
     },
     function() {
       test.assertEquals(
-        JSON.parse(context.getHTML(selector)),
+        JSON.parse(getMessage(num)),
         {type: 'fetch_update'},
         description
       );
@@ -50,7 +57,7 @@ casper.test.begin('Initial loading', function(test) {
       };
 
   casper.start(app, function() {
-    assertMessage(this, test, 1, {type: 'fetch_update'}, 'A refresh message is sent on connection');
+    assertMessage(this, test, 0, {type: 'fetch_update'}, 'A refresh message is sent on connection');
   });
 
   casper.then(function() {

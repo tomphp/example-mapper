@@ -6,8 +6,6 @@
 <body>
   <div id="app"></div>
 
-  <ul id="messages"></ul>
-
   <script src="app.js"></script>
   <script>
 var messages = [];
@@ -18,9 +16,7 @@ var app = Elm.App.embed(
 );
 
 app.ports.socketOut.subscribe(function(msg) {
-  var li = document.createElement('li');
-  li.innerHTML = msg;
-  document.getElementById('messages').appendChild(li);
+  messages.push(msg);
 });
 
 function sendMessage(message) {
