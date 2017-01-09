@@ -1,4 +1,4 @@
 /client/elm-stuff/
-/client/app.js
+/client/tests/functional/app/app.js
 /.sass-cache/
 /db/config.yml

@@ -39,11 +39,20 @@ end
 namespace :client do
   namespace :tests do
     task :unit do
-      sh 'cd client && elm-test && cd ..'
+      sh [
+        'cd client',
+        'elm-test tests/unit/Main.elm',
+        'cd ..'
+      ].join(' && ')
     end
 
     task :functional do
-      sh 'cd client && casperjs test $(pwd)/test/casper.js && cd ..'
+      sh [
+        'cd client',
+        'elm-make src/App.elm --output=tests/functional/app/app.js',
+        'casperjs test $(pwd)/tests/functional/casper.js',
+        'cd ..'
+      ].join(' && ')
     end
   end
 
@@ -53,7 +62,11 @@ namespace :client do
   ]
 
   task :build do
-    sh 'cd client && elm-make src/App.elm --output ../app/assets/app.js && cd ..'
+    sh [
+      'cd client',
+      'elm-make src/App.elm --output ../app/assets/app.js',
+      'cd ..'
+    ].join(' && ')
   end
 end
 

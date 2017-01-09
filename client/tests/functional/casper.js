@@ -1,7 +1,7 @@
 var system = require('system')
 console.log('Test file: ' + system.args[system.args.length-1]);
-var dir = dirname(dirname(system.args[system.args.length-1]));
-var app = 'file://' + dir + '/test.html';
+var dir = dirname(system.args[system.args.length-1]);
+var app = 'file://' + dir + '/app/test.html';
 
 console.log('Loading ' + app);
 
