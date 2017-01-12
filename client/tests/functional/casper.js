@@ -8,6 +8,8 @@ console.log('Loading ' + app);
 casper.test.begin('Initial loading', function(test) {
     var storyCardId = '8d85e649-4105-4831-9dad-d1cceb64bbaf',
       questionCardId = 'e82e0d5c-9278-4a3a-9852-1a511fdf2ee0',
+      ruleCardId = '3b6464c5-4c2b-4530-bb28-ab0734b99b16',
+      exampleCardId = 'de1ede0c-dae3-41f0-b284-2d5b10728001',
       state = {
         state: {
           story_card: {
@@ -16,14 +18,31 @@ casper.test.begin('Initial loading', function(test) {
             state: 'saved',
             position: 0
           },
-          rules: [],
+          rules: [
+            {
+              rule_card: {
+                id: ruleCardId,
+                text: 'This rule must be shown',
+                state: 'saved',
+                position: 0
+              },
+              examples: [
+              {
+                id: exampleCardId,
+                text: 'The one where this example appears',
+                state: 'saved',
+                position: 0
+              }
+              ]
+            },
+          ],
           questions:[
-          {
-            id: questionCardId,
-            text: 'Does this card appear?',
-            state: 'saved',
-            position: 0
-          },
+            {
+              id: questionCardId,
+              text: 'Does this card appear?',
+              state: 'saved',
+              position: 0
+            },
           ],
         }
       };
@@ -63,6 +82,28 @@ casper.test.begin('Initial loading', function(test) {
     var cardInfo = this.getElementInfo('#card-' + questionCardId);
     var classes = cardInfo.attributes['class'].split(' ');
     test.assert(classes.indexOf('card--question') > -1, 'Question card has class card--question');
+  });
+
+  casper.then(function() {
+    test.assertEquals(
+        this.fetchText('#card-' + ruleCardId),
+        'This rule must be shown',
+        'Rule card contains rule text');
+
+    var cardInfo = this.getElementInfo('#card-' + ruleCardId);
+    var classes = cardInfo.attributes['class'].split(' ');
+    test.assert(classes.indexOf('card--rule') > -1, 'Rule card has class card--rule');
+  });
+
+  casper.then(function() {
+    test.assertEquals(
+        this.fetchText('#card-' + exampleCardId),
+        'The one where this example appears',
+        'Example card contains example text');
+
+    var cardInfo = this.getElementInfo('#card-' + exampleCardId);
+    var classes = cardInfo.attributes['class'].split(' ');
+    test.assert(classes.indexOf('card--example') > -1, 'Example card has class card--example');
   });
 
   casper.run(function() {
