@@ -49,7 +49,7 @@ namespace :client do
     task :functional do
       sh [
         'cd client',
-        'elm-make src/App.elm --output=tests/functional/app/app.js',
+        'elm-make src/App.elm --warn --output=tests/functional/app/app.js',
         'casperjs test $(pwd)/tests/functional/casper.js',
         'cd ..'
       ].join(' && ')
@@ -64,7 +64,7 @@ namespace :client do
   task :build do
     sh [
       'cd client',
-      'elm-make src/App.elm --output ../app/assets/app.js',
+      'elm-make src/App.elm --warn --output ../app/assets/app.js',
       'cd ..'
     ].join(' && ')
   end
