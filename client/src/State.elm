@@ -1,26 +1,16 @@
 module State exposing (init, update, subscriptions)
 
+import AddButton.Types exposing (AddButtonState(..))
+import Card.Types exposing (CardState(..), CardId, Card, CardType(..))
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
-import List
-import Maybe.Extra
 import Ports
 import Requests
+import Rule.Types exposing (Rule)
 import StateDecoder exposing (..)
-import Types
-    exposing
-        ( Model
-        , Msg(..)
-        , Rule
-        , Card
-        , CardState(..)
-        , AddButtonState(..)
-        , CardId
-        , Flags
-        , CardType(..)
-        )
 import Task
+import Types exposing (Model, Msg(..), Flags)
 import WebSocket
 
 

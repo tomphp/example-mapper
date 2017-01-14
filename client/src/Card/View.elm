@@ -1,27 +1,32 @@
-module View.Card exposing (existingCard, newCard)
+module Card.View exposing (existingCard, newCard)
 
+import Card.Types exposing (CardState(..), Card, CardType(..))
 import Html
 import Html.Attributes
 import Html.Events
+import Json.Decode as Json
 import List
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Types exposing (CardState(..), Msg(..), Card, CardType(..))
-import Json.Decode as Json
+import Types exposing (Msg(..))
 
 
+cardWidth : Int
 cardWidth =
     254
 
 
+cardHeight : Int
 cardHeight =
     156
 
 
+lineHeight : Int
 lineHeight =
     12
 
 
+textOffset : Int
 textOffset =
     17
 

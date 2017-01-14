@@ -1,22 +1,13 @@
 module View exposing (view)
 
+import Card.Types exposing (Card, CardState(..), CardId, CardType(..))
+import Card.View exposing (existingCard, newCard)
 import Dict exposing (Dict)
-import Types
-    exposing
-        ( Model
-        , Msg(..)
-        , Card
-        , Rule
-        , CardState(..)
-        , CardId
-        , AddButtonState(..)
-        , CardType(..)
-        )
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import View.AddButton exposing (addButton)
-import View.Card exposing (existingCard, newCard)
+import Rule.View as Rule
+import Types exposing (Model, Msg(..))
+import AddButton.View as AddButton
 
 
 view : Model -> Html Msg
@@ -35,8 +26,8 @@ rules : Model -> Html Msg
 rules model =
     div [ class "rules" ] <|
         List.append
-            (List.map (rule model) (Dict.values model.rules |> List.sortBy (.card >> .position)))
-            [ div [] [ addButton model.addRule RuleCard ]
+            (List.map (Rule.view model) (Dict.values model.rules |> List.sortBy (.card >> .position)))
+            [ div [] [ AddButton.view model.addRule RuleCard ]
             , div [] [ div [ class "rule-padding" ] [] ]
             ]
 
@@ -47,30 +38,7 @@ questions model =
         (List.concat
             [ [ h2 [] [ text "Questions" ] ]
             , Dict.values model.questions |> List.sortBy .position |> List.map divCard
-            , [ addButton model.addQuestion QuestionCard ]
-            ]
-        )
-
-
-rule : Model -> Rule -> Html Msg
-rule model r =
-    div [ class "rule" ]
-        [ existingCard r.card
-        , examples model r (Dict.values r.examples)
-        ]
-
-
-examples : Model -> Rule -> List Card -> Html Msg
-examples model rule es =
-    div [ class "examples" ]
-        (List.append
-            (List.sortBy .position es |> List.map divCard)
-            [ addButton
-                (Dict.get rule.card.id model.rules
-                    |> Maybe.map .addExample
-                    |> Maybe.withDefault Button
-                )
-                (ExampleCard rule.card.id)
+            , [ AddButton.view model.addQuestion QuestionCard ]
             ]
         )
 

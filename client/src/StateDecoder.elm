@@ -1,19 +1,11 @@
 module StateDecoder exposing (modelDecoder)
 
+import AddButton.Types exposing (AddButtonState(..))
+import Card.Types exposing (Card, CardState(..), CardType(..), CardId)
 import Dict exposing (Dict)
 import Json.Decode exposing (..)
-import Types
-    exposing
-        ( Model
-        , Card
-        , CardId
-        , RuleId
-        , Rule
-        , CardState(..)
-        , AddButtonState(..)
-        , Flags
-        , CardType(..)
-        )
+import Rule.Types exposing (RuleId, Rule)
+import Types exposing (Model, Flags)
 
 
 modelDecoder : Flags -> Decoder Model

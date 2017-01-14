@@ -1,17 +1,12 @@
-module View.AddButton exposing (addButton)
+module AddButton.View exposing (view)
 
+import AddButton.Types exposing (AddButtonState(..))
+import Card.Types exposing (CardType(..), CardId, CardState(..))
+import Card.View exposing (newCard)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Types
-    exposing
-        ( AddButtonState(..)
-        , CardId
-        , CardState(..)
-        , CardType(..)
-        , Msg(..)
-        )
-import View.Card exposing (newCard)
+import Types exposing (Msg(..))
 
 
 type alias AddButton =
@@ -22,8 +17,8 @@ type alias AddButton =
     }
 
 
-addButton : AddButtonState -> CardType -> Html Msg
-addButton state =
+view : AddButtonState -> CardType -> Html Msg
+view state =
     addButtonParams
         >> Maybe.map (displayButton state)
         >> Maybe.withDefault (text "Error")

@@ -8,7 +8,7 @@ module Requests
         )
 
 import Json.Encode exposing (..)
-import Types exposing (Card)
+import Card.Types exposing (Card)
 
 
 refresh : String
