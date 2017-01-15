@@ -98,10 +98,20 @@ saveNewCard model cardType text =
     in
         case cardType of
             QuestionCard ->
-                ( model, Requests.addQuestion text |> wsSend )
+                ( fetchCard model cardType "new-question"
+                    |> Maybe.map (\card -> { card | state = Saving })
+                    |> Maybe.map (replaceCard model)
+                    |> Maybe.withDefault model
+                , Requests.addQuestion text |> wsSend
+                )
 
             RuleCard ->
-                ( model, Requests.addRule text |> wsSend )
+                ( fetchCard model cardType "new-rule"
+                    |> Maybe.map (\card -> { card | state = Saving })
+                    |> Maybe.map (replaceCard model)
+                    |> Maybe.withDefault model
+                , Requests.addRule text |> wsSend
+                )
 
             ExampleCard ruleId ->
                 ( model
@@ -110,6 +120,16 @@ saveNewCard model cardType text =
 
             _ ->
                 ( model, Cmd.none )
+
+
+maybeCall : a -> (a -> b -> a) -> Maybe b -> a
+maybeCall model fn card =
+    case card of
+        Just c ->
+            fn model c
+
+        Nothing ->
+            model
 
 
 createCard : Model -> CardType -> ( Model, Cmd Msg )
@@ -138,6 +158,24 @@ createCard model cardType =
             }
         , focusCardInput id
         )
+
+
+fetchCard : Model -> CardType -> CardId -> Maybe Card
+fetchCard model cardType id =
+    case cardType of
+        StoryCard ->
+            model.storyCard
+
+        RuleCard ->
+            Dict.get id model.rules |> Maybe.map .card
+
+        ExampleCard ruleId ->
+            Dict.get ruleId model.rules
+                |> Maybe.map .examples
+                |> Maybe.andThen (Dict.get id)
+
+        QuestionCard ->
+            Dict.get id model.questions
 
 
 replaceCard : Model -> Card -> Model

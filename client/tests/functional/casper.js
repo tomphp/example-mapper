@@ -151,6 +151,8 @@ casper.test.begin('Adding a Rule', function(test) {
       var classes = cardInfo.attributes['class'].split(' ');
       test.assert(classes.indexOf('card--editing') > -1, 'New rule card has class card--editing');
 
+      test.assertEquals(getActiveElement.call(this).id, 'card-input-new-rule', 'Card input has focus');
+
       this.sendKeys('#card-new-rule textarea', 'This rule must be created', {keepFocus: true});
       this.sendKeys('#card-new-rule textarea', casper.page.event.key.Tab , {keepFocus: true});
     }, function() {
@@ -158,19 +160,14 @@ casper.test.begin('Adding a Rule', function(test) {
     });
   });
 
-  /*
   casper.then(function() {
     this.waitFor(function() {
-      var cardInfo = this.getElementInfo('#new-rule');
-      this.echo(cardInfo.attributes['class']);
-
-      return this.exists('#new-rule.card--saving');
+      return this.exists('#card-new-rule.card--saving');
     }, function() {
     }, function() {
       this.echo('Card state didn\'t updated').exit();
     });
   });
-  */
 
   casper.then(function() {
     assertMessage.call(
@@ -229,6 +226,8 @@ casper.test.begin('Adding a Question', function(test) {
       var classes = cardInfo.attributes['class'].split(' ');
       test.assert(classes.indexOf('card--editing') > -1, 'New question card has class card--editing');
 
+      test.assertEquals(getActiveElement.call(this).id, 'card-input-new-question', 'Card input has focus');
+
       this.sendKeys('#card-new-question textarea', 'Will this question be created?', {keepFocus: true});
       this.sendKeys('#card-new-question textarea', casper.page.event.key.Tab , {keepFocus: true});
     }, function() {
@@ -236,19 +235,14 @@ casper.test.begin('Adding a Question', function(test) {
     });
   });
 
-  /*
   casper.then(function() {
     this.waitFor(function() {
-      var cardInfo = this.getElementInfo('#new-question');
-      this.echo(cardInfo.attributes['class']);
-
-      return this.exists('#new-question.card--saving');
+      return this.exists('#card-new-question.card--saving');
     }, function() {
     }, function() {
       this.echo('Card state didn\'t updated').exit();
     });
   });
-  */
 
   casper.then(function() {
     assertMessage.call(
@@ -275,6 +269,12 @@ function sendState(state) {
   this.evaluate(function(state) {
     sendMessage(state);
   }, {state: state});
+}
+
+function getActiveElement() {
+  return this.evaluate(function() {
+    return document.activeElement;
+  });
 }
 
 function assertMessage(test, num, expected, description) {
