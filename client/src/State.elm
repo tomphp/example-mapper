@@ -1,13 +1,12 @@
 module State exposing (init, update, subscriptions)
 
-import AddButton.Types exposing (AddButtonState(..))
 import Card.Types exposing (CardState(..), CardId, Card, CardType(..))
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
 import Ports
 import Requests
-import Rule.Types exposing (Rule)
+import Rule.Types exposing (Rule, RuleId)
 import StateDecoder exposing (..)
 import Task
 import Types exposing (Model, Msg(..), Flags)
@@ -34,20 +33,38 @@ init flags =
 -- init =
 --     let
 --         flags =
---             { backendUrl = "ws://localhost:9000/workspace/8f0d042c-96e9-496b-8d26-2d6c63b14663" }
+--             { backendUrl = Just "ws://localhost:9000/workspace/414c091e-5360-4ec0-a52e-79d99a0430da" }
 --     in
---         ( initialModel flags, Requests.refresh |> WebSocket.send flags.backendUrl )
+--         ( initialModel flags
+--         , Requests.refresh
+--             |> WebSocket.send (Maybe.withDefault "" flags.backendUrl)
+--         )
 
 
 initialModel : Flags -> Model
 initialModel flags =
     { storyCard = Nothing
-    , rules = Dict.empty
-    , questions = Dict.empty
+    , rules = Dict.singleton "new-rule" addRule
+    , questions = Dict.singleton "new-question" <| addCard QuestionCard "new-question"
     , error = Nothing
     , flags = flags
-    , addRule = Button
-    , addQuestion = Button
+    }
+
+
+addCard : CardType -> CardId -> Card
+addCard cardType cardId =
+    { id = cardId
+    , state = AddButton
+    , text = ""
+    , cardType = cardType
+    , position = 9999
+    }
+
+
+addRule : Rule
+addRule =
+    { card = addCard RuleCard "new-rule"
+    , examples = Dict.empty
     }
 
 
@@ -81,13 +98,13 @@ saveNewCard model cardType text =
     in
         case cardType of
             QuestionCard ->
-                ( { model | addQuestion = Button }, Requests.addQuestion text |> wsSend )
+                ( model, Requests.addQuestion text |> wsSend )
 
             RuleCard ->
-                ( { model | addRule = Button }, Requests.addRule text |> wsSend )
+                ( model, Requests.addRule text |> wsSend )
 
             ExampleCard ruleId ->
-                ( updateAddExampleState model ruleId Button
+                ( model
                 , Requests.addExample ruleId text |> wsSend
                 )
 
@@ -97,20 +114,30 @@ saveNewCard model cardType text =
 
 createCard : Model -> CardType -> ( Model, Cmd Msg )
 createCard model cardType =
-    case cardType of
-        QuestionCard ->
-            ( { model | addQuestion = Preparing }, focusCardInput "new-question" )
+    let
+        id =
+            case cardType of
+                QuestionCard ->
+                    "new-question"
 
-        RuleCard ->
-            ( { model | addRule = Preparing }, focusCardInput "new-rule" )
+                RuleCard ->
+                    "new-rule"
 
-        ExampleCard ruleId ->
-            ( updateAddExampleState model ruleId Preparing
-            , focusCardInput "new-example"
-            )
+                ExampleCard ruleId ->
+                    "new-example-" ++ ruleId
 
-        _ ->
-            ( model, Cmd.none )
+                _ ->
+                    "invalid-card-id"
+    in
+        ( replaceCard model
+            { id = id
+            , state = Preparing
+            , text = ""
+            , cardType = cardType
+            , position = 9999
+            }
+        , focusCardInput id
+        )
 
 
 replaceCard : Model -> Card -> Model
@@ -158,9 +185,10 @@ saveCard model theCard =
         ( replaceCard model card, Requests.updateCard card |> send model.flags.backendUrl )
 
 
-updateAddExampleState : Model -> CardId -> AddButtonState -> Model
-updateAddExampleState model ruleId state =
-    { model | rules = Dict.update ruleId (Maybe.map (\r -> { r | addExample = state })) model.rules }
+
+-- updateAddExampleState : Model -> CardId -> AddButtonState -> Model
+-- updateAddExampleState model ruleId state =
+--     { model | rules = Dict.update ruleId (Maybe.map (\r -> { r | addExample = state })) model.rules }
 
 
 focusCardInput : String -> Cmd Msg
@@ -184,9 +212,29 @@ updateModel model update =
         Ok m ->
             { model
                 | storyCard = m.storyCard
-                , rules = m.rules
-                , questions = m.questions
+                , rules =
+                    Dict.insert
+                        "new-rule"
+                        addRule
+                        (Dict.map addExampleButton m.rules)
+                , questions =
+                    Dict.insert
+                        "new-question"
+                        (addCard QuestionCard "new-question")
+                        m.questions
             }
 
         Err msg ->
             { model | error = Just msg }
+
+
+addExampleButton : RuleId -> Rule -> Rule
+addExampleButton id rule =
+    let
+        exampleId =
+            "new-example-" ++ id
+
+        button =
+            addCard (ExampleCard id) exampleId
+    in
+        { rule | examples = Dict.insert exampleId button rule.examples }

@@ -5,7 +5,6 @@ module Types
         , Flags
         )
 
-import AddButton.Types exposing (AddButtonState(..))
 import Card.Types exposing (Card, CardId, CardType)
 import Dict exposing (Dict)
 import Rule.Types exposing (Rule)
@@ -21,8 +20,6 @@ type alias Model =
     , questions : Dict CardId Card
     , error : Maybe String
     , flags : Flags
-    , addRule : AddButtonState
-    , addQuestion : AddButtonState
     }
 
 

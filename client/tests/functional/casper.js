@@ -145,14 +145,14 @@ casper.test.begin('Adding a Rule', function(test) {
     this.click('#new-rule');
 
     this.waitFor(function() {
-      return this.exists('div#new-rule');
+      return this.exists('div#card-new-rule');
     }, function() {
-      var cardInfo = this.getElementInfo('#new-rule');
+      var cardInfo = this.getElementInfo('#card-new-rule');
       var classes = cardInfo.attributes['class'].split(' ');
       test.assert(classes.indexOf('card--editing') > -1, 'New rule card has class card--editing');
 
-      this.sendKeys('#new-rule textarea', 'This rule must be created', {keepFocus: true});
-      this.sendKeys('#new-rule textarea', casper.page.event.key.Tab , {keepFocus: true});
+      this.sendKeys('#card-new-rule textarea', 'This rule must be created', {keepFocus: true});
+      this.sendKeys('#card-new-rule textarea', casper.page.event.key.Tab , {keepFocus: true});
     }, function() {
       this.echo('Click didn\'t apply.').exit();
     });
@@ -223,14 +223,14 @@ casper.test.begin('Adding a Question', function(test) {
     this.click('#new-question');
 
     this.waitFor(function() {
-      return this.exists('div#new-question');
+      return this.exists('div#card-new-question');
     }, function() {
-      var cardInfo = this.getElementInfo('#new-question');
+      var cardInfo = this.getElementInfo('#card-new-question');
       var classes = cardInfo.attributes['class'].split(' ');
       test.assert(classes.indexOf('card--editing') > -1, 'New question card has class card--editing');
 
-      this.sendKeys('#new-question textarea', 'Will this question be created?', {keepFocus: true});
-      this.sendKeys('#new-question textarea', casper.page.event.key.Tab , {keepFocus: true});
+      this.sendKeys('#card-new-question textarea', 'Will this question be created?', {keepFocus: true});
+      this.sendKeys('#card-new-question textarea', casper.page.event.key.Tab , {keepFocus: true});
     }, function() {
       this.echo('Click didn\'t apply.').exit();
     });

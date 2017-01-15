@@ -1,6 +1,7 @@
-module Card.View exposing (existingCard, newCard)
+module Card.View exposing (view)
 
 import Card.Types exposing (CardState(..), Card, CardType(..))
+import Card.AddButtonView as AddButton
 import Html
 import Html.Attributes
 import Html.Events
@@ -31,28 +32,26 @@ textOffset =
     17
 
 
-newCard : Card -> Html.Html Msg
-newCard card =
-    Html.div
-        [ Html.Events.onClick <| UpdateCardInModel { card | state = Editing }
-        , Html.Attributes.class <| cardClass card.cardType card.state
-        , Html.Attributes.id card.id
-        ]
-        [ svg
-            [ width <| toString cardWidth
-            , height <| toString cardHeight
-            ]
-          <|
-            cardBackground
-                ++ [ cardContent (SaveNewCard card.cardType) card ]
-        ]
+view : Card -> Html.Html Msg
+view card =
+    case card.state of
+        AddButton ->
+            AddButton.view card.cardType
+
+        _ ->
+            drawCard card
 
 
-existingCard : Card -> Html.Html Msg
-existingCard card =
+drawCard : Card -> Html.Html Msg
+drawCard card =
     let
         saveAction =
-            \text -> SaveCard { card | text = text }
+            case card.state of
+                Preparing ->
+                    SaveNewCard card.cardType
+
+                _ ->
+                    \text -> SaveCard { card | text = text }
     in
         Html.div
             [ Html.Events.onClick <| UpdateCardInModel { card | state = Editing }
@@ -115,6 +114,9 @@ cardStateClass state =
         Editing ->
             " card--editing"
 
+        Preparing ->
+            " card--editing"
+
         Saving ->
             " card--saving"
 
@@ -159,6 +161,9 @@ cardContent save card =
         ]
         (case card.state of
             Editing ->
+                cardInput save card
+
+            Preparing ->
                 cardInput save card
 
             _ ->

@@ -17,6 +17,7 @@ main =
 
 
 
+-- main : Program Never Types.Model Types.Msg
 -- main =
 --     Html.program
 --         { init = init

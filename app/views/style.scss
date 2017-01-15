@@ -33,8 +33,8 @@ body {
   flex-direction: row;
 }
 
-.rule-padding {
-  width: 300px;
+.rule:last-child {
+  padding-right: 300px;
 }
 
 .questions {

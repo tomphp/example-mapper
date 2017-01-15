@@ -22,7 +22,9 @@ type CardType
 
 
 type CardState
-    = Editing
+    = AddButton
+    | Preparing
+    | Editing
     | Locked
     | Saving
     | Saved

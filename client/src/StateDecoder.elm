@@ -1,6 +1,5 @@
 module StateDecoder exposing (modelDecoder)
 
-import AddButton.Types exposing (AddButtonState(..))
 import Card.Types exposing (Card, CardState(..), CardType(..), CardId)
 import Dict exposing (Dict)
 import Json.Decode exposing (..)
@@ -11,14 +10,12 @@ import Types exposing (Model, Flags)
 modelDecoder : Flags -> Decoder Model
 modelDecoder flags =
     field "state" <|
-        map7 Model
+        map5 Model
             (maybe <| field "story_card" (card StoryCard))
             (field "rules" <| rules)
             (field "questions" <| map (dictKeyedBy .id) <| list (card QuestionCard))
             (succeed Nothing)
             (succeed flags)
-            (succeed Button)
-            (succeed Button)
 
 
 rules : Decoder (Dict CardId Rule)
@@ -39,7 +36,7 @@ rule =
 
 ruleWithId : RuleId -> Decoder Rule
 ruleWithId ruleId =
-    map3 Rule
+    map2 Rule
         (field "rule_card" (card RuleCard))
         (field "examples" <|
             map (dictKeyedBy .id) <|
@@ -47,7 +44,6 @@ ruleWithId ruleId =
                     card <|
                         ExampleCard ruleId
         )
-        (succeed Button)
 
 
 exampleCard : Decoder Card

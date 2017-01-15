@@ -1,8 +1,6 @@
-module AddButton.View exposing (view)
+module Card.AddButtonView exposing (view)
 
-import AddButton.Types exposing (AddButtonState(..))
 import Card.Types exposing (CardType(..), CardId, CardState(..))
-import Card.View exposing (newCard)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -17,10 +15,10 @@ type alias AddButton =
     }
 
 
-view : AddButtonState -> CardType -> Html Msg
-view state =
+view : CardType -> Html Msg
+view =
     addButtonParams
-        >> Maybe.map (displayButton state)
+        >> Maybe.map displayButton
         >> Maybe.withDefault (text "Error")
 
 
@@ -55,22 +53,11 @@ addButtonParams t =
             Nothing
 
 
-displayButton : AddButtonState -> AddButton -> Html Msg
-displayButton state b =
-    case state of
-        Preparing ->
-            newCard
-                { id = b.id
-                , state = Editing
-                , text = ""
-                , cardType = b.cardType
-                , position = 999999999
-                }
-
-        _ ->
-            button
-                [ onClick (CreateCard b.cardType)
-                , class ("card " ++ b.cssClass)
-                , id b.id
-                ]
-                [ text b.label ]
+displayButton : AddButton -> Html Msg
+displayButton b =
+    button
+        [ onClick (CreateCard b.cardType)
+        , class ("card " ++ b.cssClass)
+        , id b.id
+        ]
+        [ text b.label ]
