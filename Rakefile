@@ -49,8 +49,8 @@ namespace :client do
     task :functional do
       sh [
         'cd client',
-        'elm-make src/App.elm --warn --output=tests/functional/app/app.js',
-        'casperjs test $(pwd)/tests/functional/casper.js',
+        'elm-make src/App.elm --warn --output=tests/app/app.js',
+        'casperjs test --includes=$(pwd)/tests/functional.js $(pwd)/tests/functional',
         'cd ..'
       ].join(' && ')
     end
