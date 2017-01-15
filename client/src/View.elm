@@ -30,13 +30,18 @@ rules model =
 questions : Model -> Html Msg
 questions model =
     div [ class "questions" ]
-        (List.concat
-            [ [ h2 [] [ text "Questions" ] ]
-            , Dict.values model.questions |> List.sortBy .position |> List.map divCard
-            ]
-        )
+        [ h2 [] [ text "Questions" ]
+        , div [] (questionCards model)
+        ]
 
 
-divCard : Card -> Html Msg
-divCard card =
-    div [] [ Card.view card ]
+questionCards : Model -> List (Html Msg)
+questionCards model =
+    Dict.values model.questions
+        |> List.sortBy .position
+        |> List.map (divCard "question")
+
+
+divCard : String -> Card -> Html Msg
+divCard className card =
+    div [ class className ] [ Card.view card ]

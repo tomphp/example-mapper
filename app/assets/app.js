@@ -10773,15 +10773,31 @@ var _user$project$Rule_View$view = F2(
 			});
 	});
 
-var _user$project$View$divCard = function (card) {
+var _user$project$View$divCard = F2(
+	function (className, card) {
+		return A2(
+			_elm_lang$html$Html$div,
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$class(className),
+				_1: {ctor: '[]'}
+			},
+			{
+				ctor: '::',
+				_0: _user$project$Card_View$view(card),
+				_1: {ctor: '[]'}
+			});
+	});
+var _user$project$View$questionCards = function (model) {
 	return A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: _user$project$Card_View$view(card),
-			_1: {ctor: '[]'}
-		});
+		_elm_lang$core$List$map,
+		_user$project$View$divCard('question'),
+		A2(
+			_elm_lang$core$List$sortBy,
+			function (_) {
+				return _.position;
+			},
+			_elm_lang$core$Dict$values(model.questions)));
 };
 var _user$project$View$questions = function (model) {
 	return A2(
@@ -10791,35 +10807,25 @@ var _user$project$View$questions = function (model) {
 			_0: _elm_lang$html$Html_Attributes$class('questions'),
 			_1: {ctor: '[]'}
 		},
-		_elm_lang$core$List$concat(
-			{
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$h2,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Questions'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
 				ctor: '::',
-				_0: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$h2,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('Questions'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {ctor: '[]'}
-				},
-				_1: {
-					ctor: '::',
-					_0: A2(
-						_elm_lang$core$List$map,
-						_user$project$View$divCard,
-						A2(
-							_elm_lang$core$List$sortBy,
-							function (_) {
-								return _.position;
-							},
-							_elm_lang$core$Dict$values(model.questions))),
-					_1: {ctor: '[]'}
-				}
-			}));
+				_0: A2(
+					_elm_lang$html$Html$div,
+					{ctor: '[]'},
+					_user$project$View$questionCards(model)),
+				_1: {ctor: '[]'}
+			}
+		});
 };
 var _user$project$View$rules = function (model) {
 	return A2(

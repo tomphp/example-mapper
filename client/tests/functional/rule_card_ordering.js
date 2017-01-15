@@ -1,4 +1,4 @@
-casper.test.begin('Rule Card Ordering', function(test) {
+casper.test.begin('Rule card ordering', function(test) {
   var state = {state: {
     story_card: { id: 'story-id', text: 'Story', state: 'saved', position: 0 },
     rules: [
