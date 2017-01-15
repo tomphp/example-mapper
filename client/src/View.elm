@@ -24,7 +24,9 @@ view model =
 rules : Model -> Html Msg
 rules model =
     div [ class "rules" ] <|
-        List.map (Rule.view model) (Dict.values model.rules |> List.sortBy (.card >> .position))
+        List.map
+            (Rule.view model)
+            (Dict.values model.rules |> List.sortBy (.card >> .position))
 
 
 questions : Model -> Html Msg

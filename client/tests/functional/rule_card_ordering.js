@@ -4,15 +4,15 @@ casper.test.begin('Rule card ordering', function(test) {
     rules: [
       {
         rule_card: { id: 'rule1', text: 'Rule 1', state: 'saved', position: 1 },
-        examples: []
+        examples: [],
       },
       {
         rule_card: { id: 'rule3', text: 'Rule 3', state: 'saved', position: 3 },
-        examples: []
+        examples: [],
       },
       {
         rule_card: { id: 'rule2', text: 'Rule 2', state: 'saved', position: 2 },
-        examples: []
+        examples: [],
       },
     ],
     questions:[],
