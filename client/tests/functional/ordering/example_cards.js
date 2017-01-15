@@ -12,20 +12,11 @@ casper.test.begin('Example card ordering', function(test) {
     questions:[],
   }};
 
-  casper.start(appUrl(), function() {
-    this.info('Wait for initial message from the client');
-    this.assertMessage(test, 0, {type: 'fetch_update'}, 'A refresh message is sent on connection');
-  });
-
-  casper.then(function() {
-    this.info('Send initial state');
+  casper.start(appUrl()).waitForMessage(0, function() {
     this.sendState(state);
-
-    this.info('Wait for state to apply');
-    this.waitForElementTextToEqual('#card-story-id', 'Story');
   });
 
-  casper.then(function() {
+  casper.waitForElementTextToEqual('#card-story-id', 'Story', function() {
     test.assertSelectorHasText('#rule-rule1 .example:nth-child(1) .card', 'Example 1');
     test.assertSelectorHasText('#rule-rule1 .example:nth-child(2) .card', 'Example 2');
     test.assertSelectorHasText('#rule-rule1 .example:nth-child(3) .card', 'Example 3');

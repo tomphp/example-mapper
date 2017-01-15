@@ -9,20 +9,11 @@ casper.test.begin('Question card ordering', function(test) {
     ],
   }};
 
-  casper.start(appUrl(), function() {
-    this.info('Wait for initial message from the client');
-    this.assertMessage(test, 0, {type: 'fetch_update'}, 'A refresh message is sent on connection');
-  });
-
-  casper.then(function() {
-    this.info('Send initial state');
+  casper.start(appUrl()).waitForMessage(0, function() {
     this.sendState(state);
-
-    this.info('Wait for state to apply');
-    this.waitForElementTextToEqual('#card-story-id', 'Story');
   });
 
-  casper.then(function() {
+  casper.waitForElementTextToEqual('#card-story-id', 'Story', function() {
     test.assertSelectorHasText('.question:nth-child(1) .card', 'Question 1');
     test.assertSelectorHasText('.question:nth-child(2) .card', 'Question 2');
     test.assertSelectorHasText('.question:nth-child(3) .card', 'Question 3');

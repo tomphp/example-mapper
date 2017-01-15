@@ -6,6 +6,7 @@ function appUrl() {
   }
 
   console.log('Test file: ' + system.args[system.args.length-1]);
+
   var dir = dirname(system.args[system.args.length-1]);
   var app = 'file://' + dir + '/app/test.html';
 
@@ -33,46 +34,52 @@ casper.getActiveElement = function() {
   });
 };
 
-casper.assertMessage = function(test, num, expected, description) {
+casper.getMessage = function(num) {
+  var json = this.evaluate(function(num) {
+    return messages[num];
+  }, num);
+
+  if (typeof json === 'undefined') {
+    return undefined;
+  }
+
+  return JSON.parse(json);
+}
+
+casper.waitForMessage = function(num, success, failure) {
   function getMessage(num) {
     return this.evaluate(function(num) {
       return messages[num];
     }, num);
   }
 
-  this.waitFor(
+  return this.waitFor(
     function check() {
       return getMessage.call(this, num);
     },
-    function() {
-      test.assertEquals(
-        JSON.parse(getMessage.call(this, num)),
-        expected,
-        description
-      );
-    },
-    function timeout() {
-      this.echo('Timed out').exit();
-    }
+    success,
+    failure
   );
 };
 
-casper.waitForElementTextToEqual = function(selector, text) {
-  return this.waitFor(function() {
-    return this.fetchText(selector) === text;
-  }, function() {
-  }, function() {
-    this.echo('Timed out while waitinf for' + selector + ' to contain "' + text + '"').exit();
-  });
+casper.waitForElementTextToEqual = function(selector, text, success, failure) {
+  return this.waitFor(
+    function() {
+      return this.fetchText(selector) === text;
+    },
+    success,
+    failure
+  );
 };
 
-casper.waitForElementToExist = function (selector) {
-  return this.waitFor(function() {
-    return this.exists(selector);
-  }, function() {
-  }, function() {
-    this.echo('Timed out waiting to find ' + selector).exit();
-  });
+casper.waitForElementToExist = function (selector, success, failure) {
+  return this.waitFor(
+    function() {
+      return this.exists(selector);
+    },
+    success,
+    failure
+  );
 };
 
 casper.getClassesFor = function(selector) {
