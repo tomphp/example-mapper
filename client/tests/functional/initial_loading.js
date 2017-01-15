@@ -1,44 +1,44 @@
 casper.test.begin('Initial loading', function(test) {
-    var storyCardId = '8d85e649-4105-4831-9dad-d1cceb64bbaf',
-      questionCardId = 'e82e0d5c-9278-4a3a-9852-1a511fdf2ee0',
-      ruleCardId = '3b6464c5-4c2b-4530-bb28-ab0734b99b16',
-      exampleCardId = 'de1ede0c-dae3-41f0-b284-2d5b10728001',
-      state = {
-        state: {
-          story_card: {
-            id: storyCardId,
-            text: 'As a test script I want to check behaviour',
-            state: 'saved',
-            position: 0
-          },
-          rules: [
-            {
-              rule_card: {
-                id: ruleCardId,
-                text: 'This rule must be shown',
-                state: 'saved',
-                position: 0
-              },
-              examples: [
+  var storyCardId = '8d85e649-4105-4831-9dad-d1cceb64bbaf',
+    questionCardId = 'e82e0d5c-9278-4a3a-9852-1a511fdf2ee0',
+    ruleCardId = '3b6464c5-4c2b-4530-bb28-ab0734b99b16',
+    exampleCardId = 'de1ede0c-dae3-41f0-b284-2d5b10728001',
+    state = {
+      state: {
+        story_card: {
+          id: storyCardId,
+          text: 'As a test script I want to check behaviour',
+          state: 'saved',
+          position: 0
+        },
+        rules: [
+          {
+            rule_card: {
+              id: ruleCardId,
+              text: 'This rule must be shown',
+              state: 'saved',
+              position: 0
+            },
+            examples: [
               {
                 id: exampleCardId,
                 text: 'The one where this example appears',
                 state: 'saved',
                 position: 0
               }
-              ]
-            },
-          ],
-          questions:[
-            {
-              id: questionCardId,
-              text: 'Does this card appear?',
-              state: 'saved',
-              position: 0
-            },
-          ],
-        }
-      };
+            ]
+          },
+        ],
+        questions:[
+          {
+            id: questionCardId,
+            text: 'Does this card appear?',
+            state: 'saved',
+            position: 0
+          },
+        ],
+      }
+    };
 
   casper.start(appUrl(), function() {
     this.info('Wait for initial message from the client');
@@ -100,10 +100,6 @@ casper.test.begin('Initial loading', function(test) {
 
     test.assertElementHasClass('#card-' + exampleCardId, 'card--example');
   });
-
-  // check rule card order
-  // check example card order
-  // check question card order
 
   casper.run(function() {
     test.done();

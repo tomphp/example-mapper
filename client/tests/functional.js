@@ -58,7 +58,7 @@ casper.assertMessage = function(test, num, expected, description) {
 };
 
 casper.waitForElementTextToEqual = function(selector, text) {
-  this.waitFor(function() {
+  return this.waitFor(function() {
     return this.fetchText(selector) === text;
   }, function() {
   }, function() {
@@ -67,7 +67,7 @@ casper.waitForElementTextToEqual = function(selector, text) {
 };
 
 casper.waitForElementToExist = function (selector) {
-  this.waitFor(function() {
+  return this.waitFor(function() {
     return this.exists(selector);
   }, function() {
   }, function() {
