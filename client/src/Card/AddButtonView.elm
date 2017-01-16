@@ -1,6 +1,6 @@
 module Card.AddButtonView exposing (view)
 
-import Card.Types exposing (CardType(..), CardId, CardState(..))
+import Card.Types exposing (Card, CardType(..), CardId, CardState(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -15,38 +15,38 @@ type alias AddButton =
     }
 
 
-view : CardType -> Html Msg
+view : Card -> Html Msg
 view =
     addButtonParams
         >> Maybe.map displayButton
         >> Maybe.withDefault (text "Error")
 
 
-addButtonParams : CardType -> Maybe AddButton
-addButtonParams t =
-    case t of
+addButtonParams : Card -> Maybe AddButton
+addButtonParams card =
+    case card.cardType of
         RuleCard ->
             Just
-                { id = "new-rule"
+                { id = card.id
                 , cssClass = "card--rule"
                 , label = "Add Rule"
-                , cardType = t
+                , cardType = card.cardType
                 }
 
         ExampleCard ruleId ->
             Just
-                { id = "new-example"
+                { id = card.id
                 , cssClass = "card--example"
                 , label = "Add Example"
-                , cardType = t
+                , cardType = card.cardType
                 }
 
         QuestionCard ->
             Just
-                { id = "new-question"
+                { id = card.id
                 , cssClass = "card--question"
                 , label = "Add Question"
-                , cardType = t
+                , cardType = card.cardType
                 }
 
         _ ->

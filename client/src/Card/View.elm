@@ -36,7 +36,7 @@ view : Card -> Html.Html Msg
 view card =
     case card.state of
         AddButton ->
-            AddButton.view card.cardType
+            AddButton.view card
 
         _ ->
             drawCard card

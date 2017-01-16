@@ -36,6 +36,12 @@ casper.test.begin('Adding a Rule', function(test) {
 
   casper.waitForElementToExist('#card-new-rule.card--saving', function() {
     test.assertEquals(
+      this.fetchText('#card-new-rule'),
+      'This rule must be created',
+      'Card in saving state contains the content'
+    );
+
+    test.assertEquals(
       this.getMessage(1),
       {type: 'add_rule', text: 'This rule must be created'},
       'The add message is sent'

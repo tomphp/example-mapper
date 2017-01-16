@@ -99,7 +99,7 @@ saveNewCard model cardType text =
         case cardType of
             QuestionCard ->
                 ( fetchCard model cardType "new-question"
-                    |> Maybe.map (\card -> { card | state = Saving })
+                    |> Maybe.map (\card -> { card | state = Saving, text = text })
                     |> Maybe.map (replaceCard model)
                     |> Maybe.withDefault model
                 , Requests.addQuestion text |> wsSend
@@ -107,29 +107,22 @@ saveNewCard model cardType text =
 
             RuleCard ->
                 ( fetchCard model cardType "new-rule"
-                    |> Maybe.map (\card -> { card | state = Saving })
+                    |> Maybe.map (\card -> { card | state = Saving, text = text })
                     |> Maybe.map (replaceCard model)
                     |> Maybe.withDefault model
                 , Requests.addRule text |> wsSend
                 )
 
             ExampleCard ruleId ->
-                ( model
+                ( fetchCard model cardType ("new-example-" ++ ruleId)
+                    |> Maybe.map (\card -> { card | state = Saving, text = text })
+                    |> Maybe.map (replaceCard model)
+                    |> Maybe.withDefault model
                 , Requests.addExample ruleId text |> wsSend
                 )
 
             _ ->
                 ( model, Cmd.none )
-
-
-maybeCall : a -> (a -> b -> a) -> Maybe b -> a
-maybeCall model fn card =
-    case card of
-        Just c ->
-            fn model c
-
-        Nothing ->
-            model
 
 
 createCard : Model -> CardType -> ( Model, Cmd Msg )
@@ -267,12 +260,12 @@ updateModel model update =
 
 
 addExampleButton : RuleId -> Rule -> Rule
-addExampleButton id rule =
+addExampleButton ruleId rule =
     let
         exampleId =
-            "new-example-" ++ id
+            "new-example-" ++ ruleId
 
         button =
-            addCard (ExampleCard id) exampleId
+            addCard (ExampleCard ruleId) exampleId
     in
         { rule | examples = Dict.insert exampleId button rule.examples }

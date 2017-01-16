@@ -36,6 +36,12 @@ casper.test.begin('Adding a Question', function(test) {
 
   casper.waitForElementToExist('#card-new-question.card--saving', function() {
     test.assertEquals(
+      this.fetchText('#card-new-question'),
+      'Will this question be created?',
+      'Card in saving state contains the content'
+    );
+
+    test.assertEquals(
       this.getMessage(1),
       {type: 'add_question', text: 'Will this question be created?'},
       'The add message is sent'

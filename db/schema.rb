@@ -11,19 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161231131707) do
-
-  create_table "cards", primary_key: "card_id", force: :cascade do |t|
-    t.string  "story_id", limit: 100,  default: "", null: false
-    t.string  "type",     limit: 8
-    t.string  "text",     limit: 2000, default: "", null: false
-    t.string  "state",    limit: 20,   default: "", null: false
-    t.integer "position", limit: 4,    default: 0,  null: false
+ActiveRecord::Schema.define(version: 20_161_231_131_707) do
+  create_table 'cards', primary_key: 'card_id', force: :cascade do |t|
+    t.string  'story_id', limit: 100, default: '', null: false
+    t.string  'type',     limit: 8
+    t.string  'text',     limit: 2000, default: '', null: false
+    t.string  'state',    limit: 20,   default: '', null: false
+    t.integer 'position', limit: 4,    default: 0,  null: false
   end
 
-  create_table "examples", id: false, force: :cascade do |t|
-    t.string "rule_card_id", limit: 100, default: "", null: false
-    t.string "card_id",      limit: 100, default: "", null: false
+  create_table 'examples', id: false, force: :cascade do |t|
+    t.string 'rule_card_id', limit: 100, default: '', null: false
+    t.string 'card_id',      limit: 100, default: '', null: false
   end
-
 end

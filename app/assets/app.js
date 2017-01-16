@@ -10190,11 +10190,11 @@ var _user$project$State$addRule = {
 	examples: _elm_lang$core$Dict$empty
 };
 var _user$project$State$addExampleButton = F2(
-	function (id, rule) {
-		var exampleId = A2(_elm_lang$core$Basics_ops['++'], 'new-example-', id);
+	function (ruleId, rule) {
+		var exampleId = A2(_elm_lang$core$Basics_ops['++'], 'new-example-', ruleId);
 		var button = A2(
 			_user$project$State$addCard,
-			_user$project$Card_Types$ExampleCard(id),
+			_user$project$Card_Types$ExampleCard(ruleId),
 			exampleId);
 		return _elm_lang$core$Native_Utils.update(
 			rule,
@@ -10382,18 +10382,18 @@ var _user$project$Card_AddButtonView$displayButton = function (b) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Card_AddButtonView$addButtonParams = function (t) {
-	var _p0 = t;
+var _user$project$Card_AddButtonView$addButtonParams = function (card) {
+	var _p0 = card.cardType;
 	switch (_p0.ctor) {
 		case 'RuleCard':
 			return _elm_lang$core$Maybe$Just(
-				{id: 'new-rule', cssClass: 'card--rule', label: 'Add Rule', cardType: t});
+				{id: card.id, cssClass: 'card--rule', label: 'Add Rule', cardType: card.cardType});
 		case 'ExampleCard':
 			return _elm_lang$core$Maybe$Just(
-				{id: 'new-example', cssClass: 'card--example', label: 'Add Example', cardType: t});
+				{id: card.id, cssClass: 'card--example', label: 'Add Example', cardType: card.cardType});
 		case 'QuestionCard':
 			return _elm_lang$core$Maybe$Just(
-				{id: 'new-question', cssClass: 'card--question', label: 'Add Question', cardType: t});
+				{id: card.id, cssClass: 'card--question', label: 'Add Question', cardType: card.cardType});
 		default:
 			return _elm_lang$core$Maybe$Nothing;
 	}
@@ -10711,7 +10711,7 @@ var _user$project$Card_View$drawCard = function (card) {
 var _user$project$Card_View$view = function (card) {
 	var _p4 = card.state;
 	if (_p4.ctor === 'AddButton') {
-		return _user$project$Card_AddButtonView$view(card.cardType);
+		return _user$project$Card_AddButtonView$view(card);
 	} else {
 		return _user$project$Card_View$drawCard(card);
 	}
@@ -10720,7 +10720,11 @@ var _user$project$Card_View$view = function (card) {
 var _user$project$Rule_View$divCard = function (card) {
 	return A2(
 		_elm_lang$html$Html$div,
-		{ctor: '[]'},
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('example'),
+			_1: {ctor: '[]'}
+		},
 		{
 			ctor: '::',
 			_0: _user$project$Card_View$view(card),
@@ -10755,8 +10759,13 @@ var _user$project$Rule_View$view = F2(
 			_elm_lang$html$Html$div,
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$class('rule'),
-				_1: {ctor: '[]'}
+				_0: _elm_lang$html$Html_Attributes$id(
+					A2(_elm_lang$core$Basics_ops['++'], 'rule-', r.card.id)),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('rule'),
+					_1: {ctor: '[]'}
+				}
 			},
 			{
 				ctor: '::',
