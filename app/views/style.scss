@@ -12,6 +12,9 @@ $card-line-height: 24px;
 $card-font-size: 24px;
 $card-font-family: 'Covered By Your Grace', cursive;
 
+$card-z-index: 100;
+$panel-z-index: 200;
+
 html, head, body {
   padding:0;
   margin:0;
@@ -39,16 +42,22 @@ body {
 
 .questions {
     position: fixed;
-    top: -20px;
-    right: -20px;
-    background-color: rgba(128, 128, 128, 0.7);
-    padding: 30px;
-    padding-bottom: 15px;
-    padding-left: 15px;
-    border-radius: 20px;
+    top: 0;
+    right: 0;
+    background-color: rgba(128, 128, 128, 0.85);
+    padding: 15px;
     box-shadow: #666 5px 5px 5px;
-    max-height: 3.5 * $card-height;
     overflow-y: scroll;
+    height: 100vh;
+    z-index: $panel-z-index;
+
+    &__title {
+      text-align: center;
+      color: #fff;
+      font-size: 36px;
+      padding: 0;
+      margin: 0;
+    }
 }
 
 .add-button {
@@ -111,6 +120,7 @@ body {
     border-radius: 20px;
     box-shadow: #666 5px 5px 5px;
     color: #fff;
+    z-index: $panel-z-index;
 
     &__url {
       display: block;
@@ -124,13 +134,32 @@ body {
 
 .card {
   background-color: #ccf;
-  box-shadow: 3px 3px 10px #888888;
-  margin: 2px;
-  width: $card-width;
-  height: $card-height;
   border-radius: 0;
   border: none;
+  box-shadow: 3px 3px 10px #888888;
   cursor: pointer;
+  height: $card-height;
+  margin: 2px;
+  position: relative;
+  width: $card-width;
+  z-index: $card-z-index;
+
+  &__background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: $card-z-index + 1;
+  }
+
+  &__content {
+    position: absolute;
+    top: 30px;
+    left: 10px;
+    z-index: $card-z-index + 2;
+    overflow: hidden;
+    width: $card-width - 20px;
+    height: $card-height - 30px;
+  }
 
   &--story {
     background-color: $card-yellow;
@@ -168,6 +197,30 @@ body {
   &__line {
     stroke: #00d;
     stroke-width: 1;
+  }
+
+  &__toolbar {
+    position: absolute;
+    right: 0;
+    top: 0;
+    z-index: $card-z-index + 3;
+  }
+
+  &__toolbar-button {
+    background-color: transparent;
+    width: 26px;
+    height: 26px;
+    border: none;
+    cursor: pointer;
+    margin: 2px;
+  }
+
+  &__toolbar-button--save {
+    background-image: url('/glyphicons-194-ok-sign.png')
+  }
+
+  &__toolbar-button--cancel {
+    background-image: url('/glyphicons-193-remove-sign.png')
   }
 
   &__text {

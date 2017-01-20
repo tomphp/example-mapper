@@ -30,8 +30,8 @@ casper.test.begin('Adding a Rule', function(test) {
     test.assertElementHasClass('#card-new-rule', 'card--editing');
     test.assertEquals(this.getActiveElement().id, 'card-input-new-rule', 'Card input has focus');
 
-    this.sendKeys('#card-new-rule textarea', 'This rule must be created', {keepFocus: true});
-    this.sendKeys('#card-new-rule textarea', casper.page.event.key.Tab , {keepFocus: true});
+    this.sendKeys('#card-new-rule textarea', 'This rule must be created');
+    this.click('#card-new-rule .card__toolbar-button--save');
   });
 
   casper.waitForElementToExist('#card-new-rule.card--saving', function() {

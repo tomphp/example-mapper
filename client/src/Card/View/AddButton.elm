@@ -1,4 +1,4 @@
-module Card.AddButtonView exposing (view)
+module Card.View.AddButton exposing (view)
 
 import Card.Types exposing (Card, CardType(..), CardId, CardState(..))
 import Html exposing (..)

@@ -80,6 +80,13 @@ update msg model =
         UpdateCardInModel card ->
             ( replaceCard model card, focusCardInput card.id )
 
+        UpdateCardText card string ->
+            let
+                actualCard =
+                    Maybe.withDefault card (fetchCard model card.cardType card.id)
+            in
+                ( replaceCard model { actualCard | text = string }, Cmd.none )
+
         SaveCard card ->
             saveCard model card
 
@@ -144,7 +151,7 @@ createCard model cardType =
     in
         ( replaceCard model
             { id = id
-            , state = Preparing
+            , state = Preparing ""
             , text = ""
             , cardType = cardType
             , position = 9999

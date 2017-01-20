@@ -35,12 +35,12 @@ casper.test.begin('Adding an Example', function(test) {
     test.assertEquals(this.getActiveElement().id, 'card-input-new-example-rule-id', 'Card input has focus');
 
     this.sendKeys('#card-new-example-rule-id textarea', 'This example is created', {keepFocus: true});
-    this.sendKeys('#card-new-example-rule-id textarea', casper.page.event.key.Tab , {keepFocus: true});
+    this.click('#card-new-example-rule-id .card__toolbar-button--save');
   });
 
   casper.waitForElementToExist('#card-new-example-rule-id.card--saving', function() {
     test.assertEquals(
-      this.fetchText('#card-new-example-rule-id'),
+      this.fetchText('#card-new-example-rule-id .card_text'),
       'This example is created',
       'Card in saving state contains the content'
     );

@@ -23,8 +23,8 @@ type CardType
 
 type CardState
     = AddButton
-    | Preparing
-    | Editing
+    | Preparing String
+    | Editing String
     | Locked
     | Saving
     | Saved

@@ -1,38 +1,17 @@
 module Card.View exposing (view)
 
 import Card.Types exposing (CardState(..), Card, CardType(..))
-import Card.AddButtonView as AddButton
-import Html
-import Html.Attributes
-import Html.Events
+import Card.View.AddButton as AddButton
+import Card.View.Background as Background
+import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 import Json.Decode as Json
 import List
-import Svg exposing (..)
-import Svg.Attributes exposing (..)
 import Types exposing (Msg(..))
 
 
-cardWidth : Int
-cardWidth =
-    254
-
-
-cardHeight : Int
-cardHeight =
-    156
-
-
-lineHeight : Int
-lineHeight =
-    12
-
-
-textOffset : Int
-textOffset =
-    17
-
-
-view : Card -> Html.Html Msg
+view : Card -> Html Msg
 view card =
     case card.state of
         AddButton ->
@@ -42,49 +21,70 @@ view card =
             drawCard card
 
 
-drawCard : Card -> Html.Html Msg
+drawCard : Card -> Html Msg
 drawCard card =
     let
-        saveAction =
+        clickHandler =
             case card.state of
-                Preparing ->
-                    SaveNewCard card.cardType
+                Saved ->
+                    [ onClick <| UpdateCardInModel { card | state = Editing card.text } ]
 
                 _ ->
-                    \text -> SaveCard { card | text = text }
+                    []
+
+        attributes =
+            [ class <| cardClass card.cardType card.state
+            , id <| "card-" ++ card.id
+            ]
+                ++ clickHandler
     in
-        Html.div
-            [ Html.Events.onClick <| UpdateCardInModel { card | state = Editing }
-            , Html.Attributes.class <| cardClass card.cardType card.state
-            , Html.Attributes.id <| "card-" ++ card.id
-            ]
-            [ svg
-                [ width <| toString cardWidth
-                , height <| toString cardHeight
+        div attributes
+            (List.concat
+                [ toolbar card
+                , [ Background.view card ]
+                , [ cardContent card ]
                 ]
-              <|
-                cardBackground
-                    ++ [ cardContent saveAction card ]
-            ]
+            )
 
 
-cardBackground : List (Svg Msg)
-cardBackground =
-    let
-        headLine =
-            toString (2 * lineHeight)
-    in
-        List.append
-            [ line
-                [ x1 "0"
-                , y1 headLine
-                , x2 <| toString cardWidth
-                , y2 headLine
-                , class "card__headline"
-                ]
-                []
+toolbar : Card -> List (Html Msg)
+toolbar card =
+    case card.state of
+        Preparing _ ->
+            [ editToolbar card ]
+
+        Editing _ ->
+            [ editToolbar card ]
+
+        _ ->
+            []
+
+
+editToolbar : Card -> Html Msg
+editToolbar card =
+    div [ class "card__toolbar" ]
+        [ button
+            [ class "card__toolbar-button card__toolbar-button--save"
+            , onClick <| saveAction card
+            , title "Save card"
             ]
-            lines
+            []
+        , button
+            [ class "card__toolbar-button card__toolbar-button--cancel"
+            , title "Cancel"
+            ]
+            []
+        ]
+
+
+saveAction : Card -> Msg
+saveAction card =
+    case card.state of
+        Preparing _ ->
+            SaveNewCard card.cardType card.text
+
+        _ ->
+            SaveCard card
 
 
 cardClass : CardType -> CardState -> String
@@ -111,10 +111,10 @@ cardTypeClass cardType =
 cardStateClass : CardState -> String
 cardStateClass state =
     case state of
-        Editing ->
+        Editing _ ->
             " card--editing"
 
-        Preparing ->
+        Preparing _ ->
             " card--editing"
 
         Saving ->
@@ -124,73 +124,42 @@ cardStateClass state =
             ""
 
 
-lines : List (Svg Msg)
-lines =
-    let
-        start =
-            3 * lineHeight
-
-        end =
-            cardHeight
-
-        lines =
-            List.filter (divisibleBy lineHeight) (List.range start end)
-                |> List.map toString
-    in
-        List.map
-            (\y ->
-                line
-                    [ x1 "0"
-                    , y1 y
-                    , x2 <| toString cardWidth
-                    , y2 y
-                    , class "card__line"
-                    ]
-                    []
-            )
-            lines
-
-
-cardContent : (String -> Msg) -> Card -> Svg Msg
-cardContent save card =
-    foreignObject
-        [ x <| toString lineHeight
-        , y <| toString textOffset
-        , width <| toString (cardWidth - 2 * lineHeight)
-        , height <| toString (cardHeight - 2 * lineHeight)
-        ]
+cardContent : Card -> Html Msg
+cardContent card =
+    div
+        [ class "card__content" ]
         (case card.state of
-            Editing ->
-                cardInput save card
+            Editing _ ->
+                cardInput card
 
-            Preparing ->
-                cardInput save card
+            Preparing _ ->
+                cardInput card
 
             _ ->
                 cardText card.text
         )
 
 
-cardText : String -> List (Html.Html Msg)
+cardText : String -> List (Html Msg)
 cardText text =
-    [ Html.p [ class "card__text" ] (nl2br text) ]
+    [ p [ class "card__text" ] (nl2br text) ]
 
 
-nl2br : String -> List (Html.Html msg)
+nl2br : String -> List (Html msg)
 nl2br text =
     String.split "\n" text
         |> List.map Html.text
-        |> List.intersperse (Html.br [] [])
+        |> List.intersperse (br [] [])
 
 
-cardInput : (String -> Msg) -> Card -> List (Html.Html Msg)
-cardInput save card =
-    [ Html.textarea
-        [ Html.Attributes.id ("card-input-" ++ card.id)
-        , Html.Attributes.class "card__input"
-        , Html.Events.on "blur" (Json.map save inputValue)
+cardInput : Card -> List (Html Msg)
+cardInput card =
+    [ textarea
+        [ id ("card-input-" ++ card.id)
+        , class "card__input"
+        , on "input" (Json.map (updateCardText card) inputValue)
         ]
-        [ Html.text card.text ]
+        [ text card.text ]
     ]
 
 
@@ -199,6 +168,6 @@ inputValue =
     Json.at [ "target", "value" ] Json.string
 
 
-divisibleBy : Int -> Int -> Bool
-divisibleBy divisor number =
-    number % divisor == 0
+updateCardText : Card -> String -> Msg
+updateCardText card value =
+    UpdateCardText card value

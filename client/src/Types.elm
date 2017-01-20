@@ -27,6 +27,7 @@ type Msg
     = Noop
     | UpdateModel String
     | UpdateCardInModel Card
+    | UpdateCardText Card String
     | SaveCard Card
     | CreateCard CardType
     | SaveNewCard CardType String

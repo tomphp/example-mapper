@@ -32,7 +32,7 @@ rules model =
 questions : Model -> Html Msg
 questions model =
     div [ class "questions" ]
-        [ h2 [] [ text "Questions" ]
+        [ h2 [ class "questions__title" ] [ text "Questions" ]
         , div [] (questionCards model)
         ]
 

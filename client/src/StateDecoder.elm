@@ -74,12 +74,6 @@ cardState =
 stringToCardState : String -> CardState
 stringToCardState s =
     case s of
-        "editing" ->
-            Editing
-
-        "locked" ->
-            Locked
-
         "saving" ->
             Saving
 

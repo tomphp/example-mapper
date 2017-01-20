@@ -31,12 +31,12 @@ casper.test.begin('Adding a Question', function(test) {
     test.assertEquals(this.getActiveElement().id, 'card-input-new-question', 'Check the card input has focus');
 
     this.sendKeys('#card-new-question textarea', 'Will this question be created?', {keepFocus: true});
-    this.sendKeys('#card-new-question textarea', casper.page.event.key.Tab , {keepFocus: true});
+    this.click('#card-new-question .card__toolbar-button--save');
   });
 
   casper.waitForElementToExist('#card-new-question.card--saving', function() {
     test.assertEquals(
-      this.fetchText('#card-new-question'),
+      this.fetchText('#card-new-question .card__text'),
       'Will this question be created?',
       'Card in saving state contains the content'
     );
