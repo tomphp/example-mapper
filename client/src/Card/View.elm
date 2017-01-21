@@ -50,7 +50,7 @@ drawCard card =
 toolbar : Card -> List (Html CardMsg)
 toolbar card =
     case card.state of
-        Preparing _ ->
+        Preparing ->
             [ editToolbar card ]
 
         Editing _ ->
@@ -69,18 +69,38 @@ editToolbar card =
             , title "Save card"
             ]
             []
-        , button
-            [ class "card__toolbar-button card__toolbar-button--cancel"
-            , title "Cancel"
-            ]
-            []
+        , cancelButton card
         ]
+
+
+cancelButton : Card -> Html CardMsg
+cancelButton card =
+    let
+        cssClasses =
+            class "card__toolbar-button card__toolbar-button--cancel"
+
+        label =
+            title "Cancel"
+
+        actions =
+            [ case card.state of
+                Preparing ->
+                    onClick CancelCreateNew
+
+                Editing originalText ->
+                    onClick <| CancelEditing originalText
+
+                _ ->
+                    Html.Attributes.disabled True
+            ]
+    in
+        button (cssClasses :: label :: actions) []
 
 
 saveAction : Card -> CardMsg
 saveAction card =
     case card.state of
-        Preparing _ ->
+        Preparing ->
             FinishCreateNew
 
         _ ->
@@ -114,7 +134,7 @@ cardStateClass state =
         Editing _ ->
             " card--editing"
 
-        Preparing _ ->
+        Preparing ->
             " card--editing"
 
         Saving ->
@@ -132,7 +152,7 @@ cardContent card =
             Editing _ ->
                 cardInput card
 
-            Preparing _ ->
+            Preparing ->
                 cardInput card
 
             _ ->

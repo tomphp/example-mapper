@@ -9,17 +9,20 @@ update msg card =
         UpdateCardText text ->
             { card | text = text }
 
-        StartEditing ->
-            { card | state = Editing (card.text) }
-
         StartCreateNew ->
-            { card | state = Preparing (card.text) }
-
-        FinishEditing ->
-            { card | state = Saving }
+            { card | state = Preparing }
 
         FinishCreateNew ->
             { card | state = Saving }
 
-        _ ->
-            card
+        CancelCreateNew ->
+            { card | state = AddButton, text = "" }
+
+        StartEditing ->
+            { card | state = Editing (card.text) }
+
+        FinishEditing ->
+            { card | state = Saving }
+
+        CancelEditing originalText ->
+            { card | state = Saved, text = originalText }

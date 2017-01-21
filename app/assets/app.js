@@ -9753,14 +9753,14 @@ var _user$project$Card_Types$Locked = {ctor: 'Locked'};
 var _user$project$Card_Types$Editing = function (a) {
 	return {ctor: 'Editing', _0: a};
 };
-var _user$project$Card_Types$Preparing = function (a) {
-	return {ctor: 'Preparing', _0: a};
-};
+var _user$project$Card_Types$Preparing = {ctor: 'Preparing'};
 var _user$project$Card_Types$AddButton = {ctor: 'AddButton'};
 var _user$project$Card_Types$CancelCreateNew = {ctor: 'CancelCreateNew'};
 var _user$project$Card_Types$FinishCreateNew = {ctor: 'FinishCreateNew'};
 var _user$project$Card_Types$StartCreateNew = {ctor: 'StartCreateNew'};
-var _user$project$Card_Types$CancelEditing = {ctor: 'CancelEditing'};
+var _user$project$Card_Types$CancelEditing = function (a) {
+	return {ctor: 'CancelEditing', _0: a};
+};
 var _user$project$Card_Types$FinishEditing = {ctor: 'FinishEditing'};
 var _user$project$Card_Types$StartEditing = {ctor: 'StartEditing'};
 var _user$project$Card_Types$UpdateCardText = function (a) {
@@ -9775,28 +9775,32 @@ var _user$project$Card_State$update = F2(
 				return _elm_lang$core$Native_Utils.update(
 					card,
 					{text: _p0._0});
+			case 'StartCreateNew':
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{state: _user$project$Card_Types$Preparing});
+			case 'FinishCreateNew':
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{state: _user$project$Card_Types$Saving});
+			case 'CancelCreateNew':
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{state: _user$project$Card_Types$AddButton, text: ''});
 			case 'StartEditing':
 				return _elm_lang$core$Native_Utils.update(
 					card,
 					{
 						state: _user$project$Card_Types$Editing(card.text)
 					});
-			case 'StartCreateNew':
-				return _elm_lang$core$Native_Utils.update(
-					card,
-					{
-						state: _user$project$Card_Types$Preparing(card.text)
-					});
 			case 'FinishEditing':
 				return _elm_lang$core$Native_Utils.update(
 					card,
 					{state: _user$project$Card_Types$Saving});
-			case 'FinishCreateNew':
+			default:
 				return _elm_lang$core$Native_Utils.update(
 					card,
-					{state: _user$project$Card_Types$Saving});
-			default:
-				return card;
+					{state: _user$project$Card_Types$Saved, text: _p0._0});
 		}
 	});
 
@@ -10595,6 +10599,34 @@ var _user$project$Card_View$saveAction = function (card) {
 		return _user$project$Card_Types$FinishEditing;
 	}
 };
+var _user$project$Card_View$cancelButton = function (card) {
+	var actions = {
+		ctor: '::',
+		_0: function () {
+			var _p4 = card.state;
+			switch (_p4.ctor) {
+				case 'Preparing':
+					return _elm_lang$html$Html_Events$onClick(_user$project$Card_Types$CancelCreateNew);
+				case 'Editing':
+					return _elm_lang$html$Html_Events$onClick(
+						_user$project$Card_Types$CancelEditing(_p4._0));
+				default:
+					return _elm_lang$html$Html_Attributes$disabled(true);
+			}
+		}(),
+		_1: {ctor: '[]'}
+	};
+	var label = _elm_lang$html$Html_Attributes$title('Cancel');
+	var cssClasses = _elm_lang$html$Html_Attributes$class('card__toolbar-button card__toolbar-button--cancel');
+	return A2(
+		_elm_lang$html$Html$button,
+		{
+			ctor: '::',
+			_0: cssClasses,
+			_1: {ctor: '::', _0: label, _1: actions}
+		},
+		{ctor: '[]'});
+};
 var _user$project$Card_View$editToolbar = function (card) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -10624,25 +10656,14 @@ var _user$project$Card_View$editToolbar = function (card) {
 				{ctor: '[]'}),
 			_1: {
 				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$button,
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html_Attributes$class('card__toolbar-button card__toolbar-button--cancel'),
-						_1: {
-							ctor: '::',
-							_0: _elm_lang$html$Html_Attributes$title('Cancel'),
-							_1: {ctor: '[]'}
-						}
-					},
-					{ctor: '[]'}),
+				_0: _user$project$Card_View$cancelButton(card),
 				_1: {ctor: '[]'}
 			}
 		});
 };
 var _user$project$Card_View$toolbar = function (card) {
-	var _p4 = card.state;
-	switch (_p4.ctor) {
+	var _p5 = card.state;
+	switch (_p5.ctor) {
 		case 'Preparing':
 			return {
 				ctor: '::',
@@ -10661,8 +10682,8 @@ var _user$project$Card_View$toolbar = function (card) {
 };
 var _user$project$Card_View$drawCard = function (card) {
 	var clickHandler = function () {
-		var _p5 = card.state;
-		if (_p5.ctor === 'Saved') {
+		var _p6 = card.state;
+		if (_p6.ctor === 'Saved') {
 			return {
 				ctor: '::',
 				_0: _elm_lang$html$Html_Events$onClick(_user$project$Card_Types$StartEditing),
@@ -10713,8 +10734,8 @@ var _user$project$Card_View$drawCard = function (card) {
 			}));
 };
 var _user$project$Card_View$view = function (card) {
-	var _p6 = card.state;
-	if (_p6.ctor === 'AddButton') {
+	var _p7 = card.state;
+	if (_p7.ctor === 'AddButton') {
 		return _user$project$Card_View_AddButton$view(card);
 	} else {
 		return _user$project$Card_View$drawCard(card);

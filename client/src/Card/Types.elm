@@ -30,7 +30,7 @@ type CardType
 
 type CardState
     = AddButton
-    | Preparing String
+    | Preparing
     | Editing String
     | Locked
     | Saving
@@ -41,7 +41,7 @@ type CardMsg
     = UpdateCardText String
     | StartEditing
     | FinishEditing
-    | CancelEditing
+    | CancelEditing String
     | StartCreateNew
     | FinishCreateNew
     | CancelCreateNew
