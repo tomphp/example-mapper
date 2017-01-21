@@ -9757,6 +9757,48 @@ var _user$project$Card_Types$Preparing = function (a) {
 	return {ctor: 'Preparing', _0: a};
 };
 var _user$project$Card_Types$AddButton = {ctor: 'AddButton'};
+var _user$project$Card_Types$CancelCreateNew = {ctor: 'CancelCreateNew'};
+var _user$project$Card_Types$FinishCreateNew = {ctor: 'FinishCreateNew'};
+var _user$project$Card_Types$StartCreateNew = {ctor: 'StartCreateNew'};
+var _user$project$Card_Types$CancelEditing = {ctor: 'CancelEditing'};
+var _user$project$Card_Types$FinishEditing = {ctor: 'FinishEditing'};
+var _user$project$Card_Types$StartEditing = {ctor: 'StartEditing'};
+var _user$project$Card_Types$UpdateCardText = function (a) {
+	return {ctor: 'UpdateCardText', _0: a};
+};
+
+var _user$project$Card_State$update = F2(
+	function (msg, card) {
+		var _p0 = msg;
+		switch (_p0.ctor) {
+			case 'UpdateCardText':
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{text: _p0._0});
+			case 'StartEditing':
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{
+						state: _user$project$Card_Types$Editing(card.text)
+					});
+			case 'StartCreateNew':
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{
+						state: _user$project$Card_Types$Preparing(card.text)
+					});
+			case 'FinishEditing':
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{state: _user$project$Card_Types$Saving});
+			case 'FinishCreateNew':
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{state: _user$project$Card_Types$Saving});
+			default:
+				return card;
+		}
+	});
 
 var _user$project$Ports$socketOut = _elm_lang$core$Native_Platform.outgoingPort(
 	'socketOut',
@@ -9891,23 +9933,10 @@ var _user$project$Types$Model = F5(
 	function (a, b, c, d, e) {
 		return {storyCard: a, rules: b, questions: c, error: d, flags: e};
 	});
-var _user$project$Types$SaveNewCard = F2(
+var _user$project$Types$UpdateCard = F2(
 	function (a, b) {
-		return {ctor: 'SaveNewCard', _0: a, _1: b};
+		return {ctor: 'UpdateCard', _0: a, _1: b};
 	});
-var _user$project$Types$CreateCard = function (a) {
-	return {ctor: 'CreateCard', _0: a};
-};
-var _user$project$Types$SaveCard = function (a) {
-	return {ctor: 'SaveCard', _0: a};
-};
-var _user$project$Types$UpdateCardText = F2(
-	function (a, b) {
-		return {ctor: 'UpdateCardText', _0: a, _1: b};
-	});
-var _user$project$Types$UpdateCardInModel = function (a) {
-	return {ctor: 'UpdateCardInModel', _0: a};
-};
 var _user$project$Types$UpdateModel = function (a) {
 	return {ctor: 'UpdateModel', _0: a};
 };
@@ -10124,63 +10153,6 @@ var _user$project$State$replaceCard = F2(
 				return A2(_user$project$State$replaceQuestionCard, card, model);
 		}
 	});
-var _user$project$State$fetchCard = F3(
-	function (model, cardType, id) {
-		var _p2 = cardType;
-		switch (_p2.ctor) {
-			case 'StoryCard':
-				return model.storyCard;
-			case 'RuleCard':
-				return A2(
-					_elm_lang$core$Maybe$map,
-					function (_) {
-						return _.card;
-					},
-					A2(_elm_lang$core$Dict$get, id, model.rules));
-			case 'ExampleCard':
-				return A2(
-					_elm_lang$core$Maybe$andThen,
-					_elm_lang$core$Dict$get(id),
-					A2(
-						_elm_lang$core$Maybe$map,
-						function (_) {
-							return _.examples;
-						},
-						A2(_elm_lang$core$Dict$get, _p2._0, model.rules)));
-			default:
-				return A2(_elm_lang$core$Dict$get, id, model.questions);
-		}
-	});
-var _user$project$State$createCard = F2(
-	function (model, cardType) {
-		var id = function () {
-			var _p3 = cardType;
-			switch (_p3.ctor) {
-				case 'QuestionCard':
-					return 'new-question';
-				case 'RuleCard':
-					return 'new-rule';
-				case 'ExampleCard':
-					return A2(_elm_lang$core$Basics_ops['++'], 'new-example-', _p3._0);
-				default:
-					return 'invalid-card-id';
-			}
-		}();
-		return {
-			ctor: '_Tuple2',
-			_0: A2(
-				_user$project$State$replaceCard,
-				model,
-				{
-					id: id,
-					state: _user$project$Card_Types$Preparing(''),
-					text: '',
-					cardType: cardType,
-					position: 9999
-				}),
-			_1: _user$project$State$focusCardInput(id)
-		};
-	});
 var _user$project$State$addCard = F2(
 	function (cardType, cardId) {
 		return {id: cardId, state: _user$project$Card_Types$AddButton, text: '', cardType: cardType, position: 9999};
@@ -10204,32 +10176,32 @@ var _user$project$State$addExampleButton = F2(
 	});
 var _user$project$State$updateModel = F2(
 	function (model, update) {
-		var _p4 = A2(
+		var _p2 = A2(
 			_elm_lang$core$Json_Decode$decodeString,
 			_user$project$StateDecoder$modelDecoder(model.flags),
 			update);
-		if (_p4.ctor === 'Ok') {
-			var _p5 = _p4._0;
+		if (_p2.ctor === 'Ok') {
+			var _p3 = _p2._0;
 			return _elm_lang$core$Native_Utils.update(
 				model,
 				{
-					storyCard: _p5.storyCard,
+					storyCard: _p3.storyCard,
 					rules: A3(
 						_elm_lang$core$Dict$insert,
 						'new-rule',
 						_user$project$State$addRule,
-						A2(_elm_lang$core$Dict$map, _user$project$State$addExampleButton, _p5.rules)),
+						A2(_elm_lang$core$Dict$map, _user$project$State$addExampleButton, _p3.rules)),
 					questions: A3(
 						_elm_lang$core$Dict$insert,
 						'new-question',
 						A2(_user$project$State$addCard, _user$project$Card_Types$QuestionCard, 'new-question'),
-						_p5.questions)
+						_p3.questions)
 				});
 		} else {
 			return _elm_lang$core$Native_Utils.update(
 				model,
 				{
-					error: _elm_lang$core$Maybe$Just(_p4._0)
+					error: _elm_lang$core$Maybe$Just(_p2._0)
 				});
 		}
 	});
@@ -10246,9 +10218,9 @@ var _user$project$State$initialModel = function (flags) {
 	};
 };
 var _user$project$State$send = function (url) {
-	var _p6 = url;
-	if (_p6.ctor === 'Just') {
-		return _elm_lang$websocket$WebSocket$send(_p6._0);
+	var _p4 = url;
+	if (_p4.ctor === 'Just') {
+		return _elm_lang$websocket$WebSocket$send(_p4._0);
 	} else {
 		return _user$project$Ports$socketOut;
 	}
@@ -10260,135 +10232,67 @@ var _user$project$State$init = function (flags) {
 		_1: A2(_user$project$State$send, flags.backendUrl, _user$project$Requests$refresh)
 	};
 };
-var _user$project$State$saveNewCard = F3(
-	function (model, cardType, text) {
+var _user$project$State$saveNewCard = F2(
+	function (model, card) {
 		var wsSend = _user$project$State$send(model.flags.backendUrl);
-		var _p7 = cardType;
-		switch (_p7.ctor) {
+		var _p5 = card.cardType;
+		switch (_p5.ctor) {
 			case 'QuestionCard':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(
-						_elm_lang$core$Maybe$withDefault,
-						model,
-						A2(
-							_elm_lang$core$Maybe$map,
-							_user$project$State$replaceCard(model),
-							A2(
-								_elm_lang$core$Maybe$map,
-								function (card) {
-									return _elm_lang$core$Native_Utils.update(
-										card,
-										{state: _user$project$Card_Types$Saving, text: text});
-								},
-								A3(_user$project$State$fetchCard, model, cardType, 'new-question')))),
-					_1: wsSend(
-						_user$project$Requests$addQuestion(text))
-				};
+				return wsSend(
+					_user$project$Requests$addQuestion(card.text));
 			case 'RuleCard':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(
-						_elm_lang$core$Maybe$withDefault,
-						model,
-						A2(
-							_elm_lang$core$Maybe$map,
-							_user$project$State$replaceCard(model),
-							A2(
-								_elm_lang$core$Maybe$map,
-								function (card) {
-									return _elm_lang$core$Native_Utils.update(
-										card,
-										{state: _user$project$Card_Types$Saving, text: text});
-								},
-								A3(_user$project$State$fetchCard, model, cardType, 'new-rule')))),
-					_1: wsSend(
-						_user$project$Requests$addRule(text))
-				};
+				return wsSend(
+					_user$project$Requests$addRule(card.text));
 			case 'ExampleCard':
-				var _p8 = _p7._0;
-				return {
-					ctor: '_Tuple2',
-					_0: A2(
-						_elm_lang$core$Maybe$withDefault,
-						model,
-						A2(
-							_elm_lang$core$Maybe$map,
-							_user$project$State$replaceCard(model),
-							A2(
-								_elm_lang$core$Maybe$map,
-								function (card) {
-									return _elm_lang$core$Native_Utils.update(
-										card,
-										{state: _user$project$Card_Types$Saving, text: text});
-								},
-								A3(
-									_user$project$State$fetchCard,
-									model,
-									cardType,
-									A2(_elm_lang$core$Basics_ops['++'], 'new-example-', _p8))))),
-					_1: wsSend(
-						A2(_user$project$Requests$addExample, _p8, text))
-				};
+				return wsSend(
+					A2(_user$project$Requests$addExample, _p5._0, card.text));
 			default:
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				return _elm_lang$core$Platform_Cmd$none;
 		}
 	});
 var _user$project$State$saveCard = F2(
-	function (model, theCard) {
-		var card = _elm_lang$core$Native_Utils.update(
-			theCard,
-			{state: _user$project$Card_Types$Saving});
-		return {
-			ctor: '_Tuple2',
-			_0: A2(_user$project$State$replaceCard, model, card),
-			_1: A2(
-				_user$project$State$send,
-				model.flags.backendUrl,
-				_user$project$Requests$updateCard(card))
-		};
+	function (model, card) {
+		return A2(
+			_user$project$State$send,
+			model.flags.backendUrl,
+			_user$project$Requests$updateCard(card));
+	});
+var _user$project$State$cardUpdateAction = F3(
+	function (model, msg, card) {
+		var _p6 = msg;
+		switch (_p6.ctor) {
+			case 'StartEditing':
+				return _user$project$State$focusCardInput(card.id);
+			case 'StartCreateNew':
+				return _user$project$State$focusCardInput(card.id);
+			case 'FinishEditing':
+				return A2(_user$project$State$saveCard, model, card);
+			case 'FinishCreateNew':
+				return A2(_user$project$State$saveNewCard, model, card);
+			default:
+				return _elm_lang$core$Platform_Cmd$none;
+		}
 	});
 var _user$project$State$update = F2(
 	function (msg, model) {
-		var _p9 = msg;
-		switch (_p9.ctor) {
+		var _p7 = msg;
+		switch (_p7.ctor) {
 			case 'Noop':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'UpdateModel':
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$State$updateModel, model, _p9._0),
+					_0: A2(_user$project$State$updateModel, model, _p7._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
-			case 'UpdateCardInModel':
-				var _p10 = _p9._0;
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$State$replaceCard, model, _p10),
-					_1: _user$project$State$focusCardInput(_p10.id)
-				};
-			case 'UpdateCardText':
-				var _p11 = _p9._0;
-				var actualCard = A2(
-					_elm_lang$core$Maybe$withDefault,
-					_p11,
-					A3(_user$project$State$fetchCard, model, _p11.cardType, _p11.id));
-				return {
-					ctor: '_Tuple2',
-					_0: A2(
-						_user$project$State$replaceCard,
-						model,
-						_elm_lang$core$Native_Utils.update(
-							actualCard,
-							{text: _p9._1})),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'SaveCard':
-				return A2(_user$project$State$saveCard, model, _p9._0);
-			case 'CreateCard':
-				return A2(_user$project$State$createCard, model, _p9._0);
 			default:
-				return A3(_user$project$State$saveNewCard, model, _p9._0, _p9._1);
+				var _p8 = _p7._1;
+				var updatedCard = A2(_user$project$Card_State$update, _p8, _p7._0);
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$State$replaceCard, model, updatedCard),
+					_1: A3(_user$project$State$cardUpdateAction, model, _p8, updatedCard)
+				};
 		}
 	});
 
@@ -10397,8 +10301,7 @@ var _user$project$Card_View_AddButton$displayButton = function (b) {
 		_elm_lang$html$Html$button,
 		{
 			ctor: '::',
-			_0: _elm_lang$html$Html_Events$onClick(
-				_user$project$Types$CreateCard(b.cardType)),
+			_0: _elm_lang$html$Html_Events$onClick(_user$project$Card_Types$StartCreateNew),
 			_1: {
 				ctor: '::',
 				_0: _elm_lang$html$Html_Attributes$class(
@@ -10553,10 +10456,6 @@ var _user$project$Card_View_Background$view = function (card) {
 		_user$project$Card_View_Background$cardBackground);
 };
 
-var _user$project$Card_View$updateCardText = F2(
-	function (card, value) {
-		return A2(_user$project$Types$UpdateCardText, card, value);
-	});
 var _user$project$Card_View$inputValue = A2(
 	_elm_lang$core$Json_Decode$at,
 	{
@@ -10586,10 +10485,7 @@ var _user$project$Card_View$cardInput = function (card) {
 						_0: A2(
 							_elm_lang$html$Html_Events$on,
 							'input',
-							A2(
-								_elm_lang$core$Json_Decode$map,
-								_user$project$Card_View$updateCardText(card),
-								_user$project$Card_View$inputValue)),
+							A2(_elm_lang$core$Json_Decode$map, _user$project$Card_Types$UpdateCardText, _user$project$Card_View$inputValue)),
 						_1: {ctor: '[]'}
 					}
 				}
@@ -10694,9 +10590,9 @@ var _user$project$Card_View$cardClass = F2(
 var _user$project$Card_View$saveAction = function (card) {
 	var _p3 = card.state;
 	if (_p3.ctor === 'Preparing') {
-		return A2(_user$project$Types$SaveNewCard, card.cardType, card.text);
+		return _user$project$Card_Types$FinishCreateNew;
 	} else {
-		return _user$project$Types$SaveCard(card);
+		return _user$project$Card_Types$FinishEditing;
 	}
 };
 var _user$project$Card_View$editToolbar = function (card) {
@@ -10769,13 +10665,7 @@ var _user$project$Card_View$drawCard = function (card) {
 		if (_p5.ctor === 'Saved') {
 			return {
 				ctor: '::',
-				_0: _elm_lang$html$Html_Events$onClick(
-					_user$project$Types$UpdateCardInModel(
-						_elm_lang$core$Native_Utils.update(
-							card,
-							{
-								state: _user$project$Card_Types$Editing(card.text)
-							}))),
+				_0: _elm_lang$html$Html_Events$onClick(_user$project$Card_Types$StartEditing),
 				_1: {ctor: '[]'}
 			};
 		} else {
@@ -10831,6 +10721,12 @@ var _user$project$Card_View$view = function (card) {
 	}
 };
 
+var _user$project$Rule_View$htmlCard = function (card) {
+	return A2(
+		_elm_lang$html$Html$map,
+		_user$project$Types$UpdateCard(card),
+		_user$project$Card_View$view(card));
+};
 var _user$project$Rule_View$divCard = function (card) {
 	return A2(
 		_elm_lang$html$Html$div,
@@ -10841,7 +10737,7 @@ var _user$project$Rule_View$divCard = function (card) {
 		},
 		{
 			ctor: '::',
-			_0: _user$project$Card_View$view(card),
+			_0: _user$project$Rule_View$htmlCard(card),
 			_1: {ctor: '[]'}
 		});
 };
@@ -10883,7 +10779,10 @@ var _user$project$Rule_View$view = F2(
 			},
 			{
 				ctor: '::',
-				_0: _user$project$Card_View$view(r.card),
+				_0: A2(
+					_elm_lang$html$Html$map,
+					_user$project$Types$UpdateCard(r.card),
+					_user$project$Card_View$view(r.card)),
 				_1: {
 					ctor: '::',
 					_0: A3(
@@ -10896,6 +10795,12 @@ var _user$project$Rule_View$view = F2(
 			});
 	});
 
+var _user$project$View$htmlCard = function (card) {
+	return A2(
+		_elm_lang$html$Html$map,
+		_user$project$Types$UpdateCard(card),
+		_user$project$Card_View$view(card));
+};
 var _user$project$View$divCard = F2(
 	function (className, card) {
 		return A2(
@@ -10907,7 +10812,7 @@ var _user$project$View$divCard = F2(
 			},
 			{
 				ctor: '::',
-				_0: _user$project$Card_View$view(card),
+				_0: _user$project$View$htmlCard(card),
 				_1: {ctor: '[]'}
 			});
 	});
@@ -11001,7 +10906,7 @@ var _user$project$View$view = function (model) {
 				_0: A2(
 					_elm_lang$core$Maybe$withDefault,
 					_elm_lang$html$Html$text('Error'),
-					A2(_elm_lang$core$Maybe$map, _user$project$Card_View$view, model.storyCard)),
+					A2(_elm_lang$core$Maybe$map, _user$project$View$htmlCard, model.storyCard)),
 				_1: {
 					ctor: '::',
 					_0: _user$project$View$rules(model),

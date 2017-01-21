@@ -5,7 +5,7 @@ module Types
         , Flags
         )
 
-import Card.Types exposing (Card, CardId, CardType)
+import Card.Types exposing (Card, CardId, CardType, CardMsg)
 import Dict exposing (Dict)
 import Rule.Types exposing (Rule)
 
@@ -26,8 +26,4 @@ type alias Model =
 type Msg
     = Noop
     | UpdateModel String
-    | UpdateCardInModel Card
-    | UpdateCardText Card String
-    | SaveCard Card
-    | CreateCard CardType
-    | SaveNewCard CardType String
+    | UpdateCard Card CardMsg

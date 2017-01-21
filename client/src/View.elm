@@ -14,7 +14,7 @@ view model =
     div [ class "workspace" ]
         [ p [] [ text <| Maybe.withDefault "" model.error ]
         , model.storyCard
-            |> Maybe.map Card.view
+            |> Maybe.map htmlCard
             |> Maybe.withDefault (text "Error")
         , rules model
         , questions model
@@ -46,4 +46,11 @@ questionCards model =
 
 divCard : String -> Card -> Html Msg
 divCard className card =
-    div [ class className ] [ Card.view card ]
+    div [ class className ] [ htmlCard card ]
+
+
+htmlCard : Card -> Html Msg
+htmlCard card =
+    card
+        |> Card.view
+        |> Html.map (UpdateCard card)

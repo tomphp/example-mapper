@@ -1,10 +1,9 @@
 module Card.View.Background exposing (view)
 
-import Card.Types exposing (Card, CardType(..))
+import Card.Types exposing (Card, CardType(..), CardMsg(..))
 import Html exposing (Html)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
-import Types exposing (Msg)
 
 
 cardWidth : Int
@@ -27,7 +26,7 @@ textOffset =
     17
 
 
-view : Card -> Html Msg
+view : Card -> Html CardMsg
 view card =
     svg
         [ class "card__background"
@@ -37,7 +36,7 @@ view card =
         cardBackground
 
 
-cardBackground : List (Svg Msg)
+cardBackground : List (Svg CardMsg)
 cardBackground =
     let
         headLine =
@@ -56,7 +55,7 @@ cardBackground =
             lines
 
 
-lines : List (Svg Msg)
+lines : List (Svg CardMsg)
 lines =
     let
         start =

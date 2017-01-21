@@ -12,7 +12,7 @@ import Dict exposing (Dict)
 view : Model -> Rule -> Html Msg
 view model r =
     div [ id ("rule-" ++ r.card.id), class "rule" ]
-        [ Card.View.view r.card
+        [ Card.View.view r.card |> Html.map (UpdateCard r.card)
         , examples model r (Dict.values r.examples)
         ]
 
@@ -29,4 +29,11 @@ exampleCards es =
 
 divCard : Card -> Html Msg
 divCard card =
-    div [ class "example" ] [ Card.View.view card ]
+    div [ class "example" ] [ htmlCard card ]
+
+
+htmlCard : Card -> Html Msg
+htmlCard card =
+    card
+        |> Card.View.view
+        |> Html.map (UpdateCard card)

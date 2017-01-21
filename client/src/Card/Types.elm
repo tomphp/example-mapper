@@ -1,4 +1,11 @@
-module Card.Types exposing (CardType(..), CardState(..), CardId, Card)
+module Card.Types
+    exposing
+        ( CardType(..)
+        , CardState(..)
+        , CardMsg(..)
+        , CardId
+        , Card
+        )
 
 
 type alias Card =
@@ -28,3 +35,13 @@ type CardState
     | Locked
     | Saving
     | Saved
+
+
+type CardMsg
+    = UpdateCardText String
+    | StartEditing
+    | FinishEditing
+    | CancelEditing
+    | StartCreateNew
+    | FinishCreateNew
+    | CancelCreateNew

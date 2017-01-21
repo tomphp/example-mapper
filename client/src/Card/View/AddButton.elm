@@ -1,10 +1,9 @@
 module Card.View.AddButton exposing (view)
 
-import Card.Types exposing (Card, CardType(..), CardId, CardState(..))
+import Card.Types exposing (Card, CardType(..), CardId, CardState(..), CardMsg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Types exposing (Msg(..))
 
 
 type alias AddButton =
@@ -15,7 +14,7 @@ type alias AddButton =
     }
 
 
-view : Card -> Html Msg
+view : Card -> Html CardMsg
 view =
     addButtonParams
         >> Maybe.map displayButton
@@ -53,10 +52,10 @@ addButtonParams card =
             Nothing
 
 
-displayButton : AddButton -> Html Msg
+displayButton : AddButton -> Html CardMsg
 displayButton b =
     button
-        [ onClick (CreateCard b.cardType)
+        [ onClick StartCreateNew
         , class ("card " ++ b.cssClass)
         , id b.id
         ]

@@ -8,10 +8,10 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Json
 import List
-import Types exposing (Msg(..))
+import Card.Types exposing (CardMsg(..))
 
 
-view : Card -> Html Msg
+view : Card -> Html CardMsg
 view card =
     case card.state of
         AddButton ->
@@ -21,13 +21,13 @@ view card =
             drawCard card
 
 
-drawCard : Card -> Html Msg
+drawCard : Card -> Html CardMsg
 drawCard card =
     let
         clickHandler =
             case card.state of
                 Saved ->
-                    [ onClick <| UpdateCardInModel { card | state = Editing card.text } ]
+                    [ onClick StartEditing ]
 
                 _ ->
                     []
@@ -47,7 +47,7 @@ drawCard card =
             )
 
 
-toolbar : Card -> List (Html Msg)
+toolbar : Card -> List (Html CardMsg)
 toolbar card =
     case card.state of
         Preparing _ ->
@@ -60,7 +60,7 @@ toolbar card =
             []
 
 
-editToolbar : Card -> Html Msg
+editToolbar : Card -> Html CardMsg
 editToolbar card =
     div [ class "card__toolbar" ]
         [ button
@@ -77,14 +77,14 @@ editToolbar card =
         ]
 
 
-saveAction : Card -> Msg
+saveAction : Card -> CardMsg
 saveAction card =
     case card.state of
         Preparing _ ->
-            SaveNewCard card.cardType card.text
+            FinishCreateNew
 
         _ ->
-            SaveCard card
+            FinishEditing
 
 
 cardClass : CardType -> CardState -> String
@@ -124,7 +124,7 @@ cardStateClass state =
             ""
 
 
-cardContent : Card -> Html Msg
+cardContent : Card -> Html CardMsg
 cardContent card =
     div
         [ class "card__content" ]
@@ -140,7 +140,7 @@ cardContent card =
         )
 
 
-cardText : String -> List (Html Msg)
+cardText : String -> List (Html CardMsg)
 cardText text =
     [ p [ class "card__text" ] (nl2br text) ]
 
@@ -152,12 +152,12 @@ nl2br text =
         |> List.intersperse (br [] [])
 
 
-cardInput : Card -> List (Html Msg)
+cardInput : Card -> List (Html CardMsg)
 cardInput card =
     [ textarea
         [ id ("card-input-" ++ card.id)
         , class "card__input"
-        , on "input" (Json.map (updateCardText card) inputValue)
+        , on "input" (Json.map UpdateCardText inputValue)
         ]
         [ text card.text ]
     ]
@@ -166,8 +166,3 @@ cardInput card =
 inputValue : Json.Decoder String
 inputValue =
     Json.at [ "target", "value" ] Json.string
-
-
-updateCardText : Card -> String -> Msg
-updateCardText card value =
-    UpdateCardText card value

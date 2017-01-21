@@ -1,6 +1,7 @@
 module State exposing (init, update, subscriptions)
 
-import Card.Types exposing (CardState(..), CardId, Card, CardType(..))
+import Card.Types exposing (CardState(..), CardId, Card, CardType(..), CardMsg(..))
+import Card.State
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
@@ -77,105 +78,53 @@ update msg model =
         UpdateModel update ->
             ( updateModel model update, Cmd.none )
 
-        UpdateCardInModel card ->
-            ( replaceCard model card, focusCardInput card.id )
-
-        UpdateCardText card string ->
+        UpdateCard card msg ->
             let
-                actualCard =
-                    Maybe.withDefault card (fetchCard model card.cardType card.id)
+                updatedCard =
+                    Card.State.update msg card
             in
-                ( replaceCard model { actualCard | text = string }, Cmd.none )
+                ( replaceCard model updatedCard
+                , cardUpdateAction model msg updatedCard
+                )
 
-        SaveCard card ->
+
+cardUpdateAction : Model -> CardMsg -> Card -> Cmd Msg
+cardUpdateAction model msg card =
+    case msg of
+        StartEditing ->
+            focusCardInput card.id
+
+        StartCreateNew ->
+            focusCardInput card.id
+
+        FinishEditing ->
             saveCard model card
 
-        CreateCard cardType ->
-            createCard model cardType
+        FinishCreateNew ->
+            saveNewCard model card
 
-        SaveNewCard cardType text ->
-            saveNewCard model cardType text
+        _ ->
+            Cmd.none
 
 
-saveNewCard : Model -> CardType -> String -> ( Model, Cmd Msg )
-saveNewCard model cardType text =
+saveNewCard : Model -> Card -> Cmd Msg
+saveNewCard model card =
     let
         wsSend =
             send model.flags.backendUrl
     in
-        case cardType of
+        case card.cardType of
             QuestionCard ->
-                ( fetchCard model cardType "new-question"
-                    |> Maybe.map (\card -> { card | state = Saving, text = text })
-                    |> Maybe.map (replaceCard model)
-                    |> Maybe.withDefault model
-                , Requests.addQuestion text |> wsSend
-                )
+                Requests.addQuestion card.text |> wsSend
 
             RuleCard ->
-                ( fetchCard model cardType "new-rule"
-                    |> Maybe.map (\card -> { card | state = Saving, text = text })
-                    |> Maybe.map (replaceCard model)
-                    |> Maybe.withDefault model
-                , Requests.addRule text |> wsSend
-                )
+                Requests.addRule card.text |> wsSend
 
             ExampleCard ruleId ->
-                ( fetchCard model cardType ("new-example-" ++ ruleId)
-                    |> Maybe.map (\card -> { card | state = Saving, text = text })
-                    |> Maybe.map (replaceCard model)
-                    |> Maybe.withDefault model
-                , Requests.addExample ruleId text |> wsSend
-                )
+                Requests.addExample ruleId card.text |> wsSend
 
             _ ->
-                ( model, Cmd.none )
-
-
-createCard : Model -> CardType -> ( Model, Cmd Msg )
-createCard model cardType =
-    let
-        id =
-            case cardType of
-                QuestionCard ->
-                    "new-question"
-
-                RuleCard ->
-                    "new-rule"
-
-                ExampleCard ruleId ->
-                    "new-example-" ++ ruleId
-
-                _ ->
-                    "invalid-card-id"
-    in
-        ( replaceCard model
-            { id = id
-            , state = Preparing ""
-            , text = ""
-            , cardType = cardType
-            , position = 9999
-            }
-        , focusCardInput id
-        )
-
-
-fetchCard : Model -> CardType -> CardId -> Maybe Card
-fetchCard model cardType id =
-    case cardType of
-        StoryCard ->
-            model.storyCard
-
-        RuleCard ->
-            Dict.get id model.rules |> Maybe.map .card
-
-        ExampleCard ruleId ->
-            Dict.get ruleId model.rules
-                |> Maybe.map .examples
-                |> Maybe.andThen (Dict.get id)
-
-        QuestionCard ->
-            Dict.get id model.questions
+                Cmd.none
 
 
 replaceCard : Model -> Card -> Model
@@ -214,19 +163,9 @@ replaceExampleCard card rule =
     { rule | examples = Dict.update card.id (always <| Just card) rule.examples }
 
 
-saveCard : Model -> Card -> ( Model, Cmd Msg )
-saveCard model theCard =
-    let
-        card =
-            { theCard | state = Saving }
-    in
-        ( replaceCard model card, Requests.updateCard card |> send model.flags.backendUrl )
-
-
-
--- updateAddExampleState : Model -> CardId -> AddButtonState -> Model
--- updateAddExampleState model ruleId state =
---     { model | rules = Dict.update ruleId (Maybe.map (\r -> { r | addExample = state })) model.rules }
+saveCard : Model -> Card -> Cmd Msg
+saveCard model card =
+    Requests.updateCard card |> send model.flags.backendUrl
 
 
 focusCardInput : String -> Cmd Msg
@@ -246,7 +185,7 @@ subscriptions model =
 
 updateModel : Model -> String -> Model
 updateModel model update =
-    case (decodeString (modelDecoder model.flags) update) of
+    case decodeString (modelDecoder model.flags) update of
         Ok m ->
             { model
                 | storyCard = m.storyCard
