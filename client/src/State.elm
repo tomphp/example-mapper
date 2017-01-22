@@ -5,10 +5,15 @@ import Card.State
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
+import ModelUpdater exposing (replaceCard)
 import Ports
 import Requests
 import Rule.Types exposing (Rule, RuleId)
-import StateDecoder exposing (..)
+
+
+--import StateDecoder exposing (..)
+
+import UpdateDecoder exposing (..)
 import Task
 import Types exposing (Model, Msg(..), Flags)
 import WebSocket
@@ -34,7 +39,7 @@ init flags =
 -- init =
 --     let
 --         flags =
---             { backendUrl = Just "ws://localhost:9000/workspace/414c091e-5360-4ec0-a52e-79d99a0430da" }
+--             { backendUrl = Just "ws://localhost:9000/workspace/81999634-e5f0-490f-9557-ba986dbd1e97" }
 --     in
 --         ( initialModel flags
 --         , Requests.refresh
@@ -45,27 +50,27 @@ init flags =
 initialModel : Flags -> Model
 initialModel flags =
     { storyCard = Nothing
-    , rules = Dict.singleton "new-rule" addRule
-    , questions = Dict.singleton "new-question" <| addCard QuestionCard "new-question"
+    , rules = Dict.singleton "new-rule" addRuleButton
+    , questions = Dict.singleton "new-question" <| addCardButton QuestionCard "new-question"
     , error = Nothing
     , flags = flags
     }
 
 
-addCard : CardType -> CardId -> Card
-addCard cardType cardId =
+addRuleButton : Rule
+addRuleButton =
+    { card = addCardButton RuleCard "new-rule"
+    , examples = Dict.empty
+    }
+
+
+addCardButton : CardType -> CardId -> Card
+addCardButton cardType cardId =
     { id = cardId
     , state = AddButton
     , text = ""
     , cardType = cardType
     , position = 9999
-    }
-
-
-addRule : Rule
-addRule =
-    { card = addCard RuleCard "new-rule"
-    , examples = Dict.empty
     }
 
 
@@ -83,7 +88,7 @@ update msg model =
                 updatedCard =
                     Card.State.update msg card
             in
-                ( replaceCard model updatedCard
+                ( replaceCard updatedCard model
                 , cardUpdateAction model msg updatedCard
                 )
 
@@ -127,42 +132,6 @@ saveNewCard model card =
                 Cmd.none
 
 
-replaceCard : Model -> Card -> Model
-replaceCard model card =
-    case card.cardType of
-        StoryCard ->
-            { model | storyCard = Just card }
-
-        RuleCard ->
-            updateRule (replaceRuleCard card) card.id model
-
-        ExampleCard ruleId ->
-            updateRule (replaceExampleCard card) ruleId model
-
-        QuestionCard ->
-            replaceQuestionCard card model
-
-
-updateRule : (Rule -> Rule) -> CardId -> Model -> Model
-updateRule update ruleId model =
-    { model | rules = Dict.update ruleId (Maybe.map update) model.rules }
-
-
-replaceRuleCard : Card -> Rule -> Rule
-replaceRuleCard card rule =
-    { rule | card = card }
-
-
-replaceQuestionCard : Card -> Model -> Model
-replaceQuestionCard card model =
-    { model | questions = Dict.update card.id (always <| Just card) model.questions }
-
-
-replaceExampleCard : Card -> Rule -> Rule
-replaceExampleCard card rule =
-    { rule | examples = Dict.update card.id (always <| Just card) rule.examples }
-
-
 saveCard : Model -> Card -> Cmd Msg
 saveCard model card =
     Requests.updateCard card |> send model.flags.backendUrl
@@ -186,32 +155,8 @@ subscriptions model =
 updateModel : Model -> String -> Model
 updateModel model update =
     case decodeString (modelDecoder model.flags) update of
-        Ok m ->
-            { model
-                | storyCard = m.storyCard
-                , rules =
-                    Dict.insert
-                        "new-rule"
-                        addRule
-                        (Dict.map addExampleButton m.rules)
-                , questions =
-                    Dict.insert
-                        "new-question"
-                        (addCard QuestionCard "new-question")
-                        m.questions
-            }
+        Ok cards ->
+            List.foldl identity model (Debug.log "cards: " cards)
 
         Err msg ->
             { model | error = Just msg }
-
-
-addExampleButton : RuleId -> Rule -> Rule
-addExampleButton ruleId rule =
-    let
-        exampleId =
-            "new-example-" ++ ruleId
-
-        button =
-            addCard (ExampleCard ruleId) exampleId
-    in
-        { rule | examples = Dict.insert exampleId button rule.examples }

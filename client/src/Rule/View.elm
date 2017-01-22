@@ -1,12 +1,12 @@
 module Rule.View exposing (view)
 
-import Types exposing (Model, Msg(..))
+import Card.Types exposing (Card, CardState(..), CardId, CardType(..))
 import Card.View
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Card.Types exposing (Card, CardState(..), CardId, CardType(..))
 import Rule.Types exposing (Rule)
-import Dict exposing (Dict)
+import Types exposing (Model, Msg(..))
 
 
 view : Model -> Rule -> Html Msg
