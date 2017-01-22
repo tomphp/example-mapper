@@ -1,6 +1,6 @@
-module Card.State exposing (update)
+module Card.State exposing (update, addCardButton)
 
-import Card.Types exposing (Card, CardMsg(..), CardState(..))
+import Card.Types exposing (Card, CardMsg(..), CardState(..), CardType(..))
 
 
 update : CardMsg -> Card -> Card
@@ -26,3 +26,28 @@ update msg card =
 
         CancelEditing originalText ->
             { card | state = Saved, text = originalText }
+
+
+addCardButton : CardType -> Card
+addCardButton cardType =
+    let
+        id =
+            case cardType of
+                RuleCard ->
+                    "new-rule"
+
+                ExampleCard ruleId ->
+                    "new-example-" ++ ruleId
+
+                QuestionCard ->
+                    "new-question"
+
+                StoryCard ->
+                    "new-story"
+    in
+        { id = id
+        , state = AddButton
+        , text = ""
+        , cardType = cardType
+        , position = 999
+        }

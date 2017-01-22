@@ -1,21 +1,16 @@
 module State exposing (init, update, subscriptions)
 
+import Card.State exposing (addCardButton)
 import Card.Types exposing (CardState(..), CardId, Card, CardType(..), CardMsg(..))
-import Card.State
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
 import ModelUpdater exposing (replaceCard)
 import Ports
 import Requests
-import Rule.Types exposing (Rule, RuleId)
-
-
---import StateDecoder exposing (..)
-
-import UpdateDecoder exposing (..)
 import Task
 import Types exposing (Model, Msg(..), Flags)
+import UpdateDecoder exposing (..)
 import WebSocket
 
 
@@ -49,29 +44,21 @@ init flags =
 
 initialModel : Flags -> Model
 initialModel flags =
-    { storyCard = Nothing
-    , rules = Dict.singleton "new-rule" addRuleButton
-    , questions = Dict.singleton "new-question" <| addCardButton QuestionCard "new-question"
-    , error = Nothing
-    , flags = flags
-    }
+    let
+        addQuestionButton =
+            addCardButton QuestionCard
 
-
-addRuleButton : Rule
-addRuleButton =
-    { card = addCardButton RuleCard "new-rule"
-    , examples = Dict.empty
-    }
-
-
-addCardButton : CardType -> CardId -> Card
-addCardButton cardType cardId =
-    { id = cardId
-    , state = AddButton
-    , text = ""
-    , cardType = cardType
-    , position = 9999
-    }
+        newRuleColumn =
+            { card = addCardButton RuleCard
+            , examples = Dict.empty
+            }
+    in
+        { storyCard = Nothing
+        , rules = Dict.singleton newRuleColumn.card.id newRuleColumn
+        , questions = Dict.singleton addQuestionButton.id addQuestionButton
+        , error = Nothing
+        , flags = flags
+        }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

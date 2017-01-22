@@ -9767,14 +9767,30 @@ var _user$project$Card_Types$UpdateCardText = function (a) {
 	return {ctor: 'UpdateCardText', _0: a};
 };
 
+var _user$project$Card_State$addCardButton = function (cardType) {
+	var id = function () {
+		var _p0 = cardType;
+		switch (_p0.ctor) {
+			case 'RuleCard':
+				return 'new-rule';
+			case 'ExampleCard':
+				return A2(_elm_lang$core$Basics_ops['++'], 'new-example-', _p0._0);
+			case 'QuestionCard':
+				return 'new-question';
+			default:
+				return 'new-story';
+		}
+	}();
+	return {id: id, state: _user$project$Card_Types$AddButton, text: '', cardType: cardType, position: 999};
+};
 var _user$project$Card_State$update = F2(
 	function (msg, card) {
-		var _p0 = msg;
-		switch (_p0.ctor) {
+		var _p1 = msg;
+		switch (_p1.ctor) {
 			case 'UpdateCardText':
 				return _elm_lang$core$Native_Utils.update(
 					card,
-					{text: _p0._0});
+					{text: _p1._0});
 			case 'StartCreateNew':
 				return _elm_lang$core$Native_Utils.update(
 					card,
@@ -9800,7 +9816,7 @@ var _user$project$Card_State$update = F2(
 			default:
 				return _elm_lang$core$Native_Utils.update(
 					card,
-					{state: _user$project$Card_Types$Saved, text: _p0._0});
+					{state: _user$project$Card_Types$Saved, text: _p1._0});
 		}
 	});
 
@@ -9825,15 +9841,24 @@ var _user$project$Types$UpdateModel = function (a) {
 };
 var _user$project$Types$Noop = {ctor: 'Noop'};
 
-var _user$project$ModelUpdater$addExampleButton = function (ruleId) {
-	return {
-		id: A2(_elm_lang$core$Basics_ops['++'], 'new-example-', ruleId),
-		state: _user$project$Card_Types$AddButton,
-		text: '',
-		cardType: _user$project$Card_Types$ExampleCard(ruleId),
-		position: 999
-	};
-};
+var _user$project$ModelUpdater$mapWithDefault = F2(
+	function ($default, update) {
+		return function (_p0) {
+			return _elm_lang$core$Maybe$Just(
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					$default,
+					A2(_elm_lang$core$Maybe$map, update, _p0)));
+		};
+	});
+var _user$project$ModelUpdater$updateRule = F3(
+	function (update, id, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				rules: A3(_elm_lang$core$Dict$update, id, update, model.rules)
+			});
+	});
 var _user$project$ModelUpdater$replaceExampleCard = F3(
 	function (ruleId, card, model) {
 		var updateExample = function (rule) {
@@ -9848,52 +9873,30 @@ var _user$project$ModelUpdater$replaceExampleCard = F3(
 						rule.examples)
 				});
 		};
-		return _elm_lang$core$Native_Utils.update(
-			model,
-			{
-				rules: A3(
-					_elm_lang$core$Dict$update,
-					ruleId,
-					_elm_lang$core$Maybe$map(updateExample),
-					model.rules)
-			});
+		return A3(
+			_user$project$ModelUpdater$updateRule,
+			_elm_lang$core$Maybe$map(updateExample),
+			ruleId,
+			model);
 	});
 var _user$project$ModelUpdater$replaceRuleCard = F2(
 	function (card, model) {
+		var addExampleButton = _user$project$Card_State$addCardButton(
+			_user$project$Card_Types$ExampleCard(card.id));
 		var newRule = {
 			card: card,
-			examples: A2(
-				_elm_lang$core$Dict$singleton,
-				A2(_elm_lang$core$Basics_ops['++'], 'new-example-', card.id),
-				_user$project$ModelUpdater$addExampleButton(card.id))
+			examples: A2(_elm_lang$core$Dict$singleton, addExampleButton.id, addExampleButton)
 		};
-		var updateWithDefault = F2(
-			function ($default, update) {
-				return function (_p0) {
-					return _elm_lang$core$Maybe$Just(
-						A2(
-							_elm_lang$core$Maybe$withDefault,
-							$default,
-							A2(_elm_lang$core$Maybe$map, update, _p0)));
-				};
-			});
 		var updateCard = function (rule) {
 			return _elm_lang$core$Native_Utils.update(
 				rule,
 				{card: card});
 		};
-		var updateRule = function (update) {
-			return A2(
-				_elm_lang$core$Debug$log,
-				'model',
-				_elm_lang$core$Native_Utils.update(
-					model,
-					{
-						rules: A3(_elm_lang$core$Dict$update, card.id, update, model.rules)
-					}));
-		};
-		return updateRule(
-			A2(updateWithDefault, newRule, updateCard));
+		return A3(
+			_user$project$ModelUpdater$updateRule,
+			A2(_user$project$ModelUpdater$mapWithDefault, newRule, updateCard),
+			card.id,
+			model);
 	});
 var _user$project$ModelUpdater$replaceQuestionCard = F2(
 	function (card, model) {
@@ -10182,22 +10185,16 @@ var _user$project$State$focusCardInput = function (id) {
 		_elm_lang$dom$Dom$focus(
 			A2(_elm_lang$core$Basics_ops['++'], 'card-input-', id)));
 };
-var _user$project$State$addCardButton = F2(
-	function (cardType, cardId) {
-		return {id: cardId, state: _user$project$Card_Types$AddButton, text: '', cardType: cardType, position: 9999};
-	});
-var _user$project$State$addRuleButton = {
-	card: A2(_user$project$State$addCardButton, _user$project$Card_Types$RuleCard, 'new-rule'),
-	examples: _elm_lang$core$Dict$empty
-};
 var _user$project$State$initialModel = function (flags) {
+	var newRuleColumn = {
+		card: _user$project$Card_State$addCardButton(_user$project$Card_Types$RuleCard),
+		examples: _elm_lang$core$Dict$empty
+	};
+	var addQuestionButton = _user$project$Card_State$addCardButton(_user$project$Card_Types$QuestionCard);
 	return {
 		storyCard: _elm_lang$core$Maybe$Nothing,
-		rules: A2(_elm_lang$core$Dict$singleton, 'new-rule', _user$project$State$addRuleButton),
-		questions: A2(
-			_elm_lang$core$Dict$singleton,
-			'new-question',
-			A2(_user$project$State$addCardButton, _user$project$Card_Types$QuestionCard, 'new-question')),
+		rules: A2(_elm_lang$core$Dict$singleton, newRuleColumn.card.id, newRuleColumn),
+		questions: A2(_elm_lang$core$Dict$singleton, addQuestionButton.id, addQuestionButton),
 		error: _elm_lang$core$Maybe$Nothing,
 		flags: flags
 	};

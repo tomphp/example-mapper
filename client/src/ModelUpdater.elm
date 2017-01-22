@@ -7,9 +7,10 @@ module ModelUpdater
         , replaceStoryCard
         )
 
+import Card.State exposing (addCardButton)
 import Card.Types exposing (Card, CardType(..), CardState(..))
 import Dict
-import Rule.Types exposing (RuleId)
+import Rule.Types exposing (RuleId, Rule)
 import Types exposing (Model)
 
 
@@ -42,22 +43,19 @@ replaceQuestionCard card model =
 replaceRuleCard : Card -> Model -> Model
 replaceRuleCard card model =
     let
-        updateRule =
-            \update ->
-                { model | rules = Dict.update card.id update model.rules }
-
         updateCard =
             \rule ->
                 { rule | card = card }
 
-        updateWithDefault =
-            \default update ->
-                Maybe.map update >> Maybe.withDefault default >> Just
+        addExampleButton =
+            addCardButton (ExampleCard card.id)
 
         newRule =
-            { card = card, examples = Dict.singleton ("new-example-" ++ card.id) (addExampleButton card.id) }
+            { card = card
+            , examples = Dict.singleton addExampleButton.id addExampleButton
+            }
     in
-        updateRule <| updateWithDefault newRule updateCard
+        updateRule (mapWithDefault newRule updateCard) card.id model
 
 
 replaceExampleCard : RuleId -> Card -> Model -> Model
@@ -67,14 +65,14 @@ replaceExampleCard ruleId card model =
             \rule ->
                 { rule | examples = Dict.update card.id (always <| Just card) rule.examples }
     in
-        { model | rules = Dict.update ruleId (Maybe.map updateExample) model.rules }
+        updateRule (Maybe.map updateExample) ruleId model
 
 
-addExampleButton : RuleId -> Card
-addExampleButton ruleId =
-    { id = "new-example-" ++ ruleId
-    , state = AddButton
-    , text = ""
-    , cardType = ExampleCard ruleId
-    , position = 999
-    }
+updateRule : (Maybe Rule -> Maybe Rule) -> RuleId -> Model -> Model
+updateRule update id model =
+    { model | rules = Dict.update id update model.rules }
+
+
+mapWithDefault : a -> (b -> a) -> Maybe b -> Maybe a
+mapWithDefault default update =
+    Maybe.map update >> Maybe.withDefault default >> Just
