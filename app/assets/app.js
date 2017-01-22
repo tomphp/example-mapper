@@ -9828,9 +9828,9 @@ var _user$project$Rule_Types$Rule = F2(
 var _user$project$Types$Flags = function (a) {
 	return {backendUrl: a};
 };
-var _user$project$Types$Model = F5(
-	function (a, b, c, d, e) {
-		return {storyCard: a, rules: b, questions: c, error: d, flags: e};
+var _user$project$Types$Model = F6(
+	function (a, b, c, d, e, f) {
+		return {clientId: a, storyCard: b, rules: c, questions: d, error: e, flags: f};
 	});
 var _user$project$Types$UpdateCard = F2(
 	function (a, b) {
@@ -9932,6 +9932,14 @@ var _user$project$ModelUpdater$replaceCard = function (card) {
 			return _user$project$ModelUpdater$replaceQuestionCard(card);
 	}
 };
+var _user$project$ModelUpdater$setClientId = F2(
+	function (id, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				clientId: _elm_lang$core$Maybe$Just(id)
+			});
+	});
 
 var _user$project$Ports$socketOut = _elm_lang$core$Native_Platform.outgoingPort(
 	'socketOut',
@@ -10054,7 +10062,22 @@ var _user$project$Requests$refresh = _user$project$Requests$encodeObject(
 		_1: {ctor: '[]'}
 	});
 
-var _user$project$UpdateDecoder$stringToCardState = function (s) {
+
+var _user$project$Decoder_SetClientId$decoder = A2(
+	_elm_lang$core$Json_Decode$map,
+	function (x) {
+		return {
+			ctor: '::',
+			_0: x,
+			_1: {ctor: '[]'}
+		};
+	},
+	A2(
+		_elm_lang$core$Json_Decode$map,
+		_user$project$ModelUpdater$setClientId,
+		A2(_elm_lang$core$Json_Decode$field, 'client_id', _elm_lang$core$Json_Decode$string)));
+
+var _user$project$Decoder_UpdateState$stringToCardState = function (s) {
 	var _p0 = s;
 	if (_p0 === 'saving') {
 		return _user$project$Card_Types$Saving;
@@ -10062,18 +10085,18 @@ var _user$project$UpdateDecoder$stringToCardState = function (s) {
 		return _user$project$Card_Types$Saved;
 	}
 };
-var _user$project$UpdateDecoder$cardState = A2(_elm_lang$core$Json_Decode$map, _user$project$UpdateDecoder$stringToCardState, _elm_lang$core$Json_Decode$string);
-var _user$project$UpdateDecoder$card = function (cardType) {
+var _user$project$Decoder_UpdateState$cardState = A2(_elm_lang$core$Json_Decode$map, _user$project$Decoder_UpdateState$stringToCardState, _elm_lang$core$Json_Decode$string);
+var _user$project$Decoder_UpdateState$card = function (cardType) {
 	return A6(
 		_elm_lang$core$Json_Decode$map5,
 		_user$project$Card_Types$Card,
 		A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string),
-		A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$UpdateDecoder$cardState),
+		A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$Decoder_UpdateState$cardState),
 		A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string),
 		_elm_lang$core$Json_Decode$succeed(cardType),
 		A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int));
 };
-var _user$project$UpdateDecoder$examples = function (ruleCard) {
+var _user$project$Decoder_UpdateState$examples = function (ruleCard) {
 	return A2(
 		_elm_lang$core$Json_Decode$field,
 		'examples',
@@ -10081,14 +10104,14 @@ var _user$project$UpdateDecoder$examples = function (ruleCard) {
 			A2(
 				_elm_lang$core$Json_Decode$map,
 				_user$project$ModelUpdater$replaceExampleCard(ruleCard.id),
-				_user$project$UpdateDecoder$card(
+				_user$project$Decoder_UpdateState$card(
 					_user$project$Card_Types$ExampleCard(ruleCard.id)))));
 };
-var _user$project$UpdateDecoder$rule = function () {
+var _user$project$Decoder_UpdateState$rule = function () {
 	var ruleCard = A2(
 		_elm_lang$core$Json_Decode$field,
 		'rule_card',
-		_user$project$UpdateDecoder$card(_user$project$Card_Types$RuleCard));
+		_user$project$Decoder_UpdateState$card(_user$project$Card_Types$RuleCard));
 	return A3(
 		_elm_lang$core$Json_Decode$map2,
 		F2(
@@ -10096,24 +10119,24 @@ var _user$project$UpdateDecoder$rule = function () {
 				return {ctor: '::', _0: x, _1: y};
 			}),
 		A2(_elm_lang$core$Json_Decode$map, _user$project$ModelUpdater$replaceRuleCard, ruleCard),
-		A2(_elm_lang$core$Json_Decode$andThen, _user$project$UpdateDecoder$examples, ruleCard));
+		A2(_elm_lang$core$Json_Decode$andThen, _user$project$Decoder_UpdateState$examples, ruleCard));
 }();
-var _user$project$UpdateDecoder$rules = A2(
+var _user$project$Decoder_UpdateState$rules = A2(
 	_elm_lang$core$Json_Decode$field,
 	'rules',
 	A2(
 		_elm_lang$core$Json_Decode$map,
 		_elm_lang$core$List$concat,
-		_elm_lang$core$Json_Decode$list(_user$project$UpdateDecoder$rule)));
-var _user$project$UpdateDecoder$questions = A2(
+		_elm_lang$core$Json_Decode$list(_user$project$Decoder_UpdateState$rule)));
+var _user$project$Decoder_UpdateState$questions = A2(
 	_elm_lang$core$Json_Decode$field,
 	'questions',
 	_elm_lang$core$Json_Decode$list(
 		A2(
 			_elm_lang$core$Json_Decode$map,
 			_user$project$ModelUpdater$replaceQuestionCard,
-			_user$project$UpdateDecoder$card(_user$project$Card_Types$QuestionCard))));
-var _user$project$UpdateDecoder$story = A2(
+			_user$project$Decoder_UpdateState$card(_user$project$Card_Types$QuestionCard))));
+var _user$project$Decoder_UpdateState$story = A2(
 	_elm_lang$core$Json_Decode$field,
 	'story_card',
 	A2(
@@ -10128,34 +10151,46 @@ var _user$project$UpdateDecoder$story = A2(
 		A2(
 			_elm_lang$core$Json_Decode$map,
 			_user$project$ModelUpdater$replaceStoryCard,
-			_user$project$UpdateDecoder$card(_user$project$Card_Types$StoryCard))));
-var _user$project$UpdateDecoder$modelDecoder = function (flags) {
-	return A2(
-		_elm_lang$core$Json_Decode$field,
-		'state',
+			_user$project$Decoder_UpdateState$card(_user$project$Card_Types$StoryCard))));
+var _user$project$Decoder_UpdateState$decoder = A2(
+	_elm_lang$core$Json_Decode$field,
+	'state',
+	A3(
+		_elm_lang$core$Json_Decode$map2,
+		F2(
+			function (x, y) {
+				return A2(_elm_lang$core$Basics_ops['++'], x, y);
+			}),
+		_user$project$Decoder_UpdateState$rules,
 		A3(
 			_elm_lang$core$Json_Decode$map2,
 			F2(
 				function (x, y) {
 					return A2(_elm_lang$core$Basics_ops['++'], x, y);
 				}),
-			_user$project$UpdateDecoder$rules,
-			A3(
-				_elm_lang$core$Json_Decode$map2,
-				F2(
-					function (x, y) {
-						return A2(_elm_lang$core$Basics_ops['++'], x, y);
-					}),
-				_user$project$UpdateDecoder$questions,
-				_user$project$UpdateDecoder$story)));
+			_user$project$Decoder_UpdateState$questions,
+			_user$project$Decoder_UpdateState$story)));
+
+var _user$project$Decoder$messageDecoder = function (msgType) {
+	var _p0 = msgType;
+	switch (_p0) {
+		case 'set_client_id':
+			return _user$project$Decoder_SetClientId$decoder;
+		case 'update_state':
+			return _user$project$Decoder_UpdateState$decoder;
+		default:
+			return _elm_lang$core$Json_Decode$succeed(
+				{ctor: '[]'});
+	}
 };
+var _user$project$Decoder$decoder = A2(
+	_elm_lang$core$Json_Decode$andThen,
+	_user$project$Decoder$messageDecoder,
+	A2(_elm_lang$core$Json_Decode$field, 'type', _elm_lang$core$Json_Decode$string));
 
 var _user$project$State$updateModel = F2(
 	function (model, update) {
-		var _p0 = A2(
-			_elm_lang$core$Json_Decode$decodeString,
-			_user$project$UpdateDecoder$modelDecoder(model.flags),
-			update);
+		var _p0 = A2(_elm_lang$core$Json_Decode$decodeString, _user$project$Decoder$decoder, update);
 		if (_p0.ctor === 'Ok') {
 			return A3(
 				_elm_lang$core$List$foldl,
@@ -10192,6 +10227,7 @@ var _user$project$State$initialModel = function (flags) {
 	};
 	var addQuestionButton = _user$project$Card_State$addCardButton(_user$project$Card_Types$QuestionCard);
 	return {
+		clientId: _elm_lang$core$Maybe$Nothing,
 		storyCard: _elm_lang$core$Maybe$Nothing,
 		rules: A2(_elm_lang$core$Dict$singleton, newRuleColumn.card.id, newRuleColumn),
 		questions: A2(_elm_lang$core$Dict$singleton, addQuestionButton.id, addQuestionButton),

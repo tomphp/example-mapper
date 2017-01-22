@@ -52,18 +52,24 @@ module ExampleMapper
 
           ws = Faye::WebSocket.new(env)
           story_id = File.basename(env['REQUEST_PATH'])
+          client_id = SecureRandom.uuid
 
           ws.on :open do |_event|
             with_error_handling do
               @connections.register(story_id, ws)
-              @logger.debug "WebSocket :open, object_id=#{ws.object_id}, story_id=#{story_id}"
+              @logger.debug "WebSocket :open, object_id=#{ws.object_id}, story_id=#{story_id}, client_id=#{client_id}"
+              ws.send({
+                story_id: story_id,
+                type: :set_client_id,
+                client_id: client_id
+              }.to_json)
             end
           end
 
           ws.on :message do |event|
             with_error_handling do
               data = JSON.parse(event.data)
-              @logger.debug "WebSocket :message, type=#{data['type']}, story_id=#{story_id} -> #{data.inspect}"
+              @logger.debug "WebSocket :message, type=#{data['type']}, story_id=#{story_id}, client_id=#{client_id} -> #{data.inspect}"
 
               case data['type']
               when 'update_card'
@@ -84,6 +90,7 @@ module ExampleMapper
 
               @redis.publish(CHANNEL, {
                 story_id: story_id,
+                from: client_id,
                 type: :update_state,
                 state: @storage.fetch_story(story_id)
               }.to_json)
@@ -92,7 +99,7 @@ module ExampleMapper
 
           ws.on :close do |event|
             with_error_handling do
-              @logger.debug "WebSocket :close, event.code=#{event.code}, event.reason=#{event.reason}, story_id=#{story_id}"
+              @logger.debug "WebSocket :close, event.code=#{event.code}, event.reason=#{event.reason}, story_id=#{story_id}, client_id=#{client_id}"
               @connections.release(story_id, ws)
               ws = nil
             end

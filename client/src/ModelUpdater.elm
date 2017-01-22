@@ -5,6 +5,7 @@ module ModelUpdater
         , replaceQuestionCard
         , replaceRuleCard
         , replaceStoryCard
+        , setClientId
         )
 
 import Card.State exposing (addCardButton)
@@ -12,6 +13,11 @@ import Card.Types exposing (Card, CardType(..), CardState(..))
 import Dict
 import Rule.Types exposing (RuleId, Rule)
 import Types exposing (Model)
+
+
+setClientId : String -> Model -> Model
+setClientId id model =
+    { model | clientId = Just id }
 
 
 replaceCard : Card -> Model -> Model

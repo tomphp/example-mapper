@@ -15,7 +15,8 @@ type alias Flags =
 
 
 type alias Model =
-    { storyCard : Maybe Card
+    { clientId : Maybe String
+    , storyCard : Maybe Card
     , rules : Dict CardId Rule
     , questions : Dict CardId Card
     , error : Maybe String

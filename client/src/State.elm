@@ -10,7 +10,7 @@ import Ports
 import Requests
 import Task
 import Types exposing (Model, Msg(..), Flags)
-import UpdateDecoder exposing (..)
+import Decoder exposing (decoder)
 import WebSocket
 
 
@@ -53,7 +53,8 @@ initialModel flags =
             , examples = Dict.empty
             }
     in
-        { storyCard = Nothing
+        { clientId = Nothing
+        , storyCard = Nothing
         , rules = Dict.singleton newRuleColumn.card.id newRuleColumn
         , questions = Dict.singleton addQuestionButton.id addQuestionButton
         , error = Nothing
@@ -141,7 +142,7 @@ subscriptions model =
 
 updateModel : Model -> String -> Model
 updateModel model update =
-    case decodeString (modelDecoder model.flags) update of
+    case decodeString decoder update of
         Ok cards ->
             List.foldl identity model (Debug.log "cards: " cards)
 

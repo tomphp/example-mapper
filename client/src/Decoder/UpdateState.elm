@@ -1,13 +1,13 @@
-module UpdateDecoder exposing (modelDecoder)
+module Decoder.UpdateState exposing (decoder)
 
 import Card.Types exposing (Card, CardType(..), CardState(..))
-import Json.Decode exposing (..)
-import Types exposing (Model, Flags)
 import ModelUpdater exposing (..)
+import Json.Decode exposing (..)
+import Decoder.Common exposing (..)
 
 
-modelDecoder : Flags -> Decoder (List (Model -> Model))
-modelDecoder flags =
+decoder : Decoder (List ModelUpdater)
+decoder =
     field "state" <|
         (story
             |> map2 (++) questions
@@ -15,7 +15,7 @@ modelDecoder flags =
         )
 
 
-story : Decoder (List (Model -> Model))
+story : Decoder (List ModelUpdater)
 story =
     card StoryCard
         |> map replaceStoryCard
@@ -23,7 +23,7 @@ story =
         |> field "story_card"
 
 
-questions : Decoder (List (Model -> Model))
+questions : Decoder (List ModelUpdater)
 questions =
     card QuestionCard
         |> map replaceQuestionCard
@@ -31,7 +31,7 @@ questions =
         |> field "questions"
 
 
-rules : Decoder (List (Model -> Model))
+rules : Decoder (List ModelUpdater)
 rules =
     rule
         |> list
@@ -39,7 +39,7 @@ rules =
         |> field "rules"
 
 
-rule : Decoder (List (Model -> Model))
+rule : Decoder (List ModelUpdater)
 rule =
     let
         ruleCard =
@@ -50,7 +50,7 @@ rule =
             (ruleCard |> andThen examples)
 
 
-examples : Card -> Decoder (List (Model -> Model))
+examples : Card -> Decoder (List ModelUpdater)
 examples ruleCard =
     card (ExampleCard ruleCard.id)
         |> map (replaceExampleCard ruleCard.id)
