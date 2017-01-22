@@ -1,6 +1,7 @@
 module ModelUpdater
     exposing
-        ( replaceCard
+        ( addDelayedAction
+        , replaceCard
         , replaceExampleCard
         , replaceQuestionCard
         , replaceRuleCard
@@ -9,10 +10,15 @@ module ModelUpdater
         )
 
 import Card.State exposing (addCardButton)
-import Card.Types exposing (Card, CardType(..), CardState(..))
+import Card.Types exposing (Card, CardType(..), CardState(..), CardId)
 import Dict
 import Rule.Types exposing (RuleId, Rule)
-import Types exposing (Model)
+import Types exposing (Model, ModelUpdater, DelayedAction)
+
+
+addDelayedAction : DelayedAction -> Model -> Model
+addDelayedAction action model =
+    { model | delayed = Dict.insert model.lastRequestNo action model.delayed }
 
 
 setClientId : String -> Model -> Model
@@ -24,16 +30,16 @@ replaceCard : Model -> Card -> Model
 replaceCard model card =
     case card.cardType of
         StoryCard ->
-            replaceStoryCard card
+            replaceStoryCard card model
 
         RuleCard ->
-            replaceRuleCard card
+            replaceRuleCard card model
 
         ExampleCard ruleId ->
-            replaceExampleCard ruleId card
+            replaceExampleCard ruleId card model
 
         QuestionCard ->
-            replaceQuestionCard card
+            replaceQuestionCard card model
 
 
 replaceStoryCard : Card -> Model -> Model

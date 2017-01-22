@@ -61,7 +61,10 @@ module ExampleMapper
               ws.send({
                 story_id: story_id,
                 type: :set_client_id,
-                client_id: client_id
+                client_id: client_id,
+                # Next to are not necesary
+                from: client_id,
+                client_request_no: 0,
               }.to_json)
             end
           end

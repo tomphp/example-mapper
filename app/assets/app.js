@@ -9828,10 +9828,13 @@ var _user$project$Rule_Types$Rule = F2(
 var _user$project$Types$Flags = function (a) {
 	return {backendUrl: a};
 };
-var _user$project$Types$Model = F7(
-	function (a, b, c, d, e, f, g) {
-		return {clientId: a, lastRequestNo: b, storyCard: c, rules: d, questions: e, error: f, flags: g};
+var _user$project$Types$Model = F8(
+	function (a, b, c, d, e, f, g, h) {
+		return {clientId: a, lastRequestNo: b, storyCard: c, rules: d, questions: e, error: f, flags: g, delayed: h};
 	});
+var _user$project$Types$ResetAddButton = function (a) {
+	return {ctor: 'ResetAddButton', _0: a};
+};
 var _user$project$Types$UpdateCard = F2(
 	function (a, b) {
 		return {ctor: 'UpdateCard', _0: a, _1: b};
@@ -9924,20 +9927,17 @@ var _user$project$ModelUpdater$replaceStoryCard = F2(
 	});
 var _user$project$ModelUpdater$replaceCard = F2(
 	function (model, card) {
-		var replace = function () {
-			var _p1 = card.cardType;
-			switch (_p1.ctor) {
-				case 'StoryCard':
-					return _user$project$ModelUpdater$replaceStoryCard(card);
-				case 'RuleCard':
-					return _user$project$ModelUpdater$replaceRuleCard(card);
-				case 'ExampleCard':
-					return A2(_user$project$ModelUpdater$replaceExampleCard, _p1._0, card);
-				default:
-					return _user$project$ModelUpdater$replaceQuestionCard(card);
-			}
-		}();
-		return replace(model);
+		var _p1 = card.cardType;
+		switch (_p1.ctor) {
+			case 'StoryCard':
+				return A2(_user$project$ModelUpdater$replaceStoryCard, card, model);
+			case 'RuleCard':
+				return A2(_user$project$ModelUpdater$replaceRuleCard, card, model);
+			case 'ExampleCard':
+				return A3(_user$project$ModelUpdater$replaceExampleCard, _p1._0, card, model);
+			default:
+				return A2(_user$project$ModelUpdater$replaceQuestionCard, card, model);
+		}
 	});
 var _user$project$ModelUpdater$setClientId = F2(
 	function (id, model) {
@@ -9945,6 +9945,14 @@ var _user$project$ModelUpdater$setClientId = F2(
 			model,
 			{
 				clientId: _elm_lang$core$Maybe$Just(id)
+			});
+	});
+var _user$project$ModelUpdater$addDelayedAction = F2(
+	function (action, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				delayed: A3(_elm_lang$core$Dict$insert, model.lastRequestNo, action, model.delayed)
 			});
 	});
 
@@ -10070,6 +10078,69 @@ var _user$project$Requests$addRequestNo = F2(
 		};
 	});
 
+var _user$project$Decoder_Delayed$resetAddButton = F2(
+	function (model, card) {
+		var _p0 = card.cardType;
+		if (_p0.ctor === 'QuestionCard') {
+			return _elm_lang$core$Native_Utils.update(
+				model,
+				{
+					questions: A3(
+						_elm_lang$core$Dict$update,
+						'new-question',
+						_elm_lang$core$Maybe$map(
+							function (c) {
+								return _elm_lang$core$Native_Utils.update(
+									c,
+									{state: _user$project$Card_Types$AddButton, text: ''});
+							}),
+						model.questions)
+				});
+		} else {
+			return model;
+		}
+	});
+var _user$project$Decoder_Delayed$applyAction = F2(
+	function (model, action) {
+		var _p1 = action;
+		return A2(_user$project$Decoder_Delayed$resetAddButton, model, _p1._0);
+	});
+var _user$project$Decoder_Delayed$buildUpdater = F2(
+	function (_p2, model) {
+		var _p3 = _p2;
+		var modelIfClientIdMatches = F2(
+			function (clientId, model) {
+				return _elm_lang$core$Native_Utils.eq(
+					_elm_lang$core$Maybe$Just(clientId),
+					model.clientId) ? _elm_lang$core$Maybe$Just(model) : _elm_lang$core$Maybe$Nothing;
+			});
+		return A2(
+			_elm_lang$core$Maybe$withDefault,
+			model,
+			A2(
+				_elm_lang$core$Maybe$map,
+				_user$project$Decoder_Delayed$applyAction(model),
+				A2(
+					_elm_lang$core$Maybe$andThen,
+					_elm_lang$core$Dict$get(_p3._1),
+					A2(
+						_elm_lang$core$Maybe$map,
+						function (_) {
+							return _.delayed;
+						},
+						A2(modelIfClientIdMatches, _p3._0, model)))));
+	});
+var _user$project$Decoder_Delayed$decoder = A2(
+	_elm_lang$core$Json_Decode$map,
+	_user$project$Decoder_Delayed$buildUpdater,
+	A3(
+		_elm_lang$core$Json_Decode$map2,
+		F2(
+			function (v0, v1) {
+				return {ctor: '_Tuple2', _0: v0, _1: v1};
+			}),
+		A2(_elm_lang$core$Json_Decode$field, 'from', _elm_lang$core$Json_Decode$string),
+		A2(_elm_lang$core$Json_Decode$field, 'client_request_no', _elm_lang$core$Json_Decode$int)));
 
 var _user$project$Decoder_SetClientId$decoder = A2(
 	_elm_lang$core$Json_Decode$map,
@@ -10191,10 +10262,17 @@ var _user$project$Decoder$messageDecoder = function (msgType) {
 				{ctor: '[]'});
 	}
 };
-var _user$project$Decoder$decoder = A2(
-	_elm_lang$core$Json_Decode$andThen,
-	_user$project$Decoder$messageDecoder,
-	A2(_elm_lang$core$Json_Decode$field, 'type', _elm_lang$core$Json_Decode$string));
+var _user$project$Decoder$decoder = A3(
+	_elm_lang$core$Json_Decode$map2,
+	F2(
+		function (x, y) {
+			return {ctor: '::', _0: x, _1: y};
+		}),
+	_user$project$Decoder_Delayed$decoder,
+	A2(
+		_elm_lang$core$Json_Decode$andThen,
+		_user$project$Decoder$messageDecoder,
+		A2(_elm_lang$core$Json_Decode$field, 'type', _elm_lang$core$Json_Decode$string)));
 
 var _user$project$State$send = function (url) {
 	var _p0 = url;
@@ -10252,10 +10330,26 @@ var _user$project$State$newCardRequest = function (card) {
 			return _elm_lang$core$Maybe$Nothing;
 	}
 };
+var _user$project$State$mapModel = F2(
+	function (updater, _p4) {
+		var _p5 = _p4;
+		return {
+			ctor: '_Tuple2',
+			_0: updater(_p5._0),
+			_1: _p5._1
+		};
+	});
+var _user$project$State$delayAction = F2(
+	function (updater, result) {
+		return A2(
+			_user$project$State$mapModel,
+			_user$project$ModelUpdater$addDelayedAction(updater),
+			result);
+	});
 var _user$project$State$update = F2(
 	function (msg, model) {
-		var _p4 = msg;
-		switch (_p4.ctor) {
+		var _p6 = msg;
+		switch (_p6.ctor) {
 			case 'Noop':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'SendRequest':
@@ -10266,7 +10360,7 @@ var _user$project$State$update = F2(
 					_elm_lang$core$Json_Encode$encode,
 					0,
 					_elm_lang$core$Json_Encode$object(
-						A2(_user$project$Requests$addRequestNo, updatedModel.lastRequestNo, _p4._0)));
+						A2(_user$project$Requests$addRequestNo, updatedModel.lastRequestNo, _p6._0)));
 				return {
 					ctor: '_Tuple2',
 					_0: updatedModel,
@@ -10275,20 +10369,20 @@ var _user$project$State$update = F2(
 			case 'UpdateModel':
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$State$updateModel, model, _p4._0),
+					_0: A2(_user$project$State$updateModel, model, _p6._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
-				var _p6 = _p4._1;
-				var _p5 = _p4._0;
+				var _p8 = _p6._1;
+				var _p7 = _p6._0;
 				return A3(
 					_user$project$State$handleCardUpdate,
-					_p6,
-					_p5,
+					_p8,
+					_p7,
 					A2(
 						_user$project$ModelUpdater$replaceCard,
 						model,
-						A2(_user$project$Card_State$update, _p6, _p5)));
+						A2(_user$project$Card_State$update, _p8, _p7)));
 		}
 	});
 var _user$project$State$handleCardUpdate = F3(
@@ -10299,8 +10393,8 @@ var _user$project$State$handleCardUpdate = F3(
 				_user$project$Types$SendRequest(req),
 				model);
 		};
-		var _p7 = msg;
-		switch (_p7.ctor) {
+		var _p9 = msg;
+		switch (_p9.ctor) {
 			case 'StartEditing':
 				return {
 					ctor: '_Tuple2',
@@ -10322,8 +10416,12 @@ var _user$project$State$handleCardUpdate = F3(
 					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none},
 					A2(
 						_elm_lang$core$Maybe$map,
-						sendRequest,
-						_user$project$State$newCardRequest(card)));
+						_user$project$State$delayAction(
+							_user$project$Types$ResetAddButton(card)),
+						A2(
+							_elm_lang$core$Maybe$map,
+							sendRequest,
+							_user$project$State$newCardRequest(card))));
 			default:
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
@@ -10341,7 +10439,8 @@ var _user$project$State$initialModel = function (flags) {
 		rules: A2(_elm_lang$core$Dict$singleton, newRuleColumn.card.id, newRuleColumn),
 		questions: A2(_elm_lang$core$Dict$singleton, addQuestionButton.id, addQuestionButton),
 		error: _elm_lang$core$Maybe$Nothing,
-		flags: flags
+		flags: flags,
+		delayed: _elm_lang$core$Dict$empty
 	};
 };
 var _user$project$State$init = function (flags) {

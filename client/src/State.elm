@@ -5,11 +5,11 @@ import Card.Types exposing (CardState(..), CardId, Card, CardType(..), CardMsg(.
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
-import ModelUpdater exposing (replaceCard)
+import ModelUpdater exposing (..)
 import Ports
 import Requests
 import Task
-import Types exposing (Model, Msg(..), Flags, Request)
+import Types exposing (Model, Msg(..), Flags, Request, ModelUpdater, DelayedAction(..))
 import Decoder exposing (decoder)
 import WebSocket
 import Json.Encode exposing (object, encode, Value, int)
@@ -51,6 +51,7 @@ initialModel flags =
         , questions = Dict.singleton addQuestionButton.id addQuestionButton
         , error = Nothing
         , flags = flags
+        , delayed = Dict.empty
         }
 
 
@@ -102,10 +103,21 @@ handleCardUpdate msg card model =
             FinishCreateNew ->
                 newCardRequest card
                     |> Maybe.map sendRequest
+                    |> Maybe.map (delayAction <| ResetAddButton card)
                     |> Maybe.withDefault ( model, Cmd.none )
 
             _ ->
                 ( model, Cmd.none )
+
+
+delayAction : DelayedAction -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+delayAction updater result =
+    mapModel (addDelayedAction updater) result
+
+
+mapModel : ModelUpdater -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+mapModel updater ( model, cmd ) =
+    ( updater model, cmd )
 
 
 newCardRequest : Card -> Maybe Request

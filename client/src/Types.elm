@@ -1,15 +1,21 @@
 module Types
     exposing
         ( Model
+        , ModelUpdater
         , Msg(..)
         , Flags
         , Request
+        , DelayedAction(..)
         )
 
 import Card.Types exposing (Card, CardId, CardType, CardMsg)
 import Dict exposing (Dict)
 import Rule.Types exposing (Rule)
 import Json.Encode exposing (Value)
+
+
+type alias ModelUpdater =
+    Model -> Model
 
 
 type alias Request =
@@ -20,6 +26,10 @@ type alias Flags =
     { backendUrl : Maybe String }
 
 
+type DelayedAction
+    = ResetAddButton Card
+
+
 type alias Model =
     { clientId : Maybe String
     , lastRequestNo : Int
@@ -28,6 +38,7 @@ type alias Model =
     , questions : Dict CardId Card
     , error : Maybe String
     , flags : Flags
+    , delayed : Dict Int DelayedAction
     }
 
 

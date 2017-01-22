@@ -1,9 +1,9 @@
 module Decoder.UpdateState exposing (decoder)
 
 import Card.Types exposing (Card, CardType(..), CardState(..))
-import ModelUpdater exposing (..)
+import Types exposing (ModelUpdater)
 import Json.Decode exposing (..)
-import Decoder.Common exposing (..)
+import ModelUpdater exposing (..)
 
 
 decoder : Decoder (List ModelUpdater)

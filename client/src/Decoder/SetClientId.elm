@@ -1,8 +1,8 @@
 module Decoder.SetClientId exposing (decoder)
 
-import ModelUpdater exposing (..)
+import Types exposing (ModelUpdater)
 import Json.Decode exposing (..)
-import Decoder.Common exposing (..)
+import ModelUpdater exposing (setClientId)
 
 
 decoder : Decoder (List ModelUpdater)
