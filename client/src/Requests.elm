@@ -1,6 +1,7 @@
 module Requests
     exposing
-        ( refresh
+        ( Request
+        , refresh
         , addQuestion
         , addRule
         , addExample
@@ -11,45 +12,40 @@ import Json.Encode exposing (..)
 import Card.Types exposing (Card)
 
 
-refresh : String
+type alias Request =
+    List ( String, Value )
+
+
+refresh : Request
 refresh =
-    encodeObject [ ( "type", string "fetch_update" ) ]
+    [ ( "type", string "fetch_update" ) ]
 
 
-addQuestion : String -> String
+addQuestion : String -> Request
 addQuestion text =
-    encodeObject
-        [ ( "type", string "add_question" )
-        , ( "text", string text )
-        ]
+    [ ( "type", string "add_question" )
+    , ( "text", string text )
+    ]
 
 
-addRule : String -> String
+addRule : String -> Request
 addRule text =
-    encodeObject
-        [ ( "type", string "add_rule" )
-        , ( "text", string text )
-        ]
+    [ ( "type", string "add_rule" )
+    , ( "text", string text )
+    ]
 
 
-addExample : String -> String -> String
+addExample : String -> String -> Request
 addExample ruleId text =
-    encodeObject
-        [ ( "type", string "add_example" )
-        , ( "rule_id", string ruleId )
-        , ( "text", string text )
-        ]
+    [ ( "type", string "add_example" )
+    , ( "rule_id", string ruleId )
+    , ( "text", string text )
+    ]
 
 
-updateCard : Card -> String
+updateCard : Card -> Request
 updateCard card =
-    encodeObject
-        [ ( "type", string "update_card" )
-        , ( "id", string card.id )
-        , ( "text", string card.text )
-        ]
-
-
-encodeObject : List ( String, Value ) -> String
-encodeObject =
-    object >> encode 0
+    [ ( "type", string "update_card" )
+    , ( "id", string card.id )
+    , ( "text", string card.text )
+    ]

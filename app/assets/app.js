@@ -9828,9 +9828,9 @@ var _user$project$Rule_Types$Rule = F2(
 var _user$project$Types$Flags = function (a) {
 	return {backendUrl: a};
 };
-var _user$project$Types$Model = F6(
-	function (a, b, c, d, e, f) {
-		return {clientId: a, storyCard: b, rules: c, questions: d, error: e, flags: f};
+var _user$project$Types$Model = F7(
+	function (a, b, c, d, e, f, g) {
+		return {clientId: a, lastRequestNo: b, storyCard: c, rules: d, questions: e, error: f, flags: g};
 	});
 var _user$project$Types$UpdateCard = F2(
 	function (a, b) {
@@ -9948,119 +9948,108 @@ var _user$project$Ports$socketOut = _elm_lang$core$Native_Platform.outgoingPort(
 	});
 var _user$project$Ports$socketIn = _elm_lang$core$Native_Platform.incomingPort('socketIn', _elm_lang$core$Json_Decode$string);
 
-var _user$project$Requests$encodeObject = function (_p0) {
-	return A2(
-		_elm_lang$core$Json_Encode$encode,
-		0,
-		_elm_lang$core$Json_Encode$object(_p0));
-};
 var _user$project$Requests$updateCard = function (card) {
-	return _user$project$Requests$encodeObject(
-		{
+	return {
+		ctor: '::',
+		_0: {
+			ctor: '_Tuple2',
+			_0: 'type',
+			_1: _elm_lang$core$Json_Encode$string('update_card')
+		},
+		_1: {
 			ctor: '::',
 			_0: {
 				ctor: '_Tuple2',
-				_0: 'type',
-				_1: _elm_lang$core$Json_Encode$string('update_card')
+				_0: 'id',
+				_1: _elm_lang$core$Json_Encode$string(card.id)
 			},
 			_1: {
 				ctor: '::',
 				_0: {
 					ctor: '_Tuple2',
-					_0: 'id',
-					_1: _elm_lang$core$Json_Encode$string(card.id)
+					_0: 'text',
+					_1: _elm_lang$core$Json_Encode$string(card.text)
+				},
+				_1: {ctor: '[]'}
+			}
+		}
+	};
+};
+var _user$project$Requests$addExample = F2(
+	function (ruleId, text) {
+		return {
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'type',
+				_1: _elm_lang$core$Json_Encode$string('add_example')
+			},
+			_1: {
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'rule_id',
+					_1: _elm_lang$core$Json_Encode$string(ruleId)
 				},
 				_1: {
 					ctor: '::',
 					_0: {
 						ctor: '_Tuple2',
 						_0: 'text',
-						_1: _elm_lang$core$Json_Encode$string(card.text)
+						_1: _elm_lang$core$Json_Encode$string(text)
 					},
 					_1: {ctor: '[]'}
 				}
 			}
-		});
-};
-var _user$project$Requests$addExample = F2(
-	function (ruleId, text) {
-		return _user$project$Requests$encodeObject(
-			{
-				ctor: '::',
-				_0: {
-					ctor: '_Tuple2',
-					_0: 'type',
-					_1: _elm_lang$core$Json_Encode$string('add_example')
-				},
-				_1: {
-					ctor: '::',
-					_0: {
-						ctor: '_Tuple2',
-						_0: 'rule_id',
-						_1: _elm_lang$core$Json_Encode$string(ruleId)
-					},
-					_1: {
-						ctor: '::',
-						_0: {
-							ctor: '_Tuple2',
-							_0: 'text',
-							_1: _elm_lang$core$Json_Encode$string(text)
-						},
-						_1: {ctor: '[]'}
-					}
-				}
-			});
+		};
 	});
 var _user$project$Requests$addRule = function (text) {
-	return _user$project$Requests$encodeObject(
-		{
-			ctor: '::',
-			_0: {
-				ctor: '_Tuple2',
-				_0: 'type',
-				_1: _elm_lang$core$Json_Encode$string('add_rule')
-			},
-			_1: {
-				ctor: '::',
-				_0: {
-					ctor: '_Tuple2',
-					_0: 'text',
-					_1: _elm_lang$core$Json_Encode$string(text)
-				},
-				_1: {ctor: '[]'}
-			}
-		});
-};
-var _user$project$Requests$addQuestion = function (text) {
-	return _user$project$Requests$encodeObject(
-		{
-			ctor: '::',
-			_0: {
-				ctor: '_Tuple2',
-				_0: 'type',
-				_1: _elm_lang$core$Json_Encode$string('add_question')
-			},
-			_1: {
-				ctor: '::',
-				_0: {
-					ctor: '_Tuple2',
-					_0: 'text',
-					_1: _elm_lang$core$Json_Encode$string(text)
-				},
-				_1: {ctor: '[]'}
-			}
-		});
-};
-var _user$project$Requests$refresh = _user$project$Requests$encodeObject(
-	{
+	return {
 		ctor: '::',
 		_0: {
 			ctor: '_Tuple2',
 			_0: 'type',
-			_1: _elm_lang$core$Json_Encode$string('fetch_update')
+			_1: _elm_lang$core$Json_Encode$string('add_rule')
 		},
-		_1: {ctor: '[]'}
-	});
+		_1: {
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'text',
+				_1: _elm_lang$core$Json_Encode$string(text)
+			},
+			_1: {ctor: '[]'}
+		}
+	};
+};
+var _user$project$Requests$addQuestion = function (text) {
+	return {
+		ctor: '::',
+		_0: {
+			ctor: '_Tuple2',
+			_0: 'type',
+			_1: _elm_lang$core$Json_Encode$string('add_question')
+		},
+		_1: {
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'text',
+				_1: _elm_lang$core$Json_Encode$string(text)
+			},
+			_1: {ctor: '[]'}
+		}
+	};
+};
+var _user$project$Requests$refresh = {
+	ctor: '::',
+	_0: {
+		ctor: '_Tuple2',
+		_0: 'type',
+		_1: _elm_lang$core$Json_Encode$string('fetch_update')
+	},
+	_1: {ctor: '[]'}
+};
 
 
 var _user$project$Decoder_SetClientId$decoder = A2(
@@ -10228,6 +10217,7 @@ var _user$project$State$initialModel = function (flags) {
 	var addQuestionButton = _user$project$Card_State$addCardButton(_user$project$Card_Types$QuestionCard);
 	return {
 		clientId: _elm_lang$core$Maybe$Nothing,
+		lastRequestNo: 0,
 		storyCard: _elm_lang$core$Maybe$Nothing,
 		rules: A2(_elm_lang$core$Dict$singleton, newRuleColumn.card.id, newRuleColumn),
 		questions: A2(_elm_lang$core$Dict$singleton, addQuestionButton.id, addQuestionButton),
@@ -10243,74 +10233,105 @@ var _user$project$State$send = function (url) {
 		return _user$project$Ports$socketOut;
 	}
 };
+var _user$project$State$sendRequest = F2(
+	function (model, req) {
+		var _p3 = req;
+		if (_p3.ctor === 'SendRequest') {
+			var requestNo = model.lastRequestNo + 1;
+			var payload = {
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'request_no',
+					_1: _elm_lang$core$Json_Encode$int(requestNo)
+				},
+				_1: _p3._0
+			};
+			var json = A2(
+				_elm_lang$core$Json_Encode$encode,
+				0,
+				_elm_lang$core$Json_Encode$object(payload));
+			return {
+				ctor: '_Tuple2',
+				_0: _elm_lang$core$Native_Utils.update(
+					model,
+					{lastRequestNo: requestNo}),
+				_1: A2(_user$project$State$send, model.flags.backendUrl, json)
+			};
+		} else {
+			return {ctor: '_Tuple2', _0: model, _1: _p3._0};
+		}
+	});
+var _user$project$State$SendRequest = function (a) {
+	return {ctor: 'SendRequest', _0: a};
+};
 var _user$project$State$init = function (flags) {
-	return {
-		ctor: '_Tuple2',
-		_0: _user$project$State$initialModel(flags),
-		_1: A2(_user$project$State$send, flags.backendUrl, _user$project$Requests$refresh)
-	};
+	return A2(
+		_user$project$State$sendRequest,
+		_user$project$State$initialModel(flags),
+		_user$project$State$SendRequest(_user$project$Requests$refresh));
+};
+var _user$project$State$saveCard = function (_p4) {
+	return _user$project$State$SendRequest(
+		_user$project$Requests$updateCard(_p4));
+};
+var _user$project$State$Command = function (a) {
+	return {ctor: 'Command', _0: a};
 };
 var _user$project$State$saveNewCard = F2(
 	function (model, card) {
-		var wsSend = _user$project$State$send(model.flags.backendUrl);
-		var _p3 = card.cardType;
-		switch (_p3.ctor) {
+		var _p5 = card.cardType;
+		switch (_p5.ctor) {
 			case 'QuestionCard':
-				return wsSend(
+				return _user$project$State$SendRequest(
 					_user$project$Requests$addQuestion(card.text));
 			case 'RuleCard':
-				return wsSend(
+				return _user$project$State$SendRequest(
 					_user$project$Requests$addRule(card.text));
 			case 'ExampleCard':
-				return wsSend(
-					A2(_user$project$Requests$addExample, _p3._0, card.text));
+				return _user$project$State$SendRequest(
+					A2(_user$project$Requests$addExample, _p5._0, card.text));
 			default:
-				return _elm_lang$core$Platform_Cmd$none;
+				return _user$project$State$Command(_elm_lang$core$Platform_Cmd$none);
 		}
-	});
-var _user$project$State$saveCard = F2(
-	function (model, card) {
-		return A2(
-			_user$project$State$send,
-			model.flags.backendUrl,
-			_user$project$Requests$updateCard(card));
 	});
 var _user$project$State$cardUpdateAction = F3(
 	function (model, msg, card) {
-		var _p4 = msg;
-		switch (_p4.ctor) {
+		var _p6 = msg;
+		switch (_p6.ctor) {
 			case 'StartEditing':
-				return _user$project$State$focusCardInput(card.id);
+				return _user$project$State$Command(
+					_user$project$State$focusCardInput(card.id));
 			case 'StartCreateNew':
-				return _user$project$State$focusCardInput(card.id);
+				return _user$project$State$Command(
+					_user$project$State$focusCardInput(card.id));
 			case 'FinishEditing':
-				return A2(_user$project$State$saveCard, model, card);
+				return _user$project$State$saveCard(card);
 			case 'FinishCreateNew':
 				return A2(_user$project$State$saveNewCard, model, card);
 			default:
-				return _elm_lang$core$Platform_Cmd$none;
+				return _user$project$State$Command(_elm_lang$core$Platform_Cmd$none);
 		}
 	});
 var _user$project$State$update = F2(
 	function (msg, model) {
-		var _p5 = msg;
-		switch (_p5.ctor) {
+		var _p7 = msg;
+		switch (_p7.ctor) {
 			case 'Noop':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'UpdateModel':
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$State$updateModel, model, _p5._0),
+					_0: A2(_user$project$State$updateModel, model, _p7._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			default:
-				var _p6 = _p5._1;
-				var updatedCard = A2(_user$project$Card_State$update, _p6, _p5._0);
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$ModelUpdater$replaceCard, updatedCard, model),
-					_1: A3(_user$project$State$cardUpdateAction, model, _p6, updatedCard)
-				};
+				var _p8 = _p7._1;
+				var updatedCard = A2(_user$project$Card_State$update, _p8, _p7._0);
+				return A2(
+					_user$project$State$sendRequest,
+					A2(_user$project$ModelUpdater$replaceCard, updatedCard, model),
+					A3(_user$project$State$cardUpdateAction, model, _p8, updatedCard));
 		}
 	});
 

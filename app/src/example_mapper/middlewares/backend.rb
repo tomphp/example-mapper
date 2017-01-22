@@ -69,7 +69,10 @@ module ExampleMapper
           ws.on :message do |event|
             with_error_handling do
               data = JSON.parse(event.data)
-              @logger.debug "WebSocket :message, type=#{data['type']}, story_id=#{story_id}, client_id=#{client_id} -> #{data.inspect}"
+              request_no = data['request_no']
+
+              @logger.debug 'WebSocket :message, type=%s, story_id=%s, client_id=%s, request_no=%s -> %s' %
+                [data['type'], story_id, client_id, request_no, data.inspect]
 
               case data['type']
               when 'update_card'
@@ -91,6 +94,7 @@ module ExampleMapper
               @redis.publish(CHANNEL, {
                 story_id: story_id,
                 from: client_id,
+                client_request_no: request_no,
                 type: :update_state,
                 state: @storage.fetch_story(story_id)
               }.to_json)

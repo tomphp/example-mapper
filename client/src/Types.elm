@@ -16,6 +16,7 @@ type alias Flags =
 
 type alias Model =
     { clientId : Maybe String
+    , lastRequestNo : Int
     , storyCard : Maybe Card
     , rules : Dict CardId Rule
     , questions : Dict CardId Card

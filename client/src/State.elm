@@ -7,11 +7,17 @@ import Dom
 import Json.Decode exposing (decodeString)
 import ModelUpdater exposing (replaceCard)
 import Ports
-import Requests
+import Requests exposing (Request)
 import Task
 import Types exposing (Model, Msg(..), Flags)
 import Decoder exposing (decoder)
 import WebSocket
+import Json.Encode exposing (object, encode, Value, int)
+
+
+type Command
+    = Command (Cmd Msg)
+    | SendRequest Request
 
 
 send : Maybe String -> String -> Cmd Msg
@@ -24,9 +30,31 @@ send url =
             Ports.socketOut
 
 
+sendRequest : Model -> Command -> ( Model, Cmd Msg )
+sendRequest model req =
+    case req of
+        SendRequest request ->
+            let
+                requestNo =
+                    model.lastRequestNo + 1
+
+                payload =
+                    ( "request_no", int requestNo ) :: request
+
+                json =
+                    object payload |> encode 0
+            in
+                ( { model | lastRequestNo = requestNo }
+                , send model.flags.backendUrl json
+                )
+
+        Command cmd ->
+            ( model, cmd )
+
+
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( initialModel flags, Requests.refresh |> send flags.backendUrl )
+    sendRequest (initialModel flags) (SendRequest Requests.refresh)
 
 
 
@@ -54,6 +82,7 @@ initialModel flags =
             }
     in
         { clientId = Nothing
+        , lastRequestNo = 0
         , storyCard = Nothing
         , rules = Dict.singleton newRuleColumn.card.id newRuleColumn
         , questions = Dict.singleton addQuestionButton.id addQuestionButton
@@ -76,53 +105,49 @@ update msg model =
                 updatedCard =
                     Card.State.update msg card
             in
-                ( replaceCard updatedCard model
-                , cardUpdateAction model msg updatedCard
-                )
+                sendRequest
+                    (replaceCard updatedCard model)
+                    (cardUpdateAction model msg updatedCard)
 
 
-cardUpdateAction : Model -> CardMsg -> Card -> Cmd Msg
+cardUpdateAction : Model -> CardMsg -> Card -> Command
 cardUpdateAction model msg card =
     case msg of
         StartEditing ->
-            focusCardInput card.id
+            Command <| focusCardInput card.id
 
         StartCreateNew ->
-            focusCardInput card.id
+            Command <| focusCardInput card.id
 
         FinishEditing ->
-            saveCard model card
+            saveCard card
 
         FinishCreateNew ->
             saveNewCard model card
 
         _ ->
-            Cmd.none
+            Command Cmd.none
 
 
-saveNewCard : Model -> Card -> Cmd Msg
+saveNewCard : Model -> Card -> Command
 saveNewCard model card =
-    let
-        wsSend =
-            send model.flags.backendUrl
-    in
-        case card.cardType of
-            QuestionCard ->
-                Requests.addQuestion card.text |> wsSend
+    case card.cardType of
+        QuestionCard ->
+            Requests.addQuestion card.text |> SendRequest
 
-            RuleCard ->
-                Requests.addRule card.text |> wsSend
+        RuleCard ->
+            Requests.addRule card.text |> SendRequest
 
-            ExampleCard ruleId ->
-                Requests.addExample ruleId card.text |> wsSend
+        ExampleCard ruleId ->
+            Requests.addExample ruleId card.text |> SendRequest
 
-            _ ->
-                Cmd.none
+        _ ->
+            Command Cmd.none
 
 
-saveCard : Model -> Card -> Cmd Msg
-saveCard model card =
-    Requests.updateCard card |> send model.flags.backendUrl
+saveCard : Card -> Command
+saveCard =
+    Requests.updateCard >> SendRequest
 
 
 focusCardInput : String -> Cmd Msg
