@@ -9839,6 +9839,9 @@ var _user$project$Types$UpdateCard = F2(
 var _user$project$Types$UpdateModel = function (a) {
 	return {ctor: 'UpdateModel', _0: a};
 };
+var _user$project$Types$SendRequest = function (a) {
+	return {ctor: 'SendRequest', _0: a};
+};
 var _user$project$Types$Noop = {ctor: 'Noop'};
 
 var _user$project$ModelUpdater$mapWithDefault = F2(
@@ -9919,19 +9922,23 @@ var _user$project$ModelUpdater$replaceStoryCard = F2(
 				storyCard: _elm_lang$core$Maybe$Just(card)
 			});
 	});
-var _user$project$ModelUpdater$replaceCard = function (card) {
-	var _p1 = card.cardType;
-	switch (_p1.ctor) {
-		case 'StoryCard':
-			return _user$project$ModelUpdater$replaceStoryCard(card);
-		case 'RuleCard':
-			return _user$project$ModelUpdater$replaceRuleCard(card);
-		case 'ExampleCard':
-			return A2(_user$project$ModelUpdater$replaceExampleCard, _p1._0, card);
-		default:
-			return _user$project$ModelUpdater$replaceQuestionCard(card);
-	}
-};
+var _user$project$ModelUpdater$replaceCard = F2(
+	function (model, card) {
+		var replace = function () {
+			var _p1 = card.cardType;
+			switch (_p1.ctor) {
+				case 'StoryCard':
+					return _user$project$ModelUpdater$replaceStoryCard(card);
+				case 'RuleCard':
+					return _user$project$ModelUpdater$replaceRuleCard(card);
+				case 'ExampleCard':
+					return A2(_user$project$ModelUpdater$replaceExampleCard, _p1._0, card);
+				default:
+					return _user$project$ModelUpdater$replaceQuestionCard(card);
+			}
+		}();
+		return replace(model);
+	});
 var _user$project$ModelUpdater$setClientId = F2(
 	function (id, model) {
 		return _elm_lang$core$Native_Utils.update(
@@ -10050,6 +10057,18 @@ var _user$project$Requests$refresh = {
 	},
 	_1: {ctor: '[]'}
 };
+var _user$project$Requests$addRequestNo = F2(
+	function (requestNo, request) {
+		return {
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'request_no',
+				_1: _elm_lang$core$Json_Encode$int(requestNo)
+			},
+			_1: request
+		};
+	});
 
 
 var _user$project$Decoder_SetClientId$decoder = A2(
@@ -10177,27 +10196,35 @@ var _user$project$Decoder$decoder = A2(
 	_user$project$Decoder$messageDecoder,
 	A2(_elm_lang$core$Json_Decode$field, 'type', _elm_lang$core$Json_Decode$string));
 
+var _user$project$State$send = function (url) {
+	var _p0 = url;
+	if (_p0.ctor === 'Just') {
+		return _elm_lang$websocket$WebSocket$send(_p0._0);
+	} else {
+		return _user$project$Ports$socketOut;
+	}
+};
 var _user$project$State$updateModel = F2(
 	function (model, update) {
-		var _p0 = A2(_elm_lang$core$Json_Decode$decodeString, _user$project$Decoder$decoder, update);
-		if (_p0.ctor === 'Ok') {
+		var _p1 = A2(_elm_lang$core$Json_Decode$decodeString, _user$project$Decoder$decoder, update);
+		if (_p1.ctor === 'Ok') {
 			return A3(
 				_elm_lang$core$List$foldl,
 				_elm_lang$core$Basics$identity,
 				model,
-				A2(_elm_lang$core$Debug$log, 'cards: ', _p0._0));
+				A2(_elm_lang$core$Debug$log, 'cards: ', _p1._0));
 		} else {
 			return _elm_lang$core$Native_Utils.update(
 				model,
 				{
-					error: _elm_lang$core$Maybe$Just(_p0._0)
+					error: _elm_lang$core$Maybe$Just(_p1._0)
 				});
 		}
 	});
 var _user$project$State$subscriptions = function (model) {
-	var _p1 = model.flags.backendUrl;
-	if (_p1.ctor === 'Just') {
-		return A2(_elm_lang$websocket$WebSocket$listen, _p1._0, _user$project$Types$UpdateModel);
+	var _p2 = model.flags.backendUrl;
+	if (_p2.ctor === 'Just') {
+		return A2(_elm_lang$websocket$WebSocket$listen, _p2._0, _user$project$Types$UpdateModel);
 	} else {
 		return _user$project$Ports$socketIn(_user$project$Types$UpdateModel);
 	}
@@ -10209,6 +10236,98 @@ var _user$project$State$focusCardInput = function (id) {
 		_elm_lang$dom$Dom$focus(
 			A2(_elm_lang$core$Basics_ops['++'], 'card-input-', id)));
 };
+var _user$project$State$newCardRequest = function (card) {
+	var _p3 = card.cardType;
+	switch (_p3.ctor) {
+		case 'QuestionCard':
+			return _elm_lang$core$Maybe$Just(
+				_user$project$Requests$addQuestion(card.text));
+		case 'RuleCard':
+			return _elm_lang$core$Maybe$Just(
+				_user$project$Requests$addRule(card.text));
+		case 'ExampleCard':
+			return _elm_lang$core$Maybe$Just(
+				A2(_user$project$Requests$addExample, _p3._0, card.text));
+		default:
+			return _elm_lang$core$Maybe$Nothing;
+	}
+};
+var _user$project$State$update = F2(
+	function (msg, model) {
+		var _p4 = msg;
+		switch (_p4.ctor) {
+			case 'Noop':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'SendRequest':
+				var updatedModel = _elm_lang$core$Native_Utils.update(
+					model,
+					{lastRequestNo: model.lastRequestNo + 1});
+				var json = A2(
+					_elm_lang$core$Json_Encode$encode,
+					0,
+					_elm_lang$core$Json_Encode$object(
+						A2(_user$project$Requests$addRequestNo, updatedModel.lastRequestNo, _p4._0)));
+				return {
+					ctor: '_Tuple2',
+					_0: updatedModel,
+					_1: A2(_user$project$State$send, model.flags.backendUrl, json)
+				};
+			case 'UpdateModel':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$State$updateModel, model, _p4._0),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var _p6 = _p4._1;
+				var _p5 = _p4._0;
+				return A3(
+					_user$project$State$handleCardUpdate,
+					_p6,
+					_p5,
+					A2(
+						_user$project$ModelUpdater$replaceCard,
+						model,
+						A2(_user$project$Card_State$update, _p6, _p5)));
+		}
+	});
+var _user$project$State$handleCardUpdate = F3(
+	function (msg, card, model) {
+		var sendRequest = function (req) {
+			return A2(
+				_user$project$State$update,
+				_user$project$Types$SendRequest(req),
+				model);
+		};
+		var _p7 = msg;
+		switch (_p7.ctor) {
+			case 'StartEditing':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$State$focusCardInput(card.id)
+				};
+			case 'StartCreateNew':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$State$focusCardInput(card.id)
+				};
+			case 'FinishEditing':
+				return sendRequest(
+					_user$project$Requests$updateCard(card));
+			case 'FinishCreateNew':
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none},
+					A2(
+						_elm_lang$core$Maybe$map,
+						sendRequest,
+						_user$project$State$newCardRequest(card)));
+			default:
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+		}
+	});
 var _user$project$State$initialModel = function (flags) {
 	var newRuleColumn = {
 		card: _user$project$Card_State$addCardButton(_user$project$Card_Types$RuleCard),
@@ -10225,115 +10344,12 @@ var _user$project$State$initialModel = function (flags) {
 		flags: flags
 	};
 };
-var _user$project$State$send = function (url) {
-	var _p2 = url;
-	if (_p2.ctor === 'Just') {
-		return _elm_lang$websocket$WebSocket$send(_p2._0);
-	} else {
-		return _user$project$Ports$socketOut;
-	}
-};
-var _user$project$State$sendRequest = F2(
-	function (model, req) {
-		var _p3 = req;
-		if (_p3.ctor === 'SendRequest') {
-			var requestNo = model.lastRequestNo + 1;
-			var payload = {
-				ctor: '::',
-				_0: {
-					ctor: '_Tuple2',
-					_0: 'request_no',
-					_1: _elm_lang$core$Json_Encode$int(requestNo)
-				},
-				_1: _p3._0
-			};
-			var json = A2(
-				_elm_lang$core$Json_Encode$encode,
-				0,
-				_elm_lang$core$Json_Encode$object(payload));
-			return {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{lastRequestNo: requestNo}),
-				_1: A2(_user$project$State$send, model.flags.backendUrl, json)
-			};
-		} else {
-			return {ctor: '_Tuple2', _0: model, _1: _p3._0};
-		}
-	});
-var _user$project$State$SendRequest = function (a) {
-	return {ctor: 'SendRequest', _0: a};
-};
 var _user$project$State$init = function (flags) {
 	return A2(
-		_user$project$State$sendRequest,
-		_user$project$State$initialModel(flags),
-		_user$project$State$SendRequest(_user$project$Requests$refresh));
+		_user$project$State$update,
+		_user$project$Types$SendRequest(_user$project$Requests$refresh),
+		_user$project$State$initialModel(flags));
 };
-var _user$project$State$saveCard = function (_p4) {
-	return _user$project$State$SendRequest(
-		_user$project$Requests$updateCard(_p4));
-};
-var _user$project$State$Command = function (a) {
-	return {ctor: 'Command', _0: a};
-};
-var _user$project$State$saveNewCard = F2(
-	function (model, card) {
-		var _p5 = card.cardType;
-		switch (_p5.ctor) {
-			case 'QuestionCard':
-				return _user$project$State$SendRequest(
-					_user$project$Requests$addQuestion(card.text));
-			case 'RuleCard':
-				return _user$project$State$SendRequest(
-					_user$project$Requests$addRule(card.text));
-			case 'ExampleCard':
-				return _user$project$State$SendRequest(
-					A2(_user$project$Requests$addExample, _p5._0, card.text));
-			default:
-				return _user$project$State$Command(_elm_lang$core$Platform_Cmd$none);
-		}
-	});
-var _user$project$State$cardUpdateAction = F3(
-	function (model, msg, card) {
-		var _p6 = msg;
-		switch (_p6.ctor) {
-			case 'StartEditing':
-				return _user$project$State$Command(
-					_user$project$State$focusCardInput(card.id));
-			case 'StartCreateNew':
-				return _user$project$State$Command(
-					_user$project$State$focusCardInput(card.id));
-			case 'FinishEditing':
-				return _user$project$State$saveCard(card);
-			case 'FinishCreateNew':
-				return A2(_user$project$State$saveNewCard, model, card);
-			default:
-				return _user$project$State$Command(_elm_lang$core$Platform_Cmd$none);
-		}
-	});
-var _user$project$State$update = F2(
-	function (msg, model) {
-		var _p7 = msg;
-		switch (_p7.ctor) {
-			case 'Noop':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'UpdateModel':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$State$updateModel, model, _p7._0),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			default:
-				var _p8 = _p7._1;
-				var updatedCard = A2(_user$project$Card_State$update, _p8, _p7._0);
-				return A2(
-					_user$project$State$sendRequest,
-					A2(_user$project$ModelUpdater$replaceCard, updatedCard, model),
-					A3(_user$project$State$cardUpdateAction, model, _p8, updatedCard));
-		}
-	});
 
 var _user$project$Card_View_AddButton$displayButton = function (b) {
 	return A2(

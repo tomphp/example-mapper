@@ -7,54 +7,17 @@ import Dom
 import Json.Decode exposing (decodeString)
 import ModelUpdater exposing (replaceCard)
 import Ports
-import Requests exposing (Request)
+import Requests
 import Task
-import Types exposing (Model, Msg(..), Flags)
+import Types exposing (Model, Msg(..), Flags, Request)
 import Decoder exposing (decoder)
 import WebSocket
 import Json.Encode exposing (object, encode, Value, int)
 
 
-type Command
-    = Command (Cmd Msg)
-    | SendRequest Request
-
-
-send : Maybe String -> String -> Cmd Msg
-send url =
-    case url of
-        Just u ->
-            WebSocket.send u
-
-        Nothing ->
-            Ports.socketOut
-
-
-sendRequest : Model -> Command -> ( Model, Cmd Msg )
-sendRequest model req =
-    case req of
-        SendRequest request ->
-            let
-                requestNo =
-                    model.lastRequestNo + 1
-
-                payload =
-                    ( "request_no", int requestNo ) :: request
-
-                json =
-                    object payload |> encode 0
-            in
-                ( { model | lastRequestNo = requestNo }
-                , send model.flags.backendUrl json
-                )
-
-        Command cmd ->
-            ( model, cmd )
-
-
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    sendRequest (initialModel flags) (SendRequest Requests.refresh)
+    update (SendRequest Requests.refresh) (initialModel flags)
 
 
 
@@ -97,57 +60,68 @@ update msg model =
         Noop ->
             ( model, Cmd.none )
 
+        SendRequest request ->
+            let
+                updatedModel =
+                    { model | lastRequestNo = model.lastRequestNo + 1 }
+
+                json =
+                    request
+                        |> Requests.addRequestNo updatedModel.lastRequestNo
+                        |> object
+                        |> encode 0
+            in
+                ( updatedModel, send model.flags.backendUrl json )
+
         UpdateModel update ->
             ( updateModel model update, Cmd.none )
 
         UpdateCard card msg ->
-            let
-                updatedCard =
-                    Card.State.update msg card
-            in
-                sendRequest
-                    (replaceCard updatedCard model)
-                    (cardUpdateAction model msg updatedCard)
+            card
+                |> Card.State.update msg
+                |> replaceCard model
+                |> handleCardUpdate msg card
 
 
-cardUpdateAction : Model -> CardMsg -> Card -> Command
-cardUpdateAction model msg card =
-    case msg of
-        StartEditing ->
-            Command <| focusCardInput card.id
+handleCardUpdate : CardMsg -> Card -> Model -> ( Model, Cmd Msg )
+handleCardUpdate msg card model =
+    let
+        sendRequest =
+            \req -> update (SendRequest req) model
+    in
+        case msg of
+            StartEditing ->
+                ( model, focusCardInput card.id )
 
-        StartCreateNew ->
-            Command <| focusCardInput card.id
+            StartCreateNew ->
+                ( model, focusCardInput card.id )
 
-        FinishEditing ->
-            saveCard card
+            FinishEditing ->
+                sendRequest <| Requests.updateCard card
 
-        FinishCreateNew ->
-            saveNewCard model card
+            FinishCreateNew ->
+                newCardRequest card
+                    |> Maybe.map sendRequest
+                    |> Maybe.withDefault ( model, Cmd.none )
 
-        _ ->
-            Command Cmd.none
+            _ ->
+                ( model, Cmd.none )
 
 
-saveNewCard : Model -> Card -> Command
-saveNewCard model card =
+newCardRequest : Card -> Maybe Request
+newCardRequest card =
     case card.cardType of
         QuestionCard ->
-            Requests.addQuestion card.text |> SendRequest
+            Just <| Requests.addQuestion card.text
 
         RuleCard ->
-            Requests.addRule card.text |> SendRequest
+            Just <| Requests.addRule card.text
 
         ExampleCard ruleId ->
-            Requests.addExample ruleId card.text |> SendRequest
+            Just <| Requests.addExample ruleId card.text
 
         _ ->
-            Command Cmd.none
-
-
-saveCard : Card -> Command
-saveCard =
-    Requests.updateCard >> SendRequest
+            Nothing
 
 
 focusCardInput : String -> Cmd Msg
@@ -173,3 +147,13 @@ updateModel model update =
 
         Err msg ->
             { model | error = Just msg }
+
+
+send : Maybe String -> String -> Cmd Msg
+send url =
+    case url of
+        Just u ->
+            WebSocket.send u
+
+        Nothing ->
+            Ports.socketOut

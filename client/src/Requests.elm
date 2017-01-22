@@ -1,6 +1,6 @@
 module Requests
     exposing
-        ( Request
+        ( addRequestNo
         , refresh
         , addQuestion
         , addRule
@@ -10,10 +10,12 @@ module Requests
 
 import Json.Encode exposing (..)
 import Card.Types exposing (Card)
+import Types exposing (Request)
 
 
-type alias Request =
-    List ( String, Value )
+addRequestNo : Int -> Request -> Request
+addRequestNo requestNo request =
+    ( "request_no", int requestNo ) :: request
 
 
 refresh : Request

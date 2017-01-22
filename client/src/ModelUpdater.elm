@@ -20,8 +20,8 @@ setClientId id model =
     { model | clientId = Just id }
 
 
-replaceCard : Card -> Model -> Model
-replaceCard card =
+replaceCard : Model -> Card -> Model
+replaceCard model card =
     case card.cardType of
         StoryCard ->
             replaceStoryCard card

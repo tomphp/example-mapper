@@ -3,11 +3,17 @@ module Types
         ( Model
         , Msg(..)
         , Flags
+        , Request
         )
 
 import Card.Types exposing (Card, CardId, CardType, CardMsg)
 import Dict exposing (Dict)
 import Rule.Types exposing (Rule)
+import Json.Encode exposing (Value)
+
+
+type alias Request =
+    List ( String, Value )
 
 
 type alias Flags =
@@ -27,5 +33,6 @@ type alias Model =
 
 type Msg
     = Noop
+    | SendRequest Request
     | UpdateModel String
     | UpdateCard Card CardMsg
