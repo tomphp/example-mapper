@@ -9,9 +9,7 @@ casper.test.begin('Question card ordering', function(test) {
     ],
   }};
 
-  casper.start(appUrl()).waitForMessage(0, function() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual('#card-story-id', 'Story', function() {
     test.assertSelectorHasText('.question:nth-child(1) .card', 'Question 1');

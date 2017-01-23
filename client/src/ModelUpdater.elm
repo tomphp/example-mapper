@@ -1,6 +1,10 @@
 module ModelUpdater
     exposing
         ( addDelayedAction
+        , updateStoryCard
+        , updateQuestionCard
+        , updateRuleCard
+        , updateExampleCard
         , replaceCard
         , replaceExampleCard
         , replaceQuestionCard
@@ -40,6 +44,26 @@ replaceCard model card =
 
         QuestionCard ->
             replaceQuestionCard card model
+
+
+updateStoryCard : (Maybe Card -> Maybe Card) -> Model -> Model
+updateStoryCard update model =
+    { model | storyCard = update model.storyCard }
+
+
+updateQuestionCard : CardId -> (Maybe Card -> Maybe Card) -> Model -> Model
+updateQuestionCard id update model =
+    { model | questions = Dict.update id update model.questions }
+
+
+updateRuleCard : RuleId -> (Maybe Card -> Maybe Card) -> Model -> Model
+updateRuleCard id update model =
+    updateRule (Maybe.map (\r -> { r | card = Maybe.withDefault r.card (update (Just r.card)) })) id model
+
+
+updateExampleCard : RuleId -> CardId -> (Maybe Card -> Maybe Card) -> Model -> Model
+updateExampleCard ruleId id update model =
+    updateRule (Maybe.map (\r -> { r | examples = Dict.update id update r.examples })) ruleId model
 
 
 replaceStoryCard : Card -> Model -> Model

@@ -7,19 +7,15 @@ casper.test.begin('Adding an Example', function(test) {
           state: 'saved',
           position: 0
         },
-        rules: [
-          {
-            rule_card: { id: 'rule-id', text: 'This rule must contain examples', state: 'saved', position: 1 },
-            examples: [],
-          },
-        ],
+        rules: [{
+          rule_card: { id: 'rule-id', text: 'This rule must contain examples', state: 'saved', position: 1 },
+          examples: [],
+        }],
         questions:[],
       }
     };
 
-  casper.start(appUrl()).waitForMessage(0, function() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual(
     '#card-story-id',

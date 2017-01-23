@@ -22,10 +22,34 @@ casper.test.assertElementHasClass = function(selector, className) {
   );
 };
 
+casper.initialiseWithState = function initialiseWithState(state) {
+  casper.start(appUrl(), function setClientId() {
+    this.sendMessage({
+      story_id: 'story-id',
+      type: 'set_client_id',
+      client_id: 'client-id',
+      from: 'client-id',
+      client_request_no: 0,
+    });
+  });
+
+  return casper.waitForMessage(0, function waitForRefreshRequest() {
+    this.sendState(state);
+  });
+};
+
 casper.sendState = function(state) {
-  this.evaluate(function(state) {
-    sendMessage(state);
-  }, {state: state});
+  state.from = 'client-id';
+  state.client_request_no = 1;
+  state.type = 'update_state';
+
+  this.sendMessage(state);
+};
+
+casper.sendMessage = function(message) {
+  this.evaluate(function(message) {
+    sendMessage(message);
+  }, {message: message});
 };
 
 casper.getActiveElement = function() {

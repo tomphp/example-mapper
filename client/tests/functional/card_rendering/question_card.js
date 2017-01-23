@@ -17,9 +17,7 @@ casper.test.begin('Question cards render correctly', function(test) {
     ],
   } };
 
-  casper.start(appUrl()).waitForMessage(0, function() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual(
     '#card-story-id',

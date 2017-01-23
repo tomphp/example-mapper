@@ -50,7 +50,7 @@ namespace :client do
       sh [
         'cd client',
         'elm-make src/App.elm --warn --output=tests/app/app.js',
-        'casperjs test --includes=$(pwd)/tests/functional.js $(pwd)/tests/functional',
+        'node_modules/casperjs/bin/casperjs test --includes=$(pwd)/tests/functional.js $(pwd)/tests/functional',
         'cd ..'
       ].join(' && ')
     end

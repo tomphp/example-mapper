@@ -45,3 +45,4 @@ type CardMsg
     | StartCreateNew
     | FinishCreateNew
     | CancelCreateNew
+    | SetAddButton

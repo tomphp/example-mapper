@@ -3,7 +3,9 @@ module Decoder.Delayed exposing (decoder)
 import Dict
 import Json.Decode exposing (..)
 import Types exposing (ModelUpdater, Model, DelayedAction(..))
-import Card.Types exposing (CardType(..), CardState(..), Card)
+import Card.Types exposing (CardType(..), CardState(..), Card, CardMsg(SetAddButton))
+import ModelUpdater exposing (updateQuestionCard, updateRuleCard, updateExampleCard)
+import Card.State
 
 
 decoder : Decoder ModelUpdater
@@ -33,20 +35,20 @@ applyAction : Model -> DelayedAction -> Model
 applyAction model action =
     case action of
         ResetAddButton card ->
-            resetAddButton model card
+            resetAddButton card model
 
 
-resetAddButton : Model -> Card -> Model
-resetAddButton model card =
+resetAddButton : Card -> Model -> Model
+resetAddButton card =
     case card.cardType of
         QuestionCard ->
-            { model
-                | questions =
-                    Dict.update
-                        "new-question"
-                        (Maybe.map (\c -> { c | state = AddButton, text = "" }))
-                        model.questions
-            }
+            updateQuestionCard "new-question" (Maybe.map <| Card.State.update SetAddButton)
+
+        RuleCard ->
+            updateRuleCard "new-rule" (Maybe.map <| Card.State.update SetAddButton)
+
+        ExampleCard ruleId ->
+            updateExampleCard ruleId ("new-example-" ++ ruleId) (Maybe.map <| Card.State.update SetAddButton)
 
         _ ->
-            model
+            identity

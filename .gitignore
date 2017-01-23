@@ -2,3 +2,4 @@
 /client/tests/app/app.js
 /.sass-cache/
 /db/config.yml
+/client/node_modules/

@@ -155,7 +155,7 @@ updateModel : Model -> String -> Model
 updateModel model update =
     case decodeString decoder update of
         Ok cards ->
-            List.foldl identity model (Debug.log "cards: " cards)
+            List.foldl identity model cards
 
         Err msg ->
             { model | error = Just msg }

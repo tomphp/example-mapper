@@ -17,9 +17,7 @@ casper.test.begin('Cancelling editing a question', function(test) {
     ],
   } };
 
-  casper.start(appUrl()).waitForMessage(0, function sendState() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual(
     '#card-story-id',

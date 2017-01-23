@@ -13,9 +13,7 @@ casper.test.begin('Adding a Rule', function(test) {
       }
     };
 
-  casper.start(appUrl()).waitForMessage(0, function() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual(
     '#card-' + storyCardId,

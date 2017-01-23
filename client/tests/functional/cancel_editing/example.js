@@ -23,9 +23,7 @@ casper.test.begin('Cancelling editing a example', function(test) {
     questions:[],
   } };
 
-  casper.start(appUrl()).waitForMessage(0, function sendState() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual(
     '#card-story-id',

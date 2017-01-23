@@ -18,9 +18,7 @@ casper.test.begin('Rule cards render correctly', function(test) {
     questions:[],
   } };
 
-  casper.start(appUrl()).waitForMessage(0, function() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual(
     '#card-story-id',

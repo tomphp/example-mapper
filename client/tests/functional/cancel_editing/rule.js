@@ -18,9 +18,7 @@ casper.test.begin('Cancelling editing a rule', function(test) {
     questions:[],
   } };
 
-  casper.start(appUrl()).waitForMessage(0, function sendState() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual(
     '#card-story-id',

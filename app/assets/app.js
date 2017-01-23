@@ -9755,6 +9755,7 @@ var _user$project$Card_Types$Editing = function (a) {
 };
 var _user$project$Card_Types$Preparing = {ctor: 'Preparing'};
 var _user$project$Card_Types$AddButton = {ctor: 'AddButton'};
+var _user$project$Card_Types$SetAddButton = {ctor: 'SetAddButton'};
 var _user$project$Card_Types$CancelCreateNew = {ctor: 'CancelCreateNew'};
 var _user$project$Card_Types$FinishCreateNew = {ctor: 'FinishCreateNew'};
 var _user$project$Card_Types$StartCreateNew = {ctor: 'StartCreateNew'};
@@ -9813,10 +9814,14 @@ var _user$project$Card_State$update = F2(
 				return _elm_lang$core$Native_Utils.update(
 					card,
 					{state: _user$project$Card_Types$Saving});
-			default:
+			case 'CancelEditing':
 				return _elm_lang$core$Native_Utils.update(
 					card,
 					{state: _user$project$Card_Types$Saved, text: _p1._0});
+			default:
+				return _elm_lang$core$Native_Utils.update(
+					card,
+					{state: _user$project$Card_Types$AddButton, text: ''});
 		}
 	});
 
@@ -9923,6 +9928,56 @@ var _user$project$ModelUpdater$replaceStoryCard = F2(
 			model,
 			{
 				storyCard: _elm_lang$core$Maybe$Just(card)
+			});
+	});
+var _user$project$ModelUpdater$updateExampleCard = F4(
+	function (ruleId, id, update, model) {
+		return A3(
+			_user$project$ModelUpdater$updateRule,
+			_elm_lang$core$Maybe$map(
+				function (r) {
+					return _elm_lang$core$Native_Utils.update(
+						r,
+						{
+							examples: A3(_elm_lang$core$Dict$update, id, update, r.examples)
+						});
+				}),
+			ruleId,
+			model);
+	});
+var _user$project$ModelUpdater$updateRuleCard = F3(
+	function (id, update, model) {
+		return A3(
+			_user$project$ModelUpdater$updateRule,
+			_elm_lang$core$Maybe$map(
+				function (r) {
+					return _elm_lang$core$Native_Utils.update(
+						r,
+						{
+							card: A2(
+								_elm_lang$core$Maybe$withDefault,
+								r.card,
+								update(
+									_elm_lang$core$Maybe$Just(r.card)))
+						});
+				}),
+			id,
+			model);
+	});
+var _user$project$ModelUpdater$updateQuestionCard = F3(
+	function (id, update, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				questions: A3(_elm_lang$core$Dict$update, id, update, model.questions)
+			});
+	});
+var _user$project$ModelUpdater$updateStoryCard = F2(
+	function (update, model) {
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				storyCard: update(model.storyCard)
 			});
 	});
 var _user$project$ModelUpdater$replaceCard = F2(
@@ -10078,36 +10133,41 @@ var _user$project$Requests$addRequestNo = F2(
 		};
 	});
 
-var _user$project$Decoder_Delayed$resetAddButton = F2(
-	function (model, card) {
-		var _p0 = card.cardType;
-		if (_p0.ctor === 'QuestionCard') {
-			return _elm_lang$core$Native_Utils.update(
-				model,
-				{
-					questions: A3(
-						_elm_lang$core$Dict$update,
-						'new-question',
-						_elm_lang$core$Maybe$map(
-							function (c) {
-								return _elm_lang$core$Native_Utils.update(
-									c,
-									{state: _user$project$Card_Types$AddButton, text: ''});
-							}),
-						model.questions)
-				});
-		} else {
-			return model;
-		}
-	});
+var _user$project$Decoder_Delayed$resetAddButton = function (card) {
+	var _p0 = card.cardType;
+	switch (_p0.ctor) {
+		case 'QuestionCard':
+			return A2(
+				_user$project$ModelUpdater$updateQuestionCard,
+				'new-question',
+				_elm_lang$core$Maybe$map(
+					_user$project$Card_State$update(_user$project$Card_Types$SetAddButton)));
+		case 'RuleCard':
+			return A2(
+				_user$project$ModelUpdater$updateRuleCard,
+				'new-rule',
+				_elm_lang$core$Maybe$map(
+					_user$project$Card_State$update(_user$project$Card_Types$SetAddButton)));
+		case 'ExampleCard':
+			var _p1 = _p0._0;
+			return A3(
+				_user$project$ModelUpdater$updateExampleCard,
+				_p1,
+				A2(_elm_lang$core$Basics_ops['++'], 'new-example-', _p1),
+				_elm_lang$core$Maybe$map(
+					_user$project$Card_State$update(_user$project$Card_Types$SetAddButton)));
+		default:
+			return _elm_lang$core$Basics$identity;
+	}
+};
 var _user$project$Decoder_Delayed$applyAction = F2(
 	function (model, action) {
-		var _p1 = action;
-		return A2(_user$project$Decoder_Delayed$resetAddButton, model, _p1._0);
+		var _p2 = action;
+		return A2(_user$project$Decoder_Delayed$resetAddButton, _p2._0, model);
 	});
 var _user$project$Decoder_Delayed$buildUpdater = F2(
-	function (_p2, model) {
-		var _p3 = _p2;
+	function (_p3, model) {
+		var _p4 = _p3;
 		var modelIfClientIdMatches = F2(
 			function (clientId, model) {
 				return _elm_lang$core$Native_Utils.eq(
@@ -10122,13 +10182,13 @@ var _user$project$Decoder_Delayed$buildUpdater = F2(
 				_user$project$Decoder_Delayed$applyAction(model),
 				A2(
 					_elm_lang$core$Maybe$andThen,
-					_elm_lang$core$Dict$get(_p3._1),
+					_elm_lang$core$Dict$get(_p4._1),
 					A2(
 						_elm_lang$core$Maybe$map,
 						function (_) {
 							return _.delayed;
 						},
-						A2(modelIfClientIdMatches, _p3._0, model)))));
+						A2(modelIfClientIdMatches, _p4._0, model)))));
 	});
 var _user$project$Decoder_Delayed$decoder = A2(
 	_elm_lang$core$Json_Decode$map,

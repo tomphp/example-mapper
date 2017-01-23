@@ -18,9 +18,7 @@ casper.test.begin('Rule card ordering', function(test) {
     questions:[],
   }};
 
-  casper.start(appUrl()).waitForMessage(0, function() {
-    this.sendState(state);
-  });
+  casper.initialiseWithState(state);
 
   casper.waitForElementTextToEqual('#card-story-id', 'Story', function() {
     test.assertSelectorHasText('.rule:nth-child(1) .card', 'Rule 1');

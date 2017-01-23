@@ -27,6 +27,9 @@ update msg card =
         CancelEditing originalText ->
             { card | state = Saved, text = originalText }
 
+        SetAddButton ->
+            { card | state = AddButton, text = "" }
+
 
 addCardButton : CardType -> Card
 addCardButton cardType =
