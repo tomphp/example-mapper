@@ -15,7 +15,7 @@ view model =
         [ p [] [ text <| Maybe.withDefault "" model.error ]
         , model.storyCard
             |> Maybe.map htmlCard
-            |> Maybe.withDefault (text "Error")
+            |> Maybe.withDefault (text "Loading...")
         , rules model
         , questions model
         ]

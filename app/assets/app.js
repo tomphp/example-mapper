@@ -11168,7 +11168,7 @@ var _user$project$View$view = function (model) {
 				ctor: '::',
 				_0: A2(
 					_elm_lang$core$Maybe$withDefault,
-					_elm_lang$html$Html$text('Error'),
+					_elm_lang$html$Html$text('Loading...'),
 					A2(_elm_lang$core$Maybe$map, _user$project$View$htmlCard, model.storyCard)),
 				_1: {
 					ctor: '::',
