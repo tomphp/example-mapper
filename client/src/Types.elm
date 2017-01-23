@@ -10,7 +10,7 @@ module Types
 
 import Card.Types exposing (Card, CardId, CardType, CardMsg)
 import Dict exposing (Dict)
-import Rule.Types exposing (Rule)
+import Rule.Types exposing (Rule, RuleMsg)
 import Json.Encode exposing (Value)
 
 
@@ -47,3 +47,4 @@ type Msg
     | SendRequest Request
     | UpdateModel String
     | UpdateCard Card CardMsg
+    | UpdateRule Rule RuleMsg

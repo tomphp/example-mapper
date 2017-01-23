@@ -5,6 +5,7 @@ module ModelUpdater
         , updateQuestionCard
         , updateRuleCard
         , updateExampleCard
+        , replaceRule
         , replaceCard
         , replaceExampleCard
         , replaceQuestionCard
@@ -28,6 +29,11 @@ addDelayedAction action model =
 setClientId : String -> Model -> Model
 setClientId id model =
     { model | clientId = Just id }
+
+
+replaceRule : Model -> Rule -> Model
+replaceRule model rule =
+    updateRule (Just rule |> always) rule.card.id model
 
 
 replaceCard : Model -> Card -> Model

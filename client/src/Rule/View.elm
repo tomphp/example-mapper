@@ -2,38 +2,35 @@ module Rule.View exposing (view)
 
 import Card.Types exposing (Card, CardState(..), CardId, CardType(..))
 import Card.View
-import Dict exposing (Dict)
+import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Rule.Types exposing (Rule)
-import Types exposing (Model, Msg(..))
+import Rule.Types exposing (Rule, RuleMsg(..))
 
 
-view : Model -> Rule -> Html Msg
-view model r =
+view : Rule -> Html RuleMsg
+view r =
     div [ id ("rule-" ++ r.card.id), class "rule" ]
         [ Card.View.view r.card |> Html.map (UpdateCard r.card)
-        , examples model r (Dict.values r.examples)
+        , examples r
         ]
 
 
-examples : Model -> Rule -> List Card -> Html Msg
-examples model rule es =
-    div [ class "examples" ] (exampleCards es)
+examples : Rule -> Html RuleMsg
+examples rule =
+    div [ class "examples" ] (rule.examples |> Dict.values |> exampleCards)
 
 
-exampleCards : List Card -> List (Html Msg)
-exampleCards es =
-    List.sortBy .position es |> List.map divCard
+exampleCards : List Card -> List (Html RuleMsg)
+exampleCards examples =
+    examples |> List.sortBy .position |> List.map divCard
 
 
-divCard : Card -> Html Msg
+divCard : Card -> Html RuleMsg
 divCard card =
     div [ class "example" ] [ htmlCard card ]
 
 
-htmlCard : Card -> Html Msg
+htmlCard : Card -> Html RuleMsg
 htmlCard card =
-    card
-        |> Card.View.view
-        |> Html.map (UpdateCard card)
+    Card.View.view card |> Html.map (UpdateCard card)

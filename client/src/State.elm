@@ -2,17 +2,19 @@ module State exposing (init, update, subscriptions)
 
 import Card.State exposing (addCardButton)
 import Card.Types exposing (CardState(..), CardId, Card, CardType(..), CardMsg(..))
+import Decoder exposing (decoder)
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
+import Json.Encode exposing (object, encode, Value, int)
 import ModelUpdater exposing (..)
 import Ports
 import Requests
+import Rule.State
+import Rule.Types exposing (Rule, RuleMsg(..))
 import Task
 import Types exposing (Model, Msg(..), Flags, Request, ModelUpdater, DelayedAction(..))
-import Decoder exposing (decoder)
 import WebSocket
-import Json.Encode exposing (object, encode, Value, int)
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -77,7 +79,22 @@ update msg model =
         UpdateModel update ->
             ( updateModel model update, Cmd.none )
 
-        UpdateCard card msg ->
+        Types.UpdateCard card msg ->
+            card
+                |> Card.State.update msg
+                |> replaceCard model
+                |> handleCardUpdate msg card
+
+        UpdateRule rule msg ->
+            Rule.State.update msg rule
+                |> replaceRule model
+                |> handleRuleUpdate msg rule
+
+
+handleRuleUpdate : RuleMsg -> Rule -> Model -> ( Model, Cmd Msg )
+handleRuleUpdate msg rule model =
+    case msg of
+        Rule.Types.UpdateCard card msg ->
             card
                 |> Card.State.update msg
                 |> replaceCard model

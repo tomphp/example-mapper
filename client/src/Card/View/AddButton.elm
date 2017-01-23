@@ -32,7 +32,7 @@ addButtonParams card =
                 , cardType = card.cardType
                 }
 
-        ExampleCard ruleId ->
+        ExampleCard _ ->
             Just
                 { id = card.id
                 , cssClass = "card--example"

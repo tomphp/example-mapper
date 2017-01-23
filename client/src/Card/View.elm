@@ -177,12 +177,7 @@ cardInput card =
     [ textarea
         [ id ("card-input-" ++ card.id)
         , class "card__input"
-        , on "input" (Json.map UpdateCardText inputValue)
+        , on "input" (Json.map UpdateCardText targetValue)
         ]
         [ text card.text ]
     ]
-
-
-inputValue : Json.Decoder String
-inputValue =
-    Json.at [ "target", "value" ] Json.string
