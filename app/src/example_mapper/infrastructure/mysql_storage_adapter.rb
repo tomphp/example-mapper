@@ -34,12 +34,16 @@ module ExampleMapper
 
         result.tap { |r| @logger.debug "Response: #{r.inspect}" }
       rescue => e
-        @logger.error e.inspect
+        @logger.error e.inspect + e.backtrace.inspect
       end
 
       def update_card(text, card_id)
-        query('UPDATE cards '\
-              "SET text = '#{e(text)}' WHERE card_id = '#{e(card_id)}'")
+        transaction do
+          version = next_version(card_id)
+          query('UPDATE cards '\
+                "SET text = '#{e(text)}', version = #{version} "\
+                "WHERE card_id = '#{e(card_id)}'")
+        end
       end
 
       def add_story(story_id, text)
@@ -59,7 +63,7 @@ module ExampleMapper
           add_card(card_id, story_id, 'rule', text, 'saved', position)
         end
       rescue => e
-        @logger.error e.inspect
+        @logger.error e.inspect + e.backtrace.inspect
       end
 
       def add_example(story_id, rule_card_id, card_id, text)
@@ -78,7 +82,8 @@ module ExampleMapper
           id: row['card_id'],
           text: row['text'],
           state: row['state'],
-          position: row['position']
+          position: row['position'],
+          version: row['version']
         }
       end
 
@@ -98,14 +103,15 @@ module ExampleMapper
       def add_card(card_id, story_id, type, text, state, position)
         query(%(
         INSERT INTO cards
-          (card_id,story_id,type,text,state,position)
+          (card_id,story_id,type,text,state,position,version)
           VALUES(
             '#{e(card_id)}',
             '#{e(story_id)}',
             '#{e(type)}',
             '#{e(text)}',
             '#{e(state)}',
-            '#{e(position.to_s)}'
+            '#{e(position.to_s)}',
+            1
           )
         ))
       end
@@ -143,6 +149,14 @@ module ExampleMapper
         )).first['position']
 
         max_pos.nil? ? 0 : (max_pos + 1)
+      end
+
+      def next_version(card_id)
+        query(%(
+          SELECT version
+          FROM cards
+          WHERE card_id = '#{e(card_id)}'
+        )).first['version'] + 1
       end
 
       def query(sql)

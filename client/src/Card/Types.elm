@@ -14,6 +14,7 @@ type alias Card =
     , text : String
     , cardType : CardType
     , position : Int
+    , version : Int
     }
 
 

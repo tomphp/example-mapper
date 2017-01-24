@@ -7,10 +7,6 @@ module ModelUpdater
         , updateExampleCard
         , replaceRule
         , replaceCard
-        , replaceExampleCard
-        , replaceQuestionCard
-        , replaceRuleCard
-        , replaceStoryCard
         , setClientId
         )
 

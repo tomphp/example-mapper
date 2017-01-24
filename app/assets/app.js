@@ -9737,9 +9737,9 @@ var _elm_lang$websocket$WebSocket$onSelfMsg = F3(
 	});
 _elm_lang$core$Native_Platform.effectManagers['WebSocket'] = {pkg: 'elm-lang/websocket', init: _elm_lang$websocket$WebSocket$init, onEffects: _elm_lang$websocket$WebSocket$onEffects, onSelfMsg: _elm_lang$websocket$WebSocket$onSelfMsg, tag: 'fx', cmdMap: _elm_lang$websocket$WebSocket$cmdMap, subMap: _elm_lang$websocket$WebSocket$subMap};
 
-var _user$project$Card_Types$Card = F5(
-	function (a, b, c, d, e) {
-		return {id: a, state: b, text: c, cardType: d, position: e};
+var _user$project$Card_Types$Card = F6(
+	function (a, b, c, d, e, f) {
+		return {id: a, state: b, text: c, cardType: d, position: e, version: f};
 	});
 var _user$project$Card_Types$QuestionCard = {ctor: 'QuestionCard'};
 var _user$project$Card_Types$ExampleCard = function (a) {
@@ -9782,7 +9782,7 @@ var _user$project$Card_State$addCardButton = function (cardType) {
 				return 'new-story';
 		}
 	}();
-	return {id: id, state: _user$project$Card_Types$AddButton, text: '', cardType: cardType, position: 999};
+	return {id: id, state: _user$project$Card_Types$AddButton, text: '', cardType: cardType, position: 999, version: 1};
 };
 var _user$project$Card_State$update = F2(
 	function (msg, card) {
@@ -10121,15 +10121,60 @@ var _user$project$Decoder_UpdateState$stringToCardState = function (s) {
 };
 var _user$project$Decoder_UpdateState$cardState = A2(_elm_lang$core$Json_Decode$map, _user$project$Decoder_UpdateState$stringToCardState, _elm_lang$core$Json_Decode$string);
 var _user$project$Decoder_UpdateState$card = function (cardType) {
-	return A6(
-		_elm_lang$core$Json_Decode$map5,
+	return A7(
+		_elm_lang$core$Json_Decode$map6,
 		_user$project$Card_Types$Card,
 		A2(_elm_lang$core$Json_Decode$field, 'id', _elm_lang$core$Json_Decode$string),
 		A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$Decoder_UpdateState$cardState),
 		A2(_elm_lang$core$Json_Decode$field, 'text', _elm_lang$core$Json_Decode$string),
 		_elm_lang$core$Json_Decode$succeed(cardType),
-		A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int));
+		A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
+		A2(_elm_lang$core$Json_Decode$field, 'version', _elm_lang$core$Json_Decode$int));
 };
+var _user$project$Decoder_UpdateState$ensureRuleExists = F2(
+	function (card, model) {
+		var addExampleButton = _user$project$Card_State$addCardButton(
+			_user$project$Card_Types$ExampleCard(card.id));
+		var newRule = {
+			card: card,
+			examples: A2(_elm_lang$core$Dict$singleton, addExampleButton.id, addExampleButton)
+		};
+		return _elm_lang$core$Native_Utils.update(
+			model,
+			{
+				rules: A3(
+					_elm_lang$core$Dict$update,
+					card.id,
+					function (_p1) {
+						return _elm_lang$core$Maybe$Just(
+							A2(_elm_lang$core$Maybe$withDefault, newRule, _p1));
+					},
+					model.rules)
+			});
+	});
+var _user$project$Decoder_UpdateState$updateIfNewer = F2(
+	function (newCard, oc) {
+		var _p2 = oc;
+		if (_p2.ctor === 'Just') {
+			var _p3 = _p2._0;
+			return (_elm_lang$core$Native_Utils.cmp(newCard.version, _p3.version) > 0) ? _elm_lang$core$Maybe$Just(newCard) : _elm_lang$core$Maybe$Just(_p3);
+		} else {
+			return _elm_lang$core$Maybe$Just(newCard);
+		}
+	});
+var _user$project$Decoder_UpdateState$questions = A2(
+	_elm_lang$core$Json_Decode$field,
+	'questions',
+	_elm_lang$core$Json_Decode$list(
+		A2(
+			_elm_lang$core$Json_Decode$map,
+			function (c) {
+				return A2(
+					_user$project$ModelUpdater$updateQuestionCard,
+					c.id,
+					_user$project$Decoder_UpdateState$updateIfNewer(c));
+			},
+			_user$project$Decoder_UpdateState$card(_user$project$Card_Types$QuestionCard))));
 var _user$project$Decoder_UpdateState$examples = function (ruleCard) {
 	return A2(
 		_elm_lang$core$Json_Decode$field,
@@ -10137,7 +10182,13 @@ var _user$project$Decoder_UpdateState$examples = function (ruleCard) {
 		_elm_lang$core$Json_Decode$list(
 			A2(
 				_elm_lang$core$Json_Decode$map,
-				_user$project$ModelUpdater$replaceExampleCard(ruleCard.id),
+				function (c) {
+					return A3(
+						_user$project$ModelUpdater$updateExampleCard,
+						ruleCard.id,
+						c.id,
+						_user$project$Decoder_UpdateState$updateIfNewer(c));
+				},
 				_user$project$Decoder_UpdateState$card(
 					_user$project$Card_Types$ExampleCard(ruleCard.id)))));
 };
@@ -10152,7 +10203,18 @@ var _user$project$Decoder_UpdateState$rule = function () {
 			function (x, y) {
 				return {ctor: '::', _0: x, _1: y};
 			}),
-		A2(_elm_lang$core$Json_Decode$map, _user$project$ModelUpdater$replaceRuleCard, ruleCard),
+		A2(
+			_elm_lang$core$Json_Decode$map,
+			function (c) {
+				return function (_p4) {
+					return A3(
+						_user$project$ModelUpdater$updateRuleCard,
+						c.id,
+						_user$project$Decoder_UpdateState$updateIfNewer(c),
+						A2(_user$project$Decoder_UpdateState$ensureRuleExists, c, _p4));
+				};
+			},
+			ruleCard),
 		A2(_elm_lang$core$Json_Decode$andThen, _user$project$Decoder_UpdateState$examples, ruleCard));
 }();
 var _user$project$Decoder_UpdateState$rules = A2(
@@ -10162,14 +10224,6 @@ var _user$project$Decoder_UpdateState$rules = A2(
 		_elm_lang$core$Json_Decode$map,
 		_elm_lang$core$List$concat,
 		_elm_lang$core$Json_Decode$list(_user$project$Decoder_UpdateState$rule)));
-var _user$project$Decoder_UpdateState$questions = A2(
-	_elm_lang$core$Json_Decode$field,
-	'questions',
-	_elm_lang$core$Json_Decode$list(
-		A2(
-			_elm_lang$core$Json_Decode$map,
-			_user$project$ModelUpdater$replaceQuestionCard,
-			_user$project$Decoder_UpdateState$card(_user$project$Card_Types$QuestionCard))));
 var _user$project$Decoder_UpdateState$story = A2(
 	_elm_lang$core$Json_Decode$field,
 	'story_card',
@@ -10184,7 +10238,10 @@ var _user$project$Decoder_UpdateState$story = A2(
 		},
 		A2(
 			_elm_lang$core$Json_Decode$map,
-			_user$project$ModelUpdater$replaceStoryCard,
+			function (_p5) {
+				return _user$project$ModelUpdater$updateStoryCard(
+					_user$project$Decoder_UpdateState$updateIfNewer(_p5));
+			},
 			_user$project$Decoder_UpdateState$card(_user$project$Card_Types$StoryCard))));
 var _user$project$Decoder_UpdateState$decoder = A2(
 	_elm_lang$core$Json_Decode$field,

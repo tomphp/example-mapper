@@ -53,4 +53,5 @@ addCardButton cardType =
         , text = ""
         , cardType = cardType
         , position = 999
+        , version = 1
         }
