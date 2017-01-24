@@ -1,19 +1,28 @@
 @import url('https://fonts.googleapis.com/css?family=Covered+By+Your+Grace');
 
-$card-width: 254px;
-$card-height: 156px;
+$card-width: 318px;
+$card-height: 190px;
 
 $card-red: #fcc;
 $card-yellow: #ffa;
 $card-blue: #cdf;
 $card-green: #cfd;
 
-$card-line-height: 24px;
-$card-font-size: 24px;
+$card-padding: 10px;
+$card-content-offset: 24px;
+
+$card-line-height: 30px;
+$card-font-size: 28px;
 $card-font-family: 'Covered By Your Grace', cursive;
 
 $card-z-index: 100;
 $panel-z-index: 200;
+
+$card-small-width: 254px;
+$card-small-height: 152px;
+$card-small-content-offset: 30px;
+$card-small-font-size: 24px;
+$card-small-line-height: 24px;
 
 html, head, body {
   padding:0;
@@ -69,10 +78,12 @@ body {
   text-align: center;
 
   &__example-card {
+    display: inline-block;
     transform: rotate(-5deg);
   }
 
   &__mapper-card {
+    display: inline-block;
     transform: rotate(3deg);
     margin-left: -10px !important;
   }
@@ -153,12 +164,12 @@ body {
 
   &__content {
     position: absolute;
-    top: 30px;
-    left: 10px;
+    top: $card-content-offset;
+    left: $card-padding;
     z-index: $card-z-index + 2;
     overflow: hidden;
-    width: $card-width - 20px;
-    height: $card-height - 30px;
+    width: $card-width - (2 * $card-padding);
+    height: $card-height - $card-content-offset;
   }
 
   &--story {
@@ -229,18 +240,11 @@ body {
     margin: 0;
     font-size: $card-font-size;
     font-family: $card-font-family;
-
-    &--title {
-      padding-top: $card-font-size * 1;
-      font-size: $card-font-size * 3;
-      line-height: $card-font-size * 3;
-      text-align: center;
-    }
   }
 
   &__input {
-    width: 220px;
-    height: 122px;
+    width: $card-width - (2 * $card-padding);
+    height: $card-height - $card-content-offset;
     line-height: $card-line-height;
     padding: 0;
     margin: 0;
@@ -249,6 +253,38 @@ body {
     border: 0;
     background-color: transparent;
     resize: none;
+  }
+}
+
+.card--small {
+  height: $card-small-height;
+  width: $card-small-width;
+
+  .card__content {
+    top: $card-small-content-offset;
+    left: $card-padding;
+    width: $card-small-width - (2 * $card-padding);
+    height: $card-small-height - $card-small-content-offset;
+  }
+
+  .card__text {
+    line-height: $card-small-line-height;
+    font-size: $card-small-font-size;
+    font-family: $card-font-family;
+
+    &--title {
+      padding-top: 10px;
+      font-size: $card-small-font-size * 3;
+      line-height: $card-small-font-size * 3;
+    }
+  }
+
+  .card__input {
+    width: $card-small-width - (2 * $card-padding);
+    height: $card-small-height - $card-small-content-offset;
+    line-height: $card-small-line-height;
+    font-size: $card-small-font-size;
+    font-family: $card-font-family;
   }
 }
 

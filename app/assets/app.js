@@ -10670,10 +10670,9 @@ var _user$project$Card_View_Background$divisibleBy = F2(
 			A2(_elm_lang$core$Basics_ops['%'], number, divisor),
 			0);
 	});
-var _user$project$Card_View_Background$textOffset = 17;
-var _user$project$Card_View_Background$lineHeight = 12;
-var _user$project$Card_View_Background$cardHeight = 156;
-var _user$project$Card_View_Background$cardWidth = 254;
+var _user$project$Card_View_Background$lineHeight = 15;
+var _user$project$Card_View_Background$cardHeight = 190;
+var _user$project$Card_View_Background$cardWidth = 318;
 var _user$project$Card_View_Background$lines = function () {
 	var end = _user$project$Card_View_Background$cardHeight;
 	var start = 3 * _user$project$Card_View_Background$lineHeight;
