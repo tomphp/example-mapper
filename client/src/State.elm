@@ -6,7 +6,7 @@ import Decoder exposing (decoder)
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
-import Json.Encode exposing (object, encode, Value, int)
+import Json.Encode
 import ModelUpdater exposing (..)
 import Ports
 import Requests
@@ -71,8 +71,8 @@ update msg model =
                 json =
                     request
                         |> Requests.addRequestNo updatedModel.lastRequestNo
-                        |> object
-                        |> encode 0
+                        |> Json.Encode.object
+                        |> Json.Encode.encode 0
             in
                 ( updatedModel, send model.flags.backendUrl json )
 
@@ -86,7 +86,8 @@ update msg model =
                 |> handleCardUpdate msg card
 
         UpdateRule rule msg ->
-            Rule.State.update msg rule
+            rule
+                |> Rule.State.update msg
                 |> replaceRule model
                 |> handleRuleUpdate msg rule
 

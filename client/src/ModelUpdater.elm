@@ -15,6 +15,7 @@ import Card.Types exposing (Card, CardType(..), CardState(..), CardId)
 import Dict
 import Rule.Types exposing (RuleId, Rule)
 import Types exposing (Model, ModelUpdater, DelayedAction)
+import Maybe.Extra exposing (orElse)
 
 
 addDelayedAction : DelayedAction -> Model -> Model
@@ -29,23 +30,23 @@ setClientId id model =
 
 replaceRule : Model -> Rule -> Model
 replaceRule model rule =
-    updateRule (Just rule |> always) rule.card.id model
+    updateRule rule.card.id (Just rule |> always) model
 
 
 replaceCard : Model -> Card -> Model
 replaceCard model card =
     case card.cardType of
         StoryCard ->
-            replaceStoryCard card model
+            updateStoryCard (always <| Just card) model
 
         RuleCard ->
-            replaceRuleCard card model
+            updateRuleCard card.id (always <| Just card) model
 
         ExampleCard ruleId ->
-            replaceExampleCard ruleId card model
+            updateExampleCard ruleId card.id (always <| Just card) model
 
         QuestionCard ->
-            replaceQuestionCard card model
+            updateQuestionCard card.id (always <| Just card) model
 
 
 updateStoryCard : (Maybe Card -> Maybe Card) -> Model -> Model
@@ -59,58 +60,29 @@ updateQuestionCard id update model =
 
 
 updateRuleCard : RuleId -> (Maybe Card -> Maybe Card) -> Model -> Model
-updateRuleCard id update model =
-    updateRule (Maybe.map (\r -> { r | card = Maybe.withDefault r.card (update (Just r.card)) })) id model
+updateRuleCard id update =
+    let
+        addExampleButton =
+            addCardButton (ExampleCard id)
+
+        examples =
+            Dict.singleton addExampleButton.id addExampleButton
+
+        updateCardInRule =
+            \u r -> { r | card = u (Just r.card) |> Maybe.withDefault r.card }
+
+        ruleFromNothing =
+            update Nothing |> Maybe.map (\c -> { card = c, examples = examples })
+    in
+        updateRule id
+            (Maybe.map (updateCardInRule update) >> orElse ruleFromNothing)
 
 
 updateExampleCard : RuleId -> CardId -> (Maybe Card -> Maybe Card) -> Model -> Model
-updateExampleCard ruleId id update model =
-    updateRule (Maybe.map (\r -> { r | examples = Dict.update id update r.examples })) ruleId model
+updateExampleCard ruleId id update =
+    updateRule ruleId (Maybe.map (\r -> { r | examples = Dict.update id update r.examples }))
 
 
-replaceStoryCard : Card -> Model -> Model
-replaceStoryCard card model =
-    { model | storyCard = Just card }
-
-
-replaceQuestionCard : Card -> Model -> Model
-replaceQuestionCard card model =
-    { model | questions = Dict.update card.id (always <| Just card) model.questions }
-
-
-replaceRuleCard : Card -> Model -> Model
-replaceRuleCard card model =
-    let
-        updateCard =
-            \rule ->
-                { rule | card = card }
-
-        addExampleButton =
-            addCardButton (ExampleCard card.id)
-
-        newRule =
-            { card = card
-            , examples = Dict.singleton addExampleButton.id addExampleButton
-            }
-    in
-        updateRule (mapWithDefault newRule updateCard) card.id model
-
-
-replaceExampleCard : RuleId -> Card -> Model -> Model
-replaceExampleCard ruleId card model =
-    let
-        updateExample =
-            \rule ->
-                { rule | examples = Dict.update card.id (always <| Just card) rule.examples }
-    in
-        updateRule (Maybe.map updateExample) ruleId model
-
-
-updateRule : (Maybe Rule -> Maybe Rule) -> RuleId -> Model -> Model
-updateRule update id model =
+updateRule : RuleId -> (Maybe Rule -> Maybe Rule) -> Model -> Model
+updateRule id update model =
     { model | rules = Dict.update id update model.rules }
-
-
-mapWithDefault : a -> (b -> a) -> Maybe b -> Maybe a
-mapWithDefault default update =
-    Maybe.map update >> Maybe.withDefault default >> Just

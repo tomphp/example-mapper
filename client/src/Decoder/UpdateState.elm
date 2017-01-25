@@ -1,11 +1,10 @@
 module Decoder.UpdateState exposing (decoder)
 
-import Card.State exposing (addCardButton)
 import Card.Types exposing (Card, CardType(..), CardState(..))
-import Dict
 import Types exposing (ModelUpdater, Model)
 import Json.Decode exposing (..)
 import ModelUpdater exposing (..)
+import Maybe.Extra exposing (orElse)
 
 
 decoder : Decoder (List ModelUpdater)
@@ -17,48 +16,31 @@ decoder =
 story : Decoder (List ModelUpdater)
 story =
     card StoryCard
-        |> map (updateIfNewer >> updateStoryCard)
+        |> map (replaceWithIfNewer >> updateStoryCard)
         |> map (\x -> [ x ])
         |> field "story_card"
 
 
-updateIfNewer : Card -> Maybe Card -> Maybe Card
-updateIfNewer newCard oc =
-    case oc of
-        Just oldCard ->
-            if newCard.version > oldCard.version then
-                Just newCard
-            else
-                Just oldCard
-
-        Nothing ->
-            Just newCard
-
-
-ensureRuleExists : Card -> Model -> Model
-ensureRuleExists card model =
+replaceWithIfNewer : Card -> Maybe Card -> Maybe Card
+replaceWithIfNewer newCard oldCard =
     let
-        addExampleButton =
-            addCardButton (ExampleCard card.id)
+        isNewerThan =
+            \old new -> new.version > old.version
 
-        newRule =
-            { card = card
-            , examples = Dict.singleton addExampleButton.id addExampleButton
-            }
+        mostRecent =
+            \new old ->
+                if new |> isNewerThan old then
+                    new
+                else
+                    old
     in
-        { model
-            | rules =
-                Dict.update
-                    card.id
-                    (Maybe.withDefault newRule >> Just)
-                    model.rules
-        }
+        Maybe.map (mostRecent newCard) oldCard |> orElse (Just newCard)
 
 
 questions : Decoder (List ModelUpdater)
 questions =
     card QuestionCard
-        |> map (\c -> updateIfNewer c |> updateQuestionCard c.id)
+        |> map (\c -> updateQuestionCard c.id (replaceWithIfNewer c))
         |> list
         |> field "questions"
 
@@ -78,14 +60,14 @@ rule =
             card RuleCard |> field "rule_card"
     in
         map2 (::)
-            (ruleCard |> map (\c -> ensureRuleExists c >> updateRuleCard c.id (updateIfNewer c)))
+            (ruleCard |> map (\c -> updateRuleCard c.id (replaceWithIfNewer c)))
             (ruleCard |> andThen examples)
 
 
 examples : Card -> Decoder (List ModelUpdater)
 examples ruleCard =
     card (ExampleCard ruleCard.id)
-        |> map (\c -> updateIfNewer c |> updateExampleCard ruleCard.id c.id)
+        |> map (\c -> updateExampleCard ruleCard.id c.id (replaceWithIfNewer c))
         |> list
         |> field "examples"
 
@@ -103,11 +85,11 @@ card cardType =
 
 cardState : Decoder CardState
 cardState =
-    map stringToCardState string
+    map toCardState string
 
 
-stringToCardState : String -> CardState
-stringToCardState s =
+toCardState : String -> CardState
+toCardState s =
     case s of
         "saving" ->
             Saving

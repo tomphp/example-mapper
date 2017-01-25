@@ -4181,6 +4181,172 @@ var _elm_lang$core$Platform$Task = {ctor: 'Task'};
 var _elm_lang$core$Platform$ProcessId = {ctor: 'ProcessId'};
 var _elm_lang$core$Platform$Router = {ctor: 'Router'};
 
+var _elm_community$maybe_extra$Maybe_Extra$filter = F2(
+	function (f, m) {
+		var _p0 = A2(_elm_lang$core$Maybe$map, f, m);
+		if ((_p0.ctor === 'Just') && (_p0._0 === true)) {
+			return m;
+		} else {
+			return _elm_lang$core$Maybe$Nothing;
+		}
+	});
+var _elm_community$maybe_extra$Maybe_Extra$traverseArray = function (f) {
+	var step = F2(
+		function (e, acc) {
+			var _p1 = f(e);
+			if (_p1.ctor === 'Nothing') {
+				return _elm_lang$core$Maybe$Nothing;
+			} else {
+				return A2(
+					_elm_lang$core$Maybe$map,
+					_elm_lang$core$Array$push(_p1._0),
+					acc);
+			}
+		});
+	return A2(
+		_elm_lang$core$Array$foldl,
+		step,
+		_elm_lang$core$Maybe$Just(_elm_lang$core$Array$empty));
+};
+var _elm_community$maybe_extra$Maybe_Extra$combineArray = _elm_community$maybe_extra$Maybe_Extra$traverseArray(_elm_lang$core$Basics$identity);
+var _elm_community$maybe_extra$Maybe_Extra$traverse = function (f) {
+	var step = F2(
+		function (e, acc) {
+			var _p2 = f(e);
+			if (_p2.ctor === 'Nothing') {
+				return _elm_lang$core$Maybe$Nothing;
+			} else {
+				return A2(
+					_elm_lang$core$Maybe$map,
+					F2(
+						function (x, y) {
+							return {ctor: '::', _0: x, _1: y};
+						})(_p2._0),
+					acc);
+			}
+		});
+	return A2(
+		_elm_lang$core$List$foldr,
+		step,
+		_elm_lang$core$Maybe$Just(
+			{ctor: '[]'}));
+};
+var _elm_community$maybe_extra$Maybe_Extra$combine = _elm_community$maybe_extra$Maybe_Extra$traverse(_elm_lang$core$Basics$identity);
+var _elm_community$maybe_extra$Maybe_Extra$maybeToArray = function (m) {
+	var _p3 = m;
+	if (_p3.ctor === 'Nothing') {
+		return _elm_lang$core$Array$empty;
+	} else {
+		return A2(_elm_lang$core$Array$repeat, 1, _p3._0);
+	}
+};
+var _elm_community$maybe_extra$Maybe_Extra$maybeToList = function (m) {
+	var _p4 = m;
+	if (_p4.ctor === 'Nothing') {
+		return {ctor: '[]'};
+	} else {
+		return {
+			ctor: '::',
+			_0: _p4._0,
+			_1: {ctor: '[]'}
+		};
+	}
+};
+var _elm_community$maybe_extra$Maybe_Extra$orElse = F2(
+	function (ma, mb) {
+		var _p5 = mb;
+		if (_p5.ctor === 'Nothing') {
+			return ma;
+		} else {
+			return mb;
+		}
+	});
+var _elm_community$maybe_extra$Maybe_Extra$orElseLazy = F2(
+	function (fma, mb) {
+		var _p6 = mb;
+		if (_p6.ctor === 'Nothing') {
+			return fma(
+				{ctor: '_Tuple0'});
+		} else {
+			return mb;
+		}
+	});
+var _elm_community$maybe_extra$Maybe_Extra$orLazy = F2(
+	function (ma, fmb) {
+		var _p7 = ma;
+		if (_p7.ctor === 'Nothing') {
+			return fmb(
+				{ctor: '_Tuple0'});
+		} else {
+			return ma;
+		}
+	});
+var _elm_community$maybe_extra$Maybe_Extra$or = F2(
+	function (ma, mb) {
+		var _p8 = ma;
+		if (_p8.ctor === 'Nothing') {
+			return mb;
+		} else {
+			return ma;
+		}
+	});
+var _elm_community$maybe_extra$Maybe_Extra$prev = _elm_lang$core$Maybe$map2(_elm_lang$core$Basics$always);
+var _elm_community$maybe_extra$Maybe_Extra$next = _elm_lang$core$Maybe$map2(
+	_elm_lang$core$Basics$flip(_elm_lang$core$Basics$always));
+var _elm_community$maybe_extra$Maybe_Extra$andMap = _elm_lang$core$Maybe$map2(
+	F2(
+		function (x, y) {
+			return y(x);
+		}));
+var _elm_community$maybe_extra$Maybe_Extra$unpack = F3(
+	function (d, f, m) {
+		var _p9 = m;
+		if (_p9.ctor === 'Nothing') {
+			return d(
+				{ctor: '_Tuple0'});
+		} else {
+			return f(_p9._0);
+		}
+	});
+var _elm_community$maybe_extra$Maybe_Extra$unwrap = F3(
+	function (d, f, m) {
+		var _p10 = m;
+		if (_p10.ctor === 'Nothing') {
+			return d;
+		} else {
+			return f(_p10._0);
+		}
+	});
+var _elm_community$maybe_extra$Maybe_Extra$isJust = function (m) {
+	var _p11 = m;
+	if (_p11.ctor === 'Nothing') {
+		return false;
+	} else {
+		return true;
+	}
+};
+var _elm_community$maybe_extra$Maybe_Extra$isNothing = function (m) {
+	var _p12 = m;
+	if (_p12.ctor === 'Nothing') {
+		return true;
+	} else {
+		return false;
+	}
+};
+var _elm_community$maybe_extra$Maybe_Extra$join = function (mx) {
+	var _p13 = mx;
+	if (_p13.ctor === 'Just') {
+		return _p13._0;
+	} else {
+		return _elm_lang$core$Maybe$Nothing;
+	}
+};
+var _elm_community$maybe_extra$Maybe_Extra_ops = _elm_community$maybe_extra$Maybe_Extra_ops || {};
+_elm_community$maybe_extra$Maybe_Extra_ops['?'] = F2(
+	function (mx, x) {
+		return A2(_elm_lang$core$Maybe$withDefault, x, mx);
+	});
+
 var _elm_lang$core$Task$onError = _elm_lang$core$Native_Scheduler.onError;
 var _elm_lang$core$Task$andThen = _elm_lang$core$Native_Scheduler.andThen;
 var _elm_lang$core$Task$spawnCmd = F2(
@@ -9860,88 +10026,19 @@ var _user$project$Types$SendRequest = function (a) {
 };
 var _user$project$Types$Noop = {ctor: 'Noop'};
 
-var _user$project$ModelUpdater$mapWithDefault = F2(
-	function ($default, update) {
-		return function (_p0) {
-			return _elm_lang$core$Maybe$Just(
-				A2(
-					_elm_lang$core$Maybe$withDefault,
-					$default,
-					A2(_elm_lang$core$Maybe$map, update, _p0)));
-		};
-	});
 var _user$project$ModelUpdater$updateRule = F3(
-	function (update, id, model) {
+	function (id, update, model) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
 				rules: A3(_elm_lang$core$Dict$update, id, update, model.rules)
 			});
 	});
-var _user$project$ModelUpdater$replaceExampleCard = F3(
-	function (ruleId, card, model) {
-		var updateExample = function (rule) {
-			return _elm_lang$core$Native_Utils.update(
-				rule,
-				{
-					examples: A3(
-						_elm_lang$core$Dict$update,
-						card.id,
-						_elm_lang$core$Basics$always(
-							_elm_lang$core$Maybe$Just(card)),
-						rule.examples)
-				});
-		};
-		return A3(
+var _user$project$ModelUpdater$updateExampleCard = F3(
+	function (ruleId, id, update) {
+		return A2(
 			_user$project$ModelUpdater$updateRule,
-			_elm_lang$core$Maybe$map(updateExample),
 			ruleId,
-			model);
-	});
-var _user$project$ModelUpdater$replaceRuleCard = F2(
-	function (card, model) {
-		var addExampleButton = _user$project$Card_State$addCardButton(
-			_user$project$Card_Types$ExampleCard(card.id));
-		var newRule = {
-			card: card,
-			examples: A2(_elm_lang$core$Dict$singleton, addExampleButton.id, addExampleButton)
-		};
-		var updateCard = function (rule) {
-			return _elm_lang$core$Native_Utils.update(
-				rule,
-				{card: card});
-		};
-		return A3(
-			_user$project$ModelUpdater$updateRule,
-			A2(_user$project$ModelUpdater$mapWithDefault, newRule, updateCard),
-			card.id,
-			model);
-	});
-var _user$project$ModelUpdater$replaceQuestionCard = F2(
-	function (card, model) {
-		return _elm_lang$core$Native_Utils.update(
-			model,
-			{
-				questions: A3(
-					_elm_lang$core$Dict$update,
-					card.id,
-					_elm_lang$core$Basics$always(
-						_elm_lang$core$Maybe$Just(card)),
-					model.questions)
-			});
-	});
-var _user$project$ModelUpdater$replaceStoryCard = F2(
-	function (card, model) {
-		return _elm_lang$core$Native_Utils.update(
-			model,
-			{
-				storyCard: _elm_lang$core$Maybe$Just(card)
-			});
-	});
-var _user$project$ModelUpdater$updateExampleCard = F4(
-	function (ruleId, id, update, model) {
-		return A3(
-			_user$project$ModelUpdater$updateRule,
 			_elm_lang$core$Maybe$map(
 				function (r) {
 					return _elm_lang$core$Native_Utils.update(
@@ -9949,28 +10046,43 @@ var _user$project$ModelUpdater$updateExampleCard = F4(
 						{
 							examples: A3(_elm_lang$core$Dict$update, id, update, r.examples)
 						});
-				}),
-			ruleId,
-			model);
+				}));
 	});
-var _user$project$ModelUpdater$updateRuleCard = F3(
-	function (id, update, model) {
-		return A3(
+var _user$project$ModelUpdater$updateRuleCard = F2(
+	function (id, update) {
+		var updateCardInRule = F2(
+			function (u, r) {
+				return _elm_lang$core$Native_Utils.update(
+					r,
+					{
+						card: A2(
+							_elm_lang$core$Maybe$withDefault,
+							r.card,
+							u(
+								_elm_lang$core$Maybe$Just(r.card)))
+					});
+			});
+		var addExampleButton = _user$project$Card_State$addCardButton(
+			_user$project$Card_Types$ExampleCard(id));
+		var examples = A2(_elm_lang$core$Dict$singleton, addExampleButton.id, addExampleButton);
+		var ruleFromNothing = A2(
+			_elm_lang$core$Maybe$map,
+			function (c) {
+				return {card: c, examples: examples};
+			},
+			update(_elm_lang$core$Maybe$Nothing));
+		return A2(
 			_user$project$ModelUpdater$updateRule,
-			_elm_lang$core$Maybe$map(
-				function (r) {
-					return _elm_lang$core$Native_Utils.update(
-						r,
-						{
-							card: A2(
-								_elm_lang$core$Maybe$withDefault,
-								r.card,
-								update(
-									_elm_lang$core$Maybe$Just(r.card)))
-						});
-				}),
 			id,
-			model);
+			function (_p0) {
+				return A2(
+					_elm_community$maybe_extra$Maybe_Extra$orElse,
+					ruleFromNothing,
+					A2(
+						_elm_lang$core$Maybe$map,
+						updateCardInRule(update),
+						_p0));
+			});
 	});
 var _user$project$ModelUpdater$updateQuestionCard = F3(
 	function (id, update, model) {
@@ -9993,22 +10105,42 @@ var _user$project$ModelUpdater$replaceCard = F2(
 		var _p1 = card.cardType;
 		switch (_p1.ctor) {
 			case 'StoryCard':
-				return A2(_user$project$ModelUpdater$replaceStoryCard, card, model);
+				return A2(
+					_user$project$ModelUpdater$updateStoryCard,
+					_elm_lang$core$Basics$always(
+						_elm_lang$core$Maybe$Just(card)),
+					model);
 			case 'RuleCard':
-				return A2(_user$project$ModelUpdater$replaceRuleCard, card, model);
+				return A3(
+					_user$project$ModelUpdater$updateRuleCard,
+					card.id,
+					_elm_lang$core$Basics$always(
+						_elm_lang$core$Maybe$Just(card)),
+					model);
 			case 'ExampleCard':
-				return A3(_user$project$ModelUpdater$replaceExampleCard, _p1._0, card, model);
+				return A4(
+					_user$project$ModelUpdater$updateExampleCard,
+					_p1._0,
+					card.id,
+					_elm_lang$core$Basics$always(
+						_elm_lang$core$Maybe$Just(card)),
+					model);
 			default:
-				return A2(_user$project$ModelUpdater$replaceQuestionCard, card, model);
+				return A3(
+					_user$project$ModelUpdater$updateQuestionCard,
+					card.id,
+					_elm_lang$core$Basics$always(
+						_elm_lang$core$Maybe$Just(card)),
+					model);
 		}
 	});
 var _user$project$ModelUpdater$replaceRule = F2(
 	function (model, rule) {
 		return A3(
 			_user$project$ModelUpdater$updateRule,
+			rule.card.id,
 			_elm_lang$core$Basics$always(
 				_elm_lang$core$Maybe$Just(rule)),
-			rule.card.id,
 			model);
 	});
 var _user$project$ModelUpdater$setClientId = F2(
@@ -10111,7 +10243,7 @@ var _user$project$Decoder_SetClientId$decoder = A2(
 		_user$project$ModelUpdater$setClientId,
 		A2(_elm_lang$core$Json_Decode$field, 'client_id', _elm_lang$core$Json_Decode$string)));
 
-var _user$project$Decoder_UpdateState$stringToCardState = function (s) {
+var _user$project$Decoder_UpdateState$toCardState = function (s) {
 	var _p0 = s;
 	if (_p0 === 'saving') {
 		return _user$project$Card_Types$Saving;
@@ -10119,7 +10251,7 @@ var _user$project$Decoder_UpdateState$stringToCardState = function (s) {
 		return _user$project$Card_Types$Saved;
 	}
 };
-var _user$project$Decoder_UpdateState$cardState = A2(_elm_lang$core$Json_Decode$map, _user$project$Decoder_UpdateState$stringToCardState, _elm_lang$core$Json_Decode$string);
+var _user$project$Decoder_UpdateState$cardState = A2(_elm_lang$core$Json_Decode$map, _user$project$Decoder_UpdateState$toCardState, _elm_lang$core$Json_Decode$string);
 var _user$project$Decoder_UpdateState$card = function (cardType) {
 	return A7(
 		_elm_lang$core$Json_Decode$map6,
@@ -10131,36 +10263,23 @@ var _user$project$Decoder_UpdateState$card = function (cardType) {
 		A2(_elm_lang$core$Json_Decode$field, 'position', _elm_lang$core$Json_Decode$int),
 		A2(_elm_lang$core$Json_Decode$field, 'version', _elm_lang$core$Json_Decode$int));
 };
-var _user$project$Decoder_UpdateState$ensureRuleExists = F2(
-	function (card, model) {
-		var addExampleButton = _user$project$Card_State$addCardButton(
-			_user$project$Card_Types$ExampleCard(card.id));
-		var newRule = {
-			card: card,
-			examples: A2(_elm_lang$core$Dict$singleton, addExampleButton.id, addExampleButton)
-		};
-		return _elm_lang$core$Native_Utils.update(
-			model,
-			{
-				rules: A3(
-					_elm_lang$core$Dict$update,
-					card.id,
-					function (_p1) {
-						return _elm_lang$core$Maybe$Just(
-							A2(_elm_lang$core$Maybe$withDefault, newRule, _p1));
-					},
-					model.rules)
+var _user$project$Decoder_UpdateState$replaceWithIfNewer = F2(
+	function (newCard, oldCard) {
+		var isNewerThan = F2(
+			function (old, $new) {
+				return _elm_lang$core$Native_Utils.cmp($new.version, old.version) > 0;
 			});
-	});
-var _user$project$Decoder_UpdateState$updateIfNewer = F2(
-	function (newCard, oc) {
-		var _p2 = oc;
-		if (_p2.ctor === 'Just') {
-			var _p3 = _p2._0;
-			return (_elm_lang$core$Native_Utils.cmp(newCard.version, _p3.version) > 0) ? _elm_lang$core$Maybe$Just(newCard) : _elm_lang$core$Maybe$Just(_p3);
-		} else {
-			return _elm_lang$core$Maybe$Just(newCard);
-		}
+		var mostRecent = F2(
+			function ($new, old) {
+				return A2(isNewerThan, old, $new) ? $new : old;
+			});
+		return A2(
+			_elm_community$maybe_extra$Maybe_Extra$orElse,
+			_elm_lang$core$Maybe$Just(newCard),
+			A2(
+				_elm_lang$core$Maybe$map,
+				mostRecent(newCard),
+				oldCard));
 	});
 var _user$project$Decoder_UpdateState$questions = A2(
 	_elm_lang$core$Json_Decode$field,
@@ -10172,7 +10291,7 @@ var _user$project$Decoder_UpdateState$questions = A2(
 				return A2(
 					_user$project$ModelUpdater$updateQuestionCard,
 					c.id,
-					_user$project$Decoder_UpdateState$updateIfNewer(c));
+					_user$project$Decoder_UpdateState$replaceWithIfNewer(c));
 			},
 			_user$project$Decoder_UpdateState$card(_user$project$Card_Types$QuestionCard))));
 var _user$project$Decoder_UpdateState$examples = function (ruleCard) {
@@ -10187,7 +10306,7 @@ var _user$project$Decoder_UpdateState$examples = function (ruleCard) {
 						_user$project$ModelUpdater$updateExampleCard,
 						ruleCard.id,
 						c.id,
-						_user$project$Decoder_UpdateState$updateIfNewer(c));
+						_user$project$Decoder_UpdateState$replaceWithIfNewer(c));
 				},
 				_user$project$Decoder_UpdateState$card(
 					_user$project$Card_Types$ExampleCard(ruleCard.id)))));
@@ -10206,13 +10325,10 @@ var _user$project$Decoder_UpdateState$rule = function () {
 		A2(
 			_elm_lang$core$Json_Decode$map,
 			function (c) {
-				return function (_p4) {
-					return A3(
-						_user$project$ModelUpdater$updateRuleCard,
-						c.id,
-						_user$project$Decoder_UpdateState$updateIfNewer(c),
-						A2(_user$project$Decoder_UpdateState$ensureRuleExists, c, _p4));
-				};
+				return A2(
+					_user$project$ModelUpdater$updateRuleCard,
+					c.id,
+					_user$project$Decoder_UpdateState$replaceWithIfNewer(c));
 			},
 			ruleCard),
 		A2(_elm_lang$core$Json_Decode$andThen, _user$project$Decoder_UpdateState$examples, ruleCard));
@@ -10238,9 +10354,9 @@ var _user$project$Decoder_UpdateState$story = A2(
 		},
 		A2(
 			_elm_lang$core$Json_Decode$map,
-			function (_p5) {
+			function (_p1) {
 				return _user$project$ModelUpdater$updateStoryCard(
-					_user$project$Decoder_UpdateState$updateIfNewer(_p5));
+					_user$project$Decoder_UpdateState$replaceWithIfNewer(_p1));
 			},
 			_user$project$Decoder_UpdateState$card(_user$project$Card_Types$StoryCard))));
 var _user$project$Decoder_UpdateState$decoder = A2(
