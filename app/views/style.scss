@@ -15,6 +15,8 @@ $card-line-height: 30px;
 $card-font-size: 28px;
 $card-font-family: 'Covered By Your Grace', cursive;
 
+$panel-padding: 15px;
+
 $card-z-index: 100;
 $panel-z-index: 200;
 
@@ -46,7 +48,7 @@ body {
 }
 
 .rule:last-child {
-  padding-right: 300px;
+  padding-right: $card-width + (3 * $panel-padding);
 }
 
 .questions {
@@ -54,7 +56,7 @@ body {
     top: 0;
     right: 0;
     background-color: rgba(128, 128, 128, 0.85);
-    padding: 15px;
+    padding: $panel-padding;
     box-shadow: #666 5px 5px 5px;
     overflow-y: scroll;
     height: 100vh;
@@ -108,7 +110,7 @@ body {
 
 .introduction {
     background-color: rgba(255, 255, 255, 0.7);
-    padding: 15px;
+    padding: $panel-padding;
     border-radius: 20px;
     max-width: 800px;
     margin-left: auto;
@@ -126,8 +128,8 @@ body {
     left: -20px;
     background-color: rgba(128, 128, 128, 0.7);
     padding: 30px;
-    padding-bottom: 15px;
-    padding-right: 15px;
+    padding-bottom: $panel-padding;
+    padding-right: $panel-padding;
     border-radius: 20px;
     box-shadow: #666 5px 5px 5px;
     color: #fff;
