@@ -21,8 +21,12 @@ module ExampleMapper
       end
 
       def fetch_story(story_id)
+        story_card = fetch_story_record(story_id).first
+
+        return if story_card.nil?
+
         result = {
-          story_card: format_card(fetch_story_record(story_id).first),
+          story_card: format_card(story_card),
           rules: fetch_rules(story_id).map do |row|
             {
               rule_card: format_card(row),
