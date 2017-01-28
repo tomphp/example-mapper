@@ -14,7 +14,6 @@ import Rule.Types exposing (Rule, RuleMsg(..))
 import Task
 import Types exposing (Model, Msg(..), Flags, Request, ModelUpdater, DelayedAction(..))
 import WebSocket
-import Maybe.Extra
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -69,7 +68,7 @@ update msg model =
                     { model | lastRequestNo = model.lastRequestNo + 1 }
 
                 cmd =
-                    Requests.toJson model request |> send model.flags.backendUrl
+                    Requests.toJson m request |> send model.flags.backendUrl
             in
                 ( m, cmd )
 
@@ -116,14 +115,23 @@ handleCardUpdate msg card model =
                 sendRequest (Requests.updateCard card)
 
             FinishCreateNew ->
-                model
-                    |> addDelayedAction (ResetAddButton card)
-                    |> Just
-                    |> (\m -> Maybe.Extra.andMap m thing)
+                newCardRequest card
+                    |> Maybe.map sendRequest
+                    |> Maybe.map (delayAction (ResetAddButton card))
                     |> Maybe.withDefault ( model, Cmd.none )
 
             _ ->
                 ( model, Cmd.none )
+
+
+delayAction : DelayedAction -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+delayAction updater result =
+    mapModel (addDelayedAction updater) result
+
+
+mapModel : ModelUpdater -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
+mapModel updater ( model, cmd ) =
+    ( updater model, cmd )
 
 
 newCardRequest : Card -> Maybe Request

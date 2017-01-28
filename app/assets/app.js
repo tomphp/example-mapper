@@ -10652,52 +10652,68 @@ var _user$project$State$newCardRequest = function (card) {
 			return _elm_lang$core$Maybe$Nothing;
 	}
 };
+var _user$project$State$mapModel = F2(
+	function (updater, _p5) {
+		var _p6 = _p5;
+		return {
+			ctor: '_Tuple2',
+			_0: updater(_p6._0),
+			_1: _p6._1
+		};
+	});
+var _user$project$State$delayAction = F2(
+	function (updater, result) {
+		return A2(
+			_user$project$State$mapModel,
+			_user$project$ModelUpdater$addDelayedAction(updater),
+			result);
+	});
 var _user$project$State$update = F2(
 	function (msg, model) {
-		var _p5 = msg;
-		switch (_p5.ctor) {
+		var _p7 = msg;
+		switch (_p7.ctor) {
 			case 'Noop':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'SendRequest':
-				var cmd = A2(
-					_user$project$State$send,
-					model.flags.backendUrl,
-					A2(_user$project$Requests$toJson, model, _p5._0));
 				var m = _elm_lang$core$Native_Utils.update(
 					model,
 					{lastRequestNo: model.lastRequestNo + 1});
+				var cmd = A2(
+					_user$project$State$send,
+					model.flags.backendUrl,
+					A2(_user$project$Requests$toJson, m, _p7._0));
 				return {ctor: '_Tuple2', _0: m, _1: cmd};
 			case 'UpdateModel':
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$State$updateModel, _p5._0, model),
+					_0: A2(_user$project$State$updateModel, _p7._0, model),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateCard':
-				var _p7 = _p5._1;
-				var _p6 = _p5._0;
+				var _p9 = _p7._1;
+				var _p8 = _p7._0;
 				return A3(
 					_user$project$State$handleCardUpdate,
-					_p7,
-					_p6,
+					_p9,
+					_p8,
 					A3(
 						_user$project$ModelUpdater$updateCard,
-						_p6.id,
+						_p8.id,
 						_elm_lang$core$Maybe$map(
-							_user$project$Card_State$update(_p7)),
+							_user$project$Card_State$update(_p9)),
 						model));
 			default:
-				var _p9 = _p5._0;
-				var _p8 = _p5._1;
+				var _p11 = _p7._0;
+				var _p10 = _p7._1;
 				return A3(
 					_user$project$State$handleRuleUpdate,
-					_p8,
-					_p9,
+					_p10,
+					_p11,
 					A3(
 						_user$project$ModelUpdater$updateRule,
-						_p9.card.id.uid,
+						_p11.card.id.uid,
 						_elm_lang$core$Maybe$map(
-							_user$project$Rule_State$update(_p8)),
+							_user$project$Rule_State$update(_p10)),
 						model));
 		}
 	});
@@ -10716,8 +10732,8 @@ var _user$project$State$handleCardUpdate = F3(
 				_user$project$Types$SendRequest(req),
 				model);
 		};
-		var _p10 = msg;
-		switch (_p10.ctor) {
+		var _p12 = msg;
+		switch (_p12.ctor) {
 			case 'StartEditing':
 				return {
 					ctor: '_Tuple2',
@@ -10737,32 +10753,32 @@ var _user$project$State$handleCardUpdate = F3(
 				return A2(
 					_elm_lang$core$Maybe$withDefault,
 					{ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none},
-					function (m) {
-						return A2(_elm_community$maybe_extra$Maybe_Extra$andMap, m, thing);
-					}(
-						_elm_lang$core$Maybe$Just(
-							A2(
-								_user$project$ModelUpdater$addDelayedAction,
-								_user$project$Types$ResetAddButton(card),
-								model))));
+					A2(
+						_elm_lang$core$Maybe$map,
+						_user$project$State$delayAction(
+							_user$project$Types$ResetAddButton(card)),
+						A2(
+							_elm_lang$core$Maybe$map,
+							sendRequest,
+							_user$project$State$newCardRequest(card))));
 			default:
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
 var _user$project$State$handleRuleUpdate = F3(
 	function (msg, rule, model) {
-		var _p11 = msg;
-		var _p13 = _p11._1;
-		var _p12 = _p11._0;
+		var _p13 = msg;
+		var _p15 = _p13._1;
+		var _p14 = _p13._0;
 		return A3(
 			_user$project$State$handleCardUpdate,
-			_p13,
-			_p12,
+			_p15,
+			_p14,
 			A3(
 				_user$project$ModelUpdater$updateCard,
-				_p12.id,
+				_p14.id,
 				_elm_lang$core$Maybe$map(
-					_user$project$Card_State$update(_p13)),
+					_user$project$Card_State$update(_p15)),
 				model));
 	});
 var _user$project$State$initialModel = function (flags) {
