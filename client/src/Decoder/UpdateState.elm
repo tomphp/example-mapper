@@ -3,14 +3,21 @@ module Decoder.UpdateState exposing (decoder)
 import Card.Types exposing (Card, CardType(..), CardState(..))
 import Types exposing (ModelUpdater, Model)
 import Json.Decode exposing (..)
+import Json.Decode.Pipeline exposing (required, decode, hardcoded)
 import ModelUpdater exposing (..)
 import Maybe.Extra exposing (orElse)
 
 
 decoder : Decoder (List ModelUpdater)
 decoder =
-    field "state" <|
-        (story |> map2 (++) questions |> map2 (++) rules)
+    field "state" state
+
+
+state : Decoder (List ModelUpdater)
+state =
+    field "story_card" story
+        |> map2 (++) (field "questions" questions)
+        |> map2 (++) (field "rules" rules)
 
 
 story : Decoder (List ModelUpdater)
@@ -18,7 +25,6 @@ story =
     card StoryCard
         |> map (replaceWithIfNewer >> updateStoryCard)
         |> map (\x -> [ x ])
-        |> field "story_card"
 
 
 replaceWithIfNewer : Card -> Maybe Card -> Maybe Card
@@ -42,7 +48,6 @@ questions =
     card QuestionCard
         |> map (\c -> updateQuestionCard c.id (replaceWithIfNewer c))
         |> list
-        |> field "questions"
 
 
 rules : Decoder (List ModelUpdater)
@@ -50,14 +55,13 @@ rules =
     rule
         |> list
         |> map List.concat
-        |> field "rules"
 
 
 rule : Decoder (List ModelUpdater)
 rule =
     let
         ruleCard =
-            card RuleCard |> field "rule_card"
+            field "rule_card" (card RuleCard)
     in
         map2 (::)
             (ruleCard |> map (\c -> updateRuleCard c.id (replaceWithIfNewer c)))
@@ -74,13 +78,13 @@ examples ruleCard =
 
 card : CardType -> Decoder Card
 card cardType =
-    map6 Card
-        (field "id" string)
-        (field "state" cardState)
-        (field "text" string)
-        (succeed cardType)
-        (field "position" int)
-        (field "version" int)
+    decode Card
+        |> required "id" string
+        |> required "state" cardState
+        |> required "text" string
+        |> hardcoded cardType
+        |> required "position" int
+        |> required "version" int
 
 
 cardState : Decoder CardState

@@ -2,6 +2,7 @@ module Decoder.Delayed exposing (decoder)
 
 import Dict
 import Json.Decode exposing (..)
+import Json.Decode.Pipeline exposing (required, decode)
 import Types exposing (ModelUpdater, Model, DelayedAction(..))
 import Card.Types exposing (CardType(..), CardState(..), Card, CardMsg(SetAddButton))
 import ModelUpdater exposing (updateQuestionCard, updateRuleCard, updateExampleCard)
@@ -10,7 +11,9 @@ import Card.State
 
 decoder : Decoder ModelUpdater
 decoder =
-    (map2 (,) (field "from" string) (field "client_request_no" int))
+    decode (,)
+        |> required "from" string
+        |> required "client_request_no" int
         |> map buildUpdater
 
 
