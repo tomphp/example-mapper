@@ -30,23 +30,23 @@ setClientId id model =
 
 replaceRule : Model -> Rule -> Model
 replaceRule model rule =
-    updateRule rule.card.id (Just rule |> always) model
+    updateRule rule.card.id (\_ -> Just rule) model
 
 
 replaceCard : Model -> Card -> Model
 replaceCard model card =
     case card.cardType of
         StoryCard ->
-            updateStoryCard (always (Just card)) model
+            updateStoryCard (\_ -> Just card) model
 
         RuleCard ->
-            updateRuleCard card.id (always (Just card)) model
+            updateRuleCard card.id (\_ -> Just card) model
 
         ExampleCard ruleId ->
-            updateExampleCard ruleId card.id (always (Just card)) model
+            updateExampleCard ruleId card.id (\_ -> Just card) model
 
         QuestionCard ->
-            updateQuestionCard card.id (always (Just card)) model
+            updateQuestionCard card.id (\_ -> Just card) model
 
 
 updateStoryCard : (Maybe Card -> Maybe Card) -> Model -> Model

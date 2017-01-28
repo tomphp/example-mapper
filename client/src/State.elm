@@ -156,7 +156,7 @@ newCardRequest card =
 
 focusCardInput : String -> Cmd Msg
 focusCardInput id =
-    Task.attempt (always Noop) (Dom.focus ("card-input-" ++ id))
+    Task.attempt (\_ -> Noop) (Dom.focus ("card-input-" ++ id))
 
 
 subscriptions : Model -> Sub Msg

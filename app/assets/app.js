@@ -10107,30 +10107,34 @@ var _user$project$ModelUpdater$replaceCard = F2(
 			case 'StoryCard':
 				return A2(
 					_user$project$ModelUpdater$updateStoryCard,
-					_elm_lang$core$Basics$always(
-						_elm_lang$core$Maybe$Just(card)),
+					function (_p2) {
+						return _elm_lang$core$Maybe$Just(card);
+					},
 					model);
 			case 'RuleCard':
 				return A3(
 					_user$project$ModelUpdater$updateRuleCard,
 					card.id,
-					_elm_lang$core$Basics$always(
-						_elm_lang$core$Maybe$Just(card)),
+					function (_p3) {
+						return _elm_lang$core$Maybe$Just(card);
+					},
 					model);
 			case 'ExampleCard':
 				return A4(
 					_user$project$ModelUpdater$updateExampleCard,
 					_p1._0,
 					card.id,
-					_elm_lang$core$Basics$always(
-						_elm_lang$core$Maybe$Just(card)),
+					function (_p4) {
+						return _elm_lang$core$Maybe$Just(card);
+					},
 					model);
 			default:
 				return A3(
 					_user$project$ModelUpdater$updateQuestionCard,
 					card.id,
-					_elm_lang$core$Basics$always(
-						_elm_lang$core$Maybe$Just(card)),
+					function (_p5) {
+						return _elm_lang$core$Maybe$Just(card);
+					},
 					model);
 		}
 	});
@@ -10139,8 +10143,9 @@ var _user$project$ModelUpdater$replaceRule = F2(
 		return A3(
 			_user$project$ModelUpdater$updateRule,
 			rule.card.id,
-			_elm_lang$core$Basics$always(
-				_elm_lang$core$Maybe$Just(rule)),
+			function (_p6) {
+				return _elm_lang$core$Maybe$Just(rule);
+			},
 			model);
 	});
 var _user$project$ModelUpdater$setClientId = F2(
@@ -10562,13 +10567,15 @@ var _user$project$State$subscriptions = function (model) {
 var _user$project$State$focusCardInput = function (id) {
 	return A2(
 		_elm_lang$core$Task$attempt,
-		_elm_lang$core$Basics$always(_user$project$Types$Noop),
+		function (_p3) {
+			return _user$project$Types$Noop;
+		},
 		_elm_lang$dom$Dom$focus(
 			A2(_elm_lang$core$Basics_ops['++'], 'card-input-', id)));
 };
 var _user$project$State$newCardRequest = function (card) {
-	var _p3 = card.cardType;
-	switch (_p3.ctor) {
+	var _p4 = card.cardType;
+	switch (_p4.ctor) {
 		case 'QuestionCard':
 			return _elm_lang$core$Maybe$Just(
 				_user$project$Requests$addQuestion(card.text));
@@ -10577,18 +10584,18 @@ var _user$project$State$newCardRequest = function (card) {
 				_user$project$Requests$addRule(card.text));
 		case 'ExampleCard':
 			return _elm_lang$core$Maybe$Just(
-				A2(_user$project$Requests$addExample, _p3._0, card.text));
+				A2(_user$project$Requests$addExample, _p4._0, card.text));
 		default:
 			return _elm_lang$core$Maybe$Nothing;
 	}
 };
 var _user$project$State$mapModel = F2(
-	function (updater, _p4) {
-		var _p5 = _p4;
+	function (updater, _p5) {
+		var _p6 = _p5;
 		return {
 			ctor: '_Tuple2',
-			_0: updater(_p5._0),
-			_1: _p5._1
+			_0: updater(_p6._0),
+			_1: _p6._1
 		};
 	});
 var _user$project$State$delayAction = F2(
@@ -10600,8 +10607,8 @@ var _user$project$State$delayAction = F2(
 	});
 var _user$project$State$update = F2(
 	function (msg, model) {
-		var _p6 = msg;
-		switch (_p6.ctor) {
+		var _p7 = msg;
+		switch (_p7.ctor) {
 			case 'Noop':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'SendRequest':
@@ -10612,7 +10619,7 @@ var _user$project$State$update = F2(
 					_elm_lang$core$Json_Encode$encode,
 					0,
 					_elm_lang$core$Json_Encode$object(
-						A2(_user$project$Requests$addRequestNo, updatedModel.lastRequestNo, _p6._0)));
+						A2(_user$project$Requests$addRequestNo, updatedModel.lastRequestNo, _p7._0)));
 				return {
 					ctor: '_Tuple2',
 					_0: updatedModel,
@@ -10621,31 +10628,31 @@ var _user$project$State$update = F2(
 			case 'UpdateModel':
 				return {
 					ctor: '_Tuple2',
-					_0: A2(_user$project$State$updateModel, model, _p6._0),
+					_0: A2(_user$project$State$updateModel, model, _p7._0),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'UpdateCard':
-				var _p8 = _p6._1;
-				var _p7 = _p6._0;
+				var _p9 = _p7._1;
+				var _p8 = _p7._0;
 				return A3(
 					_user$project$State$handleCardUpdate,
+					_p9,
 					_p8,
-					_p7,
 					A2(
 						_user$project$ModelUpdater$replaceCard,
 						model,
-						A2(_user$project$Card_State$update, _p8, _p7)));
+						A2(_user$project$Card_State$update, _p9, _p8)));
 			default:
-				var _p10 = _p6._0;
-				var _p9 = _p6._1;
+				var _p11 = _p7._0;
+				var _p10 = _p7._1;
 				return A3(
 					_user$project$State$handleRuleUpdate,
-					_p9,
 					_p10,
+					_p11,
 					A2(
 						_user$project$ModelUpdater$replaceRule,
 						model,
-						A2(_user$project$Rule_State$update, _p9, _p10)));
+						A2(_user$project$Rule_State$update, _p10, _p11)));
 		}
 	});
 var _user$project$State$handleCardUpdate = F3(
@@ -10656,8 +10663,8 @@ var _user$project$State$handleCardUpdate = F3(
 				_user$project$Types$SendRequest(req),
 				model);
 		};
-		var _p11 = msg;
-		switch (_p11.ctor) {
+		var _p12 = msg;
+		switch (_p12.ctor) {
 			case 'StartEditing':
 				return {
 					ctor: '_Tuple2',
@@ -10691,17 +10698,17 @@ var _user$project$State$handleCardUpdate = F3(
 	});
 var _user$project$State$handleRuleUpdate = F3(
 	function (msg, rule, model) {
-		var _p12 = msg;
-		var _p14 = _p12._1;
-		var _p13 = _p12._0;
+		var _p13 = msg;
+		var _p15 = _p13._1;
+		var _p14 = _p13._0;
 		return A3(
 			_user$project$State$handleCardUpdate,
+			_p15,
 			_p14,
-			_p13,
 			A2(
 				_user$project$ModelUpdater$replaceCard,
 				model,
-				A2(_user$project$Card_State$update, _p14, _p13)));
+				A2(_user$project$Card_State$update, _p15, _p14)));
 	});
 var _user$project$State$initialModel = function (flags) {
 	var newRuleColumn = {
