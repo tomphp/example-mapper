@@ -33,8 +33,8 @@ drawCard card =
                     []
 
         attributes =
-            [ class <| cardClass card.cardType card.state
-            , id <| "card-" ++ card.id
+            [ class (cardClass card.cardType card.state)
+            , id ("card-" ++ card.id)
             ]
                 ++ clickHandler
     in
@@ -65,7 +65,7 @@ editToolbar card =
     div [ class "card__toolbar" ]
         [ button
             [ class "card__toolbar-button card__toolbar-button--save"
-            , onClick <| saveAction card
+            , onClick (saveAction card)
             , title "Save card"
             ]
             []
@@ -88,7 +88,7 @@ cancelButton card =
                     onClick CancelCreateNew
 
                 Editing originalText ->
-                    onClick <| CancelEditing originalText
+                    onClick (CancelEditing originalText)
 
                 _ ->
                     Html.Attributes.disabled True

@@ -116,12 +116,12 @@ handleCardUpdate msg card model =
                 ( model, focusCardInput card.id )
 
             FinishEditing ->
-                sendRequest <| Requests.updateCard card
+                sendRequest (Requests.updateCard card)
 
             FinishCreateNew ->
                 newCardRequest card
                     |> Maybe.map sendRequest
-                    |> Maybe.map (delayAction <| ResetAddButton card)
+                    |> Maybe.map (delayAction (ResetAddButton card))
                     |> Maybe.withDefault ( model, Cmd.none )
 
             _ ->
@@ -142,13 +142,13 @@ newCardRequest : Card -> Maybe Request
 newCardRequest card =
     case card.cardType of
         QuestionCard ->
-            Just <| Requests.addQuestion card.text
+            Just (Requests.addQuestion card.text)
 
         RuleCard ->
-            Just <| Requests.addRule card.text
+            Just (Requests.addRule card.text)
 
         ExampleCard ruleId ->
-            Just <| Requests.addExample ruleId card.text
+            Just (Requests.addExample ruleId card.text)
 
         _ ->
             Nothing
@@ -156,7 +156,7 @@ newCardRequest card =
 
 focusCardInput : String -> Cmd Msg
 focusCardInput id =
-    Task.attempt (always Noop) (Dom.focus <| "card-input-" ++ id)
+    Task.attempt (always Noop) (Dom.focus ("card-input-" ++ id))
 
 
 subscriptions : Model -> Sub Msg

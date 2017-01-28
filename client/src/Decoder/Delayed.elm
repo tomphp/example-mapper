@@ -42,13 +42,13 @@ resetAddButton : Card -> Model -> Model
 resetAddButton card =
     case card.cardType of
         QuestionCard ->
-            updateQuestionCard "new-question" (Maybe.map <| Card.State.update SetAddButton)
+            updateQuestionCard "new-question" (Maybe.map (Card.State.update SetAddButton))
 
         RuleCard ->
-            updateRuleCard "new-rule" (Maybe.map <| Card.State.update SetAddButton)
+            updateRuleCard "new-rule" (Maybe.map (Card.State.update SetAddButton))
 
         ExampleCard ruleId ->
-            updateExampleCard ruleId ("new-example-" ++ ruleId) (Maybe.map <| Card.State.update SetAddButton)
+            updateExampleCard ruleId ("new-example-" ++ ruleId) (Maybe.map (Card.State.update SetAddButton))
 
         _ ->
             identity

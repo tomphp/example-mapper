@@ -37,16 +37,16 @@ replaceCard : Model -> Card -> Model
 replaceCard model card =
     case card.cardType of
         StoryCard ->
-            updateStoryCard (always <| Just card) model
+            updateStoryCard (always (Just card)) model
 
         RuleCard ->
-            updateRuleCard card.id (always <| Just card) model
+            updateRuleCard card.id (always (Just card)) model
 
         ExampleCard ruleId ->
-            updateExampleCard ruleId card.id (always <| Just card) model
+            updateExampleCard ruleId card.id (always (Just card)) model
 
         QuestionCard ->
-            updateQuestionCard card.id (always <| Just card) model
+            updateQuestionCard card.id (always (Just card)) model
 
 
 updateStoryCard : (Maybe Card -> Maybe Card) -> Model -> Model

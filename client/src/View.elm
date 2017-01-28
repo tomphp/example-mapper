@@ -12,7 +12,7 @@ import Types exposing (Model, Msg(..))
 view : Model -> Html Msg
 view model =
     div [ class "workspace" ]
-        [ p [] [ text <| Maybe.withDefault "" model.error ]
+        [ p [] [ text (Maybe.withDefault "" model.error) ]
         , model.storyCard
             |> Maybe.map htmlCard
             |> Maybe.withDefault (text "Loading...")

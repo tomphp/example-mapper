@@ -25,8 +25,8 @@ view : Card -> Html CardMsg
 view card =
     svg
         [ class "card__background"
-        , width <| toString cardWidth
-        , height <| toString cardHeight
+        , width (toString cardWidth)
+        , height (toString cardHeight)
         ]
         cardBackground
 
@@ -41,7 +41,7 @@ cardBackground =
             [ line
                 [ x1 "0"
                 , y1 headLine
-                , x2 <| toString cardWidth
+                , x2 (toString cardWidth)
                 , y2 headLine
                 , class "card__headline"
                 ]
@@ -68,7 +68,7 @@ lines =
                 line
                     [ x1 "0"
                     , y1 y
-                    , x2 <| toString cardWidth
+                    , x2 (toString cardWidth)
                     , y2 y
                     , class "card__line"
                     ]
