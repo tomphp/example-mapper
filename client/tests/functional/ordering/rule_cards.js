@@ -1,17 +1,17 @@
 casper.test.begin('Rule card ordering', function(test) {
   var state = {state: {
-    story_card: { id: 'story-id', text: 'Story', state: 'saved', position: 0 },
+    story_card: { id: 'story-id', text: 'Story', state: 'saved', position: 0, version: 1 },
     rules: [
       {
-        rule_card: { id: 'rule1', text: 'Rule 1', state: 'saved', position: 1 },
+        rule_card: { id: 'rule1', text: 'Rule 1', state: 'saved', position: 1, version: 1 },
         examples: [],
       },
       {
-        rule_card: { id: 'rule3', text: 'Rule 3', state: 'saved', position: 3 },
+        rule_card: { id: 'rule3', text: 'Rule 3', state: 'saved', position: 3, version: 1 },
         examples: [],
       },
       {
-        rule_card: { id: 'rule2', text: 'Rule 2', state: 'saved', position: 2 },
+        rule_card: { id: 'rule2', text: 'Rule 2', state: 'saved', position: 2, version: 1 },
         examples: [],
       },
     ],

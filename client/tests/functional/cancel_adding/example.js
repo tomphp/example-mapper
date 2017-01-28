@@ -4,14 +4,16 @@ casper.test.begin('Cancelling adding a question', function(test) {
       id: 'story-id',
       text: 'As a test script I want to check behaviour',
       state: 'saved',
-      position: 0
+      position: 0,
+      version: 1,
     },
     rules: [{
       rule_card: {
         id: 'rule-id',
         text: 'This rule must be shown',
         state: 'saved',
-        position: 0
+        position: 0,
+        version: 1,
       },
       examples: []
     }],

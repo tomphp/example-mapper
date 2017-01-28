@@ -1,11 +1,11 @@
 casper.test.begin('Question card ordering', function(test) {
   var state = {state: {
-    story_card: { id: 'story-id', text: 'Story', state: 'saved', position: 0 },
+    story_card: { id: 'story-id', text: 'Story', state: 'saved', position: 0, version: 1 },
     rules: [],
     questions:[
-      { id: 'question1', text: 'Question 1', state: 'saved', position: 1 },
-      { id: 'question3', text: 'Question 3', state: 'saved', position: 3 },
-      { id: 'question2', text: 'Question 2', state: 'saved', position: 2 },
+      { id: 'question1', text: 'Question 1', state: 'saved', position: 1, version: 1 },
+      { id: 'question3', text: 'Question 3', state: 'saved', position: 3, version: 1 },
+      { id: 'question2', text: 'Question 2', state: 'saved', position: 2, version: 1 },
     ],
   }};
 

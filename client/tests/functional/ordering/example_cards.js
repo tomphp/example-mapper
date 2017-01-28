@@ -1,12 +1,12 @@
 casper.test.begin('Example card ordering', function(test) {
   var state = {state: {
-    story_card: { id: 'story-id', text: 'Story', state: 'saved', position: 0 },
+    story_card: { id: 'story-id', text: 'Story', state: 'saved', position: 0, version: 1 },
     rules: [{
-      rule_card: { id: 'rule1', text: 'Rule 1', state: 'saved', position: 1 },
+      rule_card: { id: 'rule1', text: 'Rule 1', state: 'saved', position: 1, version: 1 },
       examples: [
-        { id: 'example3', text: 'Example 3', state: 'saved', position: 3 },
-        { id: 'example1', text: 'Example 1', state: 'saved', position: 1 },
-        { id: 'example2', text: 'Example 2', state: 'saved', position: 2 },
+        { id: 'example3', text: 'Example 3', state: 'saved', position: 3, version: 1 },
+        { id: 'example1', text: 'Example 1', state: 'saved', position: 1, version: 1 },
+        { id: 'example2', text: 'Example 2', state: 'saved', position: 2, version: 1 },
       ]
     }],
     questions:[],
