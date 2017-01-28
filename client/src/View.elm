@@ -1,6 +1,6 @@
 module View exposing (view)
 
-import Card.Types exposing (Card, CardState(..), CardId, CardType(..))
+import Card.Types exposing (Card)
 import Card.View as Card
 import Dict exposing (Dict)
 import Html exposing (..)

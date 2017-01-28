@@ -33,25 +33,25 @@ update msg card =
 
 addCardButton : CardType -> Card
 addCardButton cardType =
-    let
-        id =
-            case cardType of
-                RuleCard ->
-                    "new-rule"
+    { id = { uid = cardId cardType, cardType = cardType }
+    , state = AddButton
+    , text = ""
+    , position = 999
+    , version = 1
+    }
 
-                ExampleCard ruleId ->
-                    "new-example-" ++ ruleId
 
-                QuestionCard ->
-                    "new-question"
+cardId : CardType -> String
+cardId cardType =
+    case cardType of
+        RuleCard ->
+            "new-rule"
 
-                StoryCard ->
-                    "new-story"
-    in
-        { id = id
-        , state = AddButton
-        , text = ""
-        , cardType = cardType
-        , position = 999
-        , version = 1
-        }
+        ExampleCard ruleId ->
+            "new-example-" ++ ruleId
+
+        QuestionCard ->
+            "new-question"
+
+        StoryCard ->
+            "new-story"

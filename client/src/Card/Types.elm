@@ -12,20 +12,19 @@ type alias Card =
     { id : CardId
     , state : CardState
     , text : String
-    , cardType : CardType
     , position : Int
     , version : Int
     }
 
 
 type alias CardId =
-    String
+    { uid : String, cardType : CardType }
 
 
 type CardType
     = StoryCard
     | RuleCard
-    | ExampleCard CardId
+    | ExampleCard String
     | QuestionCard
 
 

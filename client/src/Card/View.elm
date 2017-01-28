@@ -33,8 +33,8 @@ drawCard card =
                     []
 
         attributes =
-            [ class (cardClass card.cardType card.state)
-            , id ("card-" ++ card.id)
+            [ class (cardClass card.id.cardType card.state)
+            , id ("card-" ++ card.id.uid)
             ]
                 ++ clickHandler
     in
@@ -175,7 +175,7 @@ nl2br text =
 cardInput : Card -> List (Html CardMsg)
 cardInput card =
     [ textarea
-        [ id ("card-input-" ++ card.id)
+        [ id ("card-input-" ++ card.id.uid)
         , class "card__input"
         , on "input" (Json.map UpdateCardText targetValue)
         ]

@@ -3,15 +3,13 @@ module ModelUpdater
         ( addDelayedAction
         , updateStoryCard
         , updateQuestionCard
-        , updateRuleCard
-        , updateExampleCard
         , updateRule
         , updateCard
         , setClientId
         )
 
 import Card.State exposing (addCardButton)
-import Card.Types exposing (Card, CardType(..), CardState(..), CardId)
+import Card.Types exposing (Card, CardType(..), CardId)
 import Dict
 import Rule.Types exposing (RuleId, Rule)
 import Types exposing (Model, ModelUpdater, DelayedAction)
@@ -28,20 +26,20 @@ setClientId id model =
     { model | clientId = Just id }
 
 
-updateCard : CardId -> CardType -> (Maybe Card -> Maybe Card) -> Model -> Model
-updateCard id cardType =
-    case cardType of
+updateCard : CardId -> (Maybe Card -> Maybe Card) -> Model -> Model
+updateCard id =
+    case id.cardType of
         StoryCard ->
             updateStoryCard
 
         RuleCard ->
-            updateRuleCard id
+            updateRuleCard id.uid
 
         ExampleCard ruleId ->
-            updateExampleCard ruleId id
+            updateExampleCard ruleId id.uid
 
         QuestionCard ->
-            updateQuestionCard id
+            updateQuestionCard id.uid
 
 
 updateStoryCard : (Maybe Card -> Maybe Card) -> Model -> Model
@@ -49,7 +47,7 @@ updateStoryCard update model =
     { model | storyCard = update model.storyCard }
 
 
-updateQuestionCard : CardId -> (Maybe Card -> Maybe Card) -> Model -> Model
+updateQuestionCard : String -> (Maybe Card -> Maybe Card) -> Model -> Model
 updateQuestionCard id update model =
     { model | questions = Dict.update id update model.questions }
 
@@ -61,7 +59,7 @@ updateRuleCard id update =
             addCardButton (ExampleCard id)
 
         examples =
-            Dict.singleton addExampleButton.id addExampleButton
+            Dict.singleton addExampleButton.id.uid addExampleButton
 
         updateCardInRule =
             \u r -> { r | card = u (Just r.card) |> Maybe.withDefault r.card }
@@ -73,7 +71,7 @@ updateRuleCard id update =
             (Maybe.map (updateCardInRule update) >> orElse ruleFromNothing)
 
 
-updateExampleCard : RuleId -> CardId -> (Maybe Card -> Maybe Card) -> Model -> Model
+updateExampleCard : RuleId -> String -> (Maybe Card -> Maybe Card) -> Model -> Model
 updateExampleCard ruleId id update =
     updateRule ruleId (Maybe.map (\r -> { r | examples = Dict.update id update r.examples }))
 

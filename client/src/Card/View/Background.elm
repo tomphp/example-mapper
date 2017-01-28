@@ -1,6 +1,6 @@
 module Card.View.Background exposing (view)
 
-import Card.Types exposing (Card, CardType(..), CardMsg(..))
+import Card.Types exposing (Card, CardMsg(..))
 import Html exposing (Html)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)

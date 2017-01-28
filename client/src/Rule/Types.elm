@@ -1,16 +1,16 @@
 module Rule.Types exposing (Rule, RuleId, RuleMsg(..))
 
-import Card.Types exposing (Card, CardId, CardMsg)
+import Card.Types exposing (Card, CardMsg)
 import Dict exposing (Dict)
 
 
 type alias RuleId =
-    CardId
+    String
 
 
 type alias Rule =
     { card : Card
-    , examples : Dict CardId Card
+    , examples : Dict String Card
     }
 
 

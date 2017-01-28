@@ -1,9 +1,9 @@
 module Decoder.UpdateState exposing (decoder)
 
-import Card.Types exposing (Card, CardType(..), CardState(..))
+import Card.Types exposing (Card, CardType(..), CardState(..), CardId)
 import Types exposing (ModelUpdater, Model)
 import Json.Decode exposing (..)
-import Json.Decode.Pipeline exposing (required, decode, hardcoded)
+import Json.Decode.Pipeline exposing (required, decode, hardcoded, custom)
 import ModelUpdater exposing (..)
 import Maybe.Extra exposing (orElse)
 
@@ -23,8 +23,13 @@ state =
 story : Decoder (List ModelUpdater)
 story =
     card StoryCard
-        |> map (replaceWithIfNewer >> updateStoryCard)
+        |> map replaceCard
         |> map (\x -> [ x ])
+
+
+replaceCard : Card -> ModelUpdater
+replaceCard card =
+    updateCard card.id (replaceWithIfNewer card)
 
 
 replaceWithIfNewer : Card -> Maybe Card -> Maybe Card
@@ -46,7 +51,7 @@ replaceWithIfNewer newCard oldCard =
 questions : Decoder (List ModelUpdater)
 questions =
     card QuestionCard
-        |> map (\c -> updateQuestionCard c.id (replaceWithIfNewer c))
+        |> map replaceCard
         |> list
 
 
@@ -64,14 +69,14 @@ rule =
             field "rule_card" (card RuleCard)
     in
         map2 (::)
-            (ruleCard |> map (\c -> updateRuleCard c.id (replaceWithIfNewer c)))
+            (ruleCard |> map replaceCard)
             (ruleCard |> andThen examples)
 
 
 examples : Card -> Decoder (List ModelUpdater)
 examples ruleCard =
-    card (ExampleCard ruleCard.id)
-        |> map (\c -> updateExampleCard ruleCard.id c.id (replaceWithIfNewer c))
+    card (ExampleCard ruleCard.id.uid)
+        |> map replaceCard
         |> list
         |> field "examples"
 
@@ -79,12 +84,18 @@ examples ruleCard =
 card : CardType -> Decoder Card
 card cardType =
     decode Card
-        |> required "id" string
+        |> custom (cardId cardType)
         |> required "state" cardState
         |> required "text" string
-        |> hardcoded cardType
         |> required "position" int
         |> required "version" int
+
+
+cardId : CardType -> Decoder CardId
+cardId cardType =
+    decode CardId
+        |> required "id" string
+        |> hardcoded cardType
 
 
 cardState : Decoder CardState

@@ -8,7 +8,7 @@ module Types
         , DelayedAction(..)
         )
 
-import Card.Types exposing (Card, CardId, CardType, CardMsg)
+import Card.Types exposing (Card, CardType, CardMsg)
 import Dict exposing (Dict)
 import Rule.Types exposing (Rule, RuleMsg)
 import Json.Encode exposing (Value)
@@ -34,8 +34,8 @@ type alias Model =
     { clientId : Maybe String
     , lastRequestNo : Int
     , storyCard : Maybe Card
-    , rules : Dict CardId Rule
-    , questions : Dict CardId Card
+    , rules : Dict String Rule
+    , questions : Dict String Card
     , error : Maybe String
     , flags : Flags
     , delayed : Dict Int DelayedAction

@@ -1,13 +1,13 @@
 module Card.View.AddButton exposing (view)
 
-import Card.Types exposing (Card, CardType(..), CardId, CardState(..), CardMsg(..))
+import Card.Types exposing (Card, CardType(..), CardState(..), CardMsg(..))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 
 
 type alias AddButton =
-    { id : CardId
+    { id : String
     , cssClass : String
     , label : String
     , cardType : CardType
@@ -23,29 +23,29 @@ view =
 
 addButtonParams : Card -> Maybe AddButton
 addButtonParams card =
-    case card.cardType of
+    case card.id.cardType of
         RuleCard ->
             Just
-                { id = card.id
+                { id = card.id.uid
                 , cssClass = "card--rule"
                 , label = "Add Rule"
-                , cardType = card.cardType
+                , cardType = card.id.cardType
                 }
 
         ExampleCard _ ->
             Just
-                { id = card.id
+                { id = card.id.uid
                 , cssClass = "card--example"
                 , label = "Add Example"
-                , cardType = card.cardType
+                , cardType = card.id.cardType
                 }
 
         QuestionCard ->
             Just
-                { id = card.id
+                { id = card.id.uid
                 , cssClass = "card--question"
                 , label = "Add Question"
-                , cardType = card.cardType
+                , cardType = card.id.cardType
                 }
 
         _ ->

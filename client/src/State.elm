@@ -1,7 +1,7 @@
 module State exposing (init, update, subscriptions)
 
 import Card.State exposing (addCardButton)
-import Card.Types exposing (CardState(..), CardId, Card, CardType(..), CardMsg(..))
+import Card.Types exposing (CardState(..), Card, CardType(..), CardMsg(..))
 import Decoder exposing (decoder)
 import Dict exposing (Dict)
 import Dom
@@ -49,8 +49,8 @@ initialModel flags =
         { clientId = Nothing
         , lastRequestNo = 0
         , storyCard = Nothing
-        , rules = Dict.singleton newRuleColumn.card.id newRuleColumn
-        , questions = Dict.singleton addQuestionButton.id addQuestionButton
+        , rules = Dict.singleton newRuleColumn.card.id.uid newRuleColumn
+        , questions = Dict.singleton addQuestionButton.id.uid addQuestionButton
         , error = Nothing
         , flags = flags
         , delayed = Dict.empty
@@ -78,12 +78,12 @@ update msg model =
 
         Types.UpdateCard card msg ->
             model
-                |> updateCard card.id card.cardType (Maybe.map <| Card.State.update msg)
+                |> updateCard card.id (Maybe.map <| Card.State.update msg)
                 |> handleCardUpdate msg card
 
         UpdateRule rule msg ->
             model
-                |> updateRule rule.card.id (Maybe.map <| Rule.State.update msg)
+                |> updateRule rule.card.id.uid (Maybe.map <| Rule.State.update msg)
                 |> handleRuleUpdate msg rule
 
 
@@ -92,7 +92,7 @@ handleRuleUpdate msg rule model =
     case msg of
         Rule.Types.UpdateCard card msg ->
             model
-                |> updateCard card.id card.cardType (Maybe.map <| Card.State.update msg)
+                |> updateCard card.id (Maybe.map <| Card.State.update msg)
                 |> handleCardUpdate msg card
 
 
@@ -107,10 +107,10 @@ handleCardUpdate msg card model =
     in
         case msg of
             StartEditing ->
-                ( model, focusCardInput card.id )
+                ( model, focusCardInput card.id.uid )
 
             StartCreateNew ->
-                ( model, focusCardInput card.id )
+                ( model, focusCardInput card.id.uid )
 
             FinishEditing ->
                 sendRequest (Requests.updateCard card)
@@ -128,7 +128,7 @@ handleCardUpdate msg card model =
 
 newCardRequest : Card -> Maybe Request
 newCardRequest card =
-    case card.cardType of
+    case card.id.cardType of
         QuestionCard ->
             Just (Requests.addQuestion card.text)
 

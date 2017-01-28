@@ -56,6 +56,6 @@ addExample ruleId text =
 updateCard : Card -> Request
 updateCard card =
     [ ( "type", string "update_card" )
-    , ( "id", string card.id )
+    , ( "id", string card.id.uid )
     , ( "text", string card.text )
     ]

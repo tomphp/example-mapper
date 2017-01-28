@@ -1,6 +1,6 @@
 module Rule.View exposing (view)
 
-import Card.Types exposing (Card, CardState(..), CardId, CardType(..))
+import Card.Types exposing (Card)
 import Card.View
 import Dict
 import Html exposing (..)
@@ -10,7 +10,7 @@ import Rule.Types exposing (Rule, RuleMsg(..))
 
 view : Rule -> Html RuleMsg
 view r =
-    div [ id ("rule-" ++ r.card.id), class "rule" ]
+    div [ id ("rule-" ++ r.card.id.uid), class "rule" ]
         [ Card.View.view r.card |> Html.map (UpdateCard r.card)
         , examples r
         ]
