@@ -12,7 +12,7 @@ casper.test.begin('Initial loading', function(test) {
   casper.waitForMessage(0, function waitForRefreshRequest() {
     test.assertEquals(
       this.getMessage(0),
-      {request_no: 1, type: 'fetch_update'},
+      {request_no: 0, type: 'fetch_update'},
       'An update request is sent on initialisation'
     );
   });

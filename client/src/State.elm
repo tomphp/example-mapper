@@ -6,7 +6,6 @@ import Decoder exposing (decoder)
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
-import Json.Encode
 import ModelUpdater exposing (..)
 import Ports
 import Requests
@@ -15,6 +14,7 @@ import Rule.Types exposing (Rule, RuleMsg(..))
 import Task
 import Types exposing (Model, Msg(..), Flags, Request, ModelUpdater, DelayedAction(..))
 import WebSocket
+import Maybe.Extra
 
 
 init : Flags -> ( Model, Cmd Msg )
@@ -65,30 +65,25 @@ update msg model =
 
         SendRequest request ->
             let
-                updatedModel =
+                m =
                     { model | lastRequestNo = model.lastRequestNo + 1 }
 
-                json =
-                    request
-                        |> Requests.addRequestNo updatedModel.lastRequestNo
-                        |> Json.Encode.object
-                        |> Json.Encode.encode 0
+                cmd =
+                    Requests.toJson model request |> send model.flags.backendUrl
             in
-                ( updatedModel, send model.flags.backendUrl json )
+                ( m, cmd )
 
-        UpdateModel update ->
-            ( updateModel model update, Cmd.none )
+        UpdateModel json ->
+            ( updateModel json model, Cmd.none )
 
         Types.UpdateCard card msg ->
-            card
-                |> Card.State.update msg
-                |> replaceCard model
+            model
+                |> updateCard card.id card.cardType (Maybe.map <| Card.State.update msg)
                 |> handleCardUpdate msg card
 
         UpdateRule rule msg ->
-            rule
-                |> Rule.State.update msg
-                |> replaceRule model
+            model
+                |> updateRule rule.card.id (Maybe.map <| Rule.State.update msg)
                 |> handleRuleUpdate msg rule
 
 
@@ -96,9 +91,8 @@ handleRuleUpdate : RuleMsg -> Rule -> Model -> ( Model, Cmd Msg )
 handleRuleUpdate msg rule model =
     case msg of
         Rule.Types.UpdateCard card msg ->
-            card
-                |> Card.State.update msg
-                |> replaceCard model
+            model
+                |> updateCard card.id card.cardType (Maybe.map <| Card.State.update msg)
                 |> handleCardUpdate msg card
 
 
@@ -107,6 +101,9 @@ handleCardUpdate msg card model =
     let
         sendRequest =
             \req -> update (SendRequest req) model
+
+        thing =
+            newCardRequest card |> Maybe.map SendRequest |> Maybe.map update
     in
         case msg of
             StartEditing ->
@@ -119,23 +116,14 @@ handleCardUpdate msg card model =
                 sendRequest (Requests.updateCard card)
 
             FinishCreateNew ->
-                newCardRequest card
-                    |> Maybe.map sendRequest
-                    |> Maybe.map (delayAction (ResetAddButton card))
+                model
+                    |> addDelayedAction (ResetAddButton card)
+                    |> Just
+                    |> (\m -> Maybe.Extra.andMap m thing)
                     |> Maybe.withDefault ( model, Cmd.none )
 
             _ ->
                 ( model, Cmd.none )
-
-
-delayAction : DelayedAction -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
-delayAction updater result =
-    mapModel (addDelayedAction updater) result
-
-
-mapModel : ModelUpdater -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
-mapModel updater ( model, cmd ) =
-    ( updater model, cmd )
 
 
 newCardRequest : Card -> Maybe Request
@@ -169,9 +157,9 @@ subscriptions model =
             Ports.socketIn UpdateModel
 
 
-updateModel : Model -> String -> Model
-updateModel model update =
-    case decodeString decoder update of
+updateModel : String -> Model -> Model
+updateModel json model =
+    case decodeString decoder json of
         Ok cards ->
             List.foldl identity model cards
 

@@ -5,8 +5,8 @@ module ModelUpdater
         , updateQuestionCard
         , updateRuleCard
         , updateExampleCard
-        , replaceRule
-        , replaceCard
+        , updateRule
+        , updateCard
         , setClientId
         )
 
@@ -28,25 +28,20 @@ setClientId id model =
     { model | clientId = Just id }
 
 
-replaceRule : Model -> Rule -> Model
-replaceRule model rule =
-    updateRule rule.card.id (\_ -> Just rule) model
-
-
-replaceCard : Model -> Card -> Model
-replaceCard model card =
-    case card.cardType of
+updateCard : CardId -> CardType -> (Maybe Card -> Maybe Card) -> Model -> Model
+updateCard id cardType =
+    case cardType of
         StoryCard ->
-            updateStoryCard (\_ -> Just card) model
+            updateStoryCard
 
         RuleCard ->
-            updateRuleCard card.id (\_ -> Just card) model
+            updateRuleCard id
 
         ExampleCard ruleId ->
-            updateExampleCard ruleId card.id (\_ -> Just card) model
+            updateExampleCard ruleId id
 
         QuestionCard ->
-            updateQuestionCard card.id (\_ -> Just card) model
+            updateQuestionCard id
 
 
 updateStoryCard : (Maybe Card -> Maybe Card) -> Model -> Model

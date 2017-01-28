@@ -6,11 +6,19 @@ module Requests
         , addRule
         , addExample
         , updateCard
+        , toJson
         )
 
 import Json.Encode exposing (..)
 import Card.Types exposing (Card)
-import Types exposing (Request)
+import Types exposing (Request, Model)
+
+
+toJson : Model -> Request -> String
+toJson model =
+    addRequestNo model.lastRequestNo
+        >> Json.Encode.object
+        >> Json.Encode.encode 0
 
 
 addRequestNo : Int -> Request -> Request
