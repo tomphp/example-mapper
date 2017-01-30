@@ -44,7 +44,6 @@ type alias Model =
 
 type Msg
     = Noop
-    | SendRequest Request
     | UpdateModel String
     | UpdateCard Card CardMsg
     | UpdateRule Rule RuleMsg

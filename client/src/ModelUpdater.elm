@@ -1,6 +1,7 @@
 module ModelUpdater
     exposing
         ( addDelayedAction
+        , incrementLastRequestNo
         , updateStoryCard
         , updateQuestionCard
         , updateRule
@@ -14,6 +15,11 @@ import Dict
 import Rule.Types exposing (RuleId, Rule)
 import Types exposing (Model, ModelUpdater, DelayedAction)
 import Maybe.Extra exposing (orElse)
+
+
+incrementLastRequestNo : Model -> Model
+incrementLastRequestNo model =
+    { model | lastRequestNo = model.lastRequestNo + 1 }
 
 
 addDelayedAction : DelayedAction -> Model -> Model

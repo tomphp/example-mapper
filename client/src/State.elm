@@ -6,7 +6,7 @@ import Decoder exposing (decoder)
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
-import ModelUpdater exposing (..)
+import ModelUpdater as Model
 import Ports
 import Requests
 import Rule.State
@@ -18,7 +18,7 @@ import WebSocket
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    update (SendRequest Requests.refresh) (initialModel flags)
+    sendRequest (initialModel flags) Requests.refresh
 
 
 
@@ -56,33 +56,35 @@ initialModel flags =
         }
 
 
+sendRequest : Model -> Request -> ( Model, Cmd Msg )
+sendRequest model request =
+    let
+        m =
+            Model.incrementLastRequestNo model
+
+        cmd =
+            Requests.toJson m request |> send m.flags.backendUrl
+    in
+        ( m, cmd )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         Noop ->
             ( model, Cmd.none )
 
-        SendRequest request ->
-            let
-                m =
-                    { model | lastRequestNo = model.lastRequestNo + 1 }
-
-                cmd =
-                    Requests.toJson m request |> send model.flags.backendUrl
-            in
-                ( m, cmd )
-
         UpdateModel json ->
             ( updateModel json model, Cmd.none )
 
         Types.UpdateCard card msg ->
             model
-                |> updateCard card.id (Maybe.map <| Card.State.update msg)
+                |> Model.updateCard card.id (Maybe.map <| Card.State.update msg)
                 |> handleCardUpdate msg card
 
         UpdateRule rule msg ->
             model
-                |> updateRule rule.card.id.uid (Maybe.map <| Rule.State.update msg)
+                |> Model.updateRule rule.card.id.uid (Maybe.map <| Rule.State.update msg)
                 |> handleRuleUpdate msg rule
 
 
@@ -91,42 +93,35 @@ handleRuleUpdate msg rule model =
     case msg of
         Rule.Types.UpdateCard card msg ->
             model
-                |> updateCard card.id (Maybe.map <| Card.State.update msg)
+                |> Model.updateCard card.id (Maybe.map <| Card.State.update msg)
                 |> handleCardUpdate msg card
 
 
 handleCardUpdate : CardMsg -> Card -> Model -> ( Model, Cmd Msg )
 handleCardUpdate msg card model =
-    let
-        sendRequest =
-            \req -> update (SendRequest req) model
+    case msg of
+        StartEditing ->
+            ( model, focusCardInput card.id.uid )
 
-        thing =
-            newCardRequest card |> Maybe.map SendRequest |> Maybe.map update
-    in
-        case msg of
-            StartEditing ->
-                ( model, focusCardInput card.id.uid )
+        StartCreateNew ->
+            ( model, focusCardInput card.id.uid )
 
-            StartCreateNew ->
-                ( model, focusCardInput card.id.uid )
+        FinishEditing ->
+            sendRequest model (Requests.updateCard card)
 
-            FinishEditing ->
-                sendRequest (Requests.updateCard card)
+        FinishCreateNew ->
+            newCardRequest card
+                |> Maybe.map (sendRequest model)
+                |> Maybe.map (delayAction (ResetAddButton card))
+                |> Maybe.withDefault ( model, Cmd.none )
 
-            FinishCreateNew ->
-                newCardRequest card
-                    |> Maybe.map sendRequest
-                    |> Maybe.map (delayAction (ResetAddButton card))
-                    |> Maybe.withDefault ( model, Cmd.none )
-
-            _ ->
-                ( model, Cmd.none )
+        _ ->
+            ( model, Cmd.none )
 
 
 delayAction : DelayedAction -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 delayAction updater result =
-    mapModel (addDelayedAction updater) result
+    mapModel (Model.addDelayedAction updater) result
 
 
 mapModel : ModelUpdater -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )

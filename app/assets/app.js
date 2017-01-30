@@ -10131,9 +10131,6 @@ var _user$project$Types$UpdateCard = F2(
 var _user$project$Types$UpdateModel = function (a) {
 	return {ctor: 'UpdateModel', _0: a};
 };
-var _user$project$Types$SendRequest = function (a) {
-	return {ctor: 'SendRequest', _0: a};
-};
 var _user$project$Types$Noop = {ctor: 'Noop'};
 
 var _user$project$ModelUpdater$updateRule = F3(
@@ -10239,6 +10236,11 @@ var _user$project$ModelUpdater$addDelayedAction = F2(
 				delayed: A3(_elm_lang$core$Dict$insert, model.lastRequestNo, action, model.delayed)
 			});
 	});
+var _user$project$ModelUpdater$incrementLastRequestNo = function (model) {
+	return _elm_lang$core$Native_Utils.update(
+		model,
+		{lastRequestNo: model.lastRequestNo + 1});
+};
 
 var _user$project$Decoder_Delayed$resetAddButton = function (card) {
 	return A2(
@@ -10668,72 +10670,19 @@ var _user$project$State$delayAction = F2(
 			_user$project$ModelUpdater$addDelayedAction(updater),
 			result);
 	});
-var _user$project$State$update = F2(
-	function (msg, model) {
-		var _p7 = msg;
-		switch (_p7.ctor) {
-			case 'Noop':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'SendRequest':
-				var m = _elm_lang$core$Native_Utils.update(
-					model,
-					{lastRequestNo: model.lastRequestNo + 1});
-				var cmd = A2(
-					_user$project$State$send,
-					model.flags.backendUrl,
-					A2(_user$project$Requests$toJson, m, _p7._0));
-				return {ctor: '_Tuple2', _0: m, _1: cmd};
-			case 'UpdateModel':
-				return {
-					ctor: '_Tuple2',
-					_0: A2(_user$project$State$updateModel, _p7._0, model),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-			case 'UpdateCard':
-				var _p9 = _p7._1;
-				var _p8 = _p7._0;
-				return A3(
-					_user$project$State$handleCardUpdate,
-					_p9,
-					_p8,
-					A3(
-						_user$project$ModelUpdater$updateCard,
-						_p8.id,
-						_elm_lang$core$Maybe$map(
-							_user$project$Card_State$update(_p9)),
-						model));
-			default:
-				var _p11 = _p7._0;
-				var _p10 = _p7._1;
-				return A3(
-					_user$project$State$handleRuleUpdate,
-					_p10,
-					_p11,
-					A3(
-						_user$project$ModelUpdater$updateRule,
-						_p11.card.id.uid,
-						_elm_lang$core$Maybe$map(
-							_user$project$Rule_State$update(_p10)),
-						model));
-		}
+var _user$project$State$sendRequest = F2(
+	function (model, request) {
+		var m = _user$project$ModelUpdater$incrementLastRequestNo(model);
+		var cmd = A2(
+			_user$project$State$send,
+			m.flags.backendUrl,
+			A2(_user$project$Requests$toJson, m, request));
+		return {ctor: '_Tuple2', _0: m, _1: cmd};
 	});
 var _user$project$State$handleCardUpdate = F3(
 	function (msg, card, model) {
-		var thing = A2(
-			_elm_lang$core$Maybe$map,
-			_user$project$State$update,
-			A2(
-				_elm_lang$core$Maybe$map,
-				_user$project$Types$SendRequest,
-				_user$project$State$newCardRequest(card)));
-		var sendRequest = function (req) {
-			return A2(
-				_user$project$State$update,
-				_user$project$Types$SendRequest(req),
-				model);
-		};
-		var _p12 = msg;
-		switch (_p12.ctor) {
+		var _p7 = msg;
+		switch (_p7.ctor) {
 			case 'StartEditing':
 				return {
 					ctor: '_Tuple2',
@@ -10747,7 +10696,9 @@ var _user$project$State$handleCardUpdate = F3(
 					_1: _user$project$State$focusCardInput(card.id.uid)
 				};
 			case 'FinishEditing':
-				return sendRequest(
+				return A2(
+					_user$project$State$sendRequest,
+					model,
 					_user$project$Requests$updateCard(card));
 			case 'FinishCreateNew':
 				return A2(
@@ -10759,7 +10710,7 @@ var _user$project$State$handleCardUpdate = F3(
 							_user$project$Types$ResetAddButton(card)),
 						A2(
 							_elm_lang$core$Maybe$map,
-							sendRequest,
+							_user$project$State$sendRequest(model),
 							_user$project$State$newCardRequest(card))));
 			default:
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
@@ -10767,19 +10718,59 @@ var _user$project$State$handleCardUpdate = F3(
 	});
 var _user$project$State$handleRuleUpdate = F3(
 	function (msg, rule, model) {
-		var _p13 = msg;
-		var _p15 = _p13._1;
-		var _p14 = _p13._0;
+		var _p8 = msg;
+		var _p10 = _p8._1;
+		var _p9 = _p8._0;
 		return A3(
 			_user$project$State$handleCardUpdate,
-			_p15,
-			_p14,
+			_p10,
+			_p9,
 			A3(
 				_user$project$ModelUpdater$updateCard,
-				_p14.id,
+				_p9.id,
 				_elm_lang$core$Maybe$map(
-					_user$project$Card_State$update(_p15)),
+					_user$project$Card_State$update(_p10)),
 				model));
+	});
+var _user$project$State$update = F2(
+	function (msg, model) {
+		var _p11 = msg;
+		switch (_p11.ctor) {
+			case 'Noop':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'UpdateModel':
+				return {
+					ctor: '_Tuple2',
+					_0: A2(_user$project$State$updateModel, _p11._0, model),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'UpdateCard':
+				var _p13 = _p11._1;
+				var _p12 = _p11._0;
+				return A3(
+					_user$project$State$handleCardUpdate,
+					_p13,
+					_p12,
+					A3(
+						_user$project$ModelUpdater$updateCard,
+						_p12.id,
+						_elm_lang$core$Maybe$map(
+							_user$project$Card_State$update(_p13)),
+						model));
+			default:
+				var _p15 = _p11._0;
+				var _p14 = _p11._1;
+				return A3(
+					_user$project$State$handleRuleUpdate,
+					_p14,
+					_p15,
+					A3(
+						_user$project$ModelUpdater$updateRule,
+						_p15.card.id.uid,
+						_elm_lang$core$Maybe$map(
+							_user$project$Rule_State$update(_p14)),
+						model));
+		}
 	});
 var _user$project$State$initialModel = function (flags) {
 	var newRuleColumn = {
@@ -10800,9 +10791,9 @@ var _user$project$State$initialModel = function (flags) {
 };
 var _user$project$State$init = function (flags) {
 	return A2(
-		_user$project$State$update,
-		_user$project$Types$SendRequest(_user$project$Requests$refresh),
-		_user$project$State$initialModel(flags));
+		_user$project$State$sendRequest,
+		_user$project$State$initialModel(flags),
+		_user$project$Requests$refresh);
 };
 
 var _user$project$Card_View_AddButton$displayButton = function (b) {
