@@ -13,14 +13,17 @@ all =
         ]
 
 
+model =
+    { lastRequestNo = 5 }
+
+
 refreshTests : Test
 refreshTests =
     describe "refresh"
         [ test "it returns the JSON" <|
             \() ->
-                Expect.equal
-                    refresh
-                    """{"type":"fetch_update"}"""
+                Requests.toJson model refresh
+                    |> Expect.equal """{"request_no":5,"type":"fetch_update"}"""
         ]
 
 
@@ -29,7 +32,7 @@ addQuestonTests =
     describe "addQuestion"
         [ test "it returns the JSON" <|
             \() ->
-                Expect.equal
-                    (addQuestion "Is this a question?")
-                    """{"type":"add_question","text":"Is this a question?"}"""
+                toJson model (Requests.addQuestion "Is this a question?")
+                    |> Expect.equal
+                        """{"request_no":5,"type":"add_question","text":"Is this a question?"}"""
         ]

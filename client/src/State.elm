@@ -6,8 +6,8 @@ import Decoder exposing (decoder)
 import Dict exposing (Dict)
 import Dom
 import Json.Decode exposing (decodeString)
-import ModelUpdater as Model
 import Ports
+import Model
 import Requests
 import Rule.State
 import Rule.Types exposing (Rule, RuleMsg(..))

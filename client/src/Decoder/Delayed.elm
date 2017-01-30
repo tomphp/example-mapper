@@ -5,7 +5,7 @@ import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (required, decode)
 import Types exposing (ModelUpdater, Model, DelayedAction(..))
 import Card.Types exposing (CardType(..), CardState(..), Card, CardMsg(SetAddButton))
-import ModelUpdater exposing (updateCard)
+import Model
 import Card.State
 
 
@@ -43,4 +43,4 @@ applyAction model action =
 
 resetAddButton : Card -> Model -> Model
 resetAddButton card =
-    updateCard card.id (Maybe.map (Card.State.update SetAddButton))
+    Model.updateCard card.id (Maybe.map (Card.State.update SetAddButton))

@@ -4,7 +4,7 @@ import Card.Types exposing (Card, CardType(..), CardState(..), CardId)
 import Types exposing (ModelUpdater, Model)
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (required, decode, hardcoded, custom)
-import ModelUpdater exposing (..)
+import Model
 import Maybe.Extra exposing (orElse)
 
 
@@ -29,7 +29,7 @@ story =
 
 replaceCard : Card -> ModelUpdater
 replaceCard card =
-    updateCard card.id (replaceWithIfNewer card)
+    Model.updateCard card.id (replaceWithIfNewer card)
 
 
 replaceWithIfNewer : Card -> Maybe Card -> Maybe Card

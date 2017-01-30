@@ -10133,7 +10133,7 @@ var _user$project$Types$UpdateModel = function (a) {
 };
 var _user$project$Types$Noop = {ctor: 'Noop'};
 
-var _user$project$ModelUpdater$updateRule = F3(
+var _user$project$Model$updateRule = F3(
 	function (id, update, model) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
@@ -10141,10 +10141,10 @@ var _user$project$ModelUpdater$updateRule = F3(
 				rules: A3(_elm_lang$core$Dict$update, id, update, model.rules)
 			});
 	});
-var _user$project$ModelUpdater$updateExampleCard = F3(
+var _user$project$Model$updateExampleCard = F3(
 	function (ruleId, id, update) {
 		return A2(
-			_user$project$ModelUpdater$updateRule,
+			_user$project$Model$updateRule,
 			ruleId,
 			_elm_lang$core$Maybe$map(
 				function (r) {
@@ -10155,7 +10155,7 @@ var _user$project$ModelUpdater$updateExampleCard = F3(
 						});
 				}));
 	});
-var _user$project$ModelUpdater$updateRuleCard = F2(
+var _user$project$Model$updateRuleCard = F2(
 	function (id, update) {
 		var updateCardInRule = F2(
 			function (u, r) {
@@ -10179,7 +10179,7 @@ var _user$project$ModelUpdater$updateRuleCard = F2(
 			},
 			update(_elm_lang$core$Maybe$Nothing));
 		return A2(
-			_user$project$ModelUpdater$updateRule,
+			_user$project$Model$updateRule,
 			id,
 			function (_p0) {
 				return A2(
@@ -10191,7 +10191,7 @@ var _user$project$ModelUpdater$updateRuleCard = F2(
 						_p0));
 			});
 	});
-var _user$project$ModelUpdater$updateQuestionCard = F3(
+var _user$project$Model$updateQuestionCard = F3(
 	function (id, update, model) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
@@ -10199,7 +10199,7 @@ var _user$project$ModelUpdater$updateQuestionCard = F3(
 				questions: A3(_elm_lang$core$Dict$update, id, update, model.questions)
 			});
 	});
-var _user$project$ModelUpdater$updateStoryCard = F2(
+var _user$project$Model$updateStoryCard = F2(
 	function (update, model) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
@@ -10207,20 +10207,20 @@ var _user$project$ModelUpdater$updateStoryCard = F2(
 				storyCard: update(model.storyCard)
 			});
 	});
-var _user$project$ModelUpdater$updateCard = function (id) {
+var _user$project$Model$updateCard = function (id) {
 	var _p1 = id.cardType;
 	switch (_p1.ctor) {
 		case 'StoryCard':
-			return _user$project$ModelUpdater$updateStoryCard;
+			return _user$project$Model$updateStoryCard;
 		case 'RuleCard':
-			return _user$project$ModelUpdater$updateRuleCard(id.uid);
+			return _user$project$Model$updateRuleCard(id.uid);
 		case 'ExampleCard':
-			return A2(_user$project$ModelUpdater$updateExampleCard, _p1._0, id.uid);
+			return A2(_user$project$Model$updateExampleCard, _p1._0, id.uid);
 		default:
-			return _user$project$ModelUpdater$updateQuestionCard(id.uid);
+			return _user$project$Model$updateQuestionCard(id.uid);
 	}
 };
-var _user$project$ModelUpdater$setClientId = F2(
+var _user$project$Model$setClientId = F2(
 	function (id, model) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
@@ -10228,7 +10228,7 @@ var _user$project$ModelUpdater$setClientId = F2(
 				clientId: _elm_lang$core$Maybe$Just(id)
 			});
 	});
-var _user$project$ModelUpdater$addDelayedAction = F2(
+var _user$project$Model$addDelayedAction = F2(
 	function (action, model) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
@@ -10236,7 +10236,7 @@ var _user$project$ModelUpdater$addDelayedAction = F2(
 				delayed: A3(_elm_lang$core$Dict$insert, model.lastRequestNo, action, model.delayed)
 			});
 	});
-var _user$project$ModelUpdater$incrementLastRequestNo = function (model) {
+var _user$project$Model$incrementLastRequestNo = function (model) {
 	return _elm_lang$core$Native_Utils.update(
 		model,
 		{lastRequestNo: model.lastRequestNo + 1});
@@ -10244,7 +10244,7 @@ var _user$project$ModelUpdater$incrementLastRequestNo = function (model) {
 
 var _user$project$Decoder_Delayed$resetAddButton = function (card) {
 	return A2(
-		_user$project$ModelUpdater$updateCard,
+		_user$project$Model$updateCard,
 		card.id,
 		_elm_lang$core$Maybe$map(
 			_user$project$Card_State$update(_user$project$Card_Types$SetAddButton)));
@@ -10307,7 +10307,7 @@ var _user$project$Decoder_SetClientId$decoder = A2(
 	},
 	A2(
 		_elm_lang$core$Json_Decode$map,
-		_user$project$ModelUpdater$setClientId,
+		_user$project$Model$setClientId,
 		A2(_elm_lang$core$Json_Decode$field, 'client_id', _elm_lang$core$Json_Decode$string)));
 
 var _user$project$Decoder_UpdateState$toCardState = function (s) {
@@ -10371,7 +10371,7 @@ var _user$project$Decoder_UpdateState$replaceWithIfNewer = F2(
 	});
 var _user$project$Decoder_UpdateState$replaceCard = function (card) {
 	return A2(
-		_user$project$ModelUpdater$updateCard,
+		_user$project$Model$updateCard,
 		card.id,
 		_user$project$Decoder_UpdateState$replaceWithIfNewer(card));
 };
@@ -10470,6 +10470,18 @@ var _user$project$Ports$socketOut = _elm_lang$core$Native_Platform.outgoingPort(
 	});
 var _user$project$Ports$socketIn = _elm_lang$core$Native_Platform.incomingPort('socketIn', _elm_lang$core$Json_Decode$string);
 
+var _user$project$Requests$addRequestNo = F2(
+	function (requestNo, request) {
+		return {
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'request_no',
+				_1: _elm_lang$core$Json_Encode$int(requestNo)
+			},
+			_1: request
+		};
+	});
 var _user$project$Requests$updateCard = function (card) {
 	return {
 		ctor: '::',
@@ -10572,18 +10584,6 @@ var _user$project$Requests$refresh = {
 	},
 	_1: {ctor: '[]'}
 };
-var _user$project$Requests$addRequestNo = F2(
-	function (requestNo, request) {
-		return {
-			ctor: '::',
-			_0: {
-				ctor: '_Tuple2',
-				_0: 'request_no',
-				_1: _elm_lang$core$Json_Encode$int(requestNo)
-			},
-			_1: request
-		};
-	});
 var _user$project$Requests$toJson = function (model) {
 	return function (_p0) {
 		return A2(
@@ -10667,12 +10667,12 @@ var _user$project$State$delayAction = F2(
 	function (updater, result) {
 		return A2(
 			_user$project$State$mapModel,
-			_user$project$ModelUpdater$addDelayedAction(updater),
+			_user$project$Model$addDelayedAction(updater),
 			result);
 	});
 var _user$project$State$sendRequest = F2(
 	function (model, request) {
-		var m = _user$project$ModelUpdater$incrementLastRequestNo(model);
+		var m = _user$project$Model$incrementLastRequestNo(model);
 		var cmd = A2(
 			_user$project$State$send,
 			m.flags.backendUrl,
@@ -10726,7 +10726,7 @@ var _user$project$State$handleRuleUpdate = F3(
 			_p10,
 			_p9,
 			A3(
-				_user$project$ModelUpdater$updateCard,
+				_user$project$Model$updateCard,
 				_p9.id,
 				_elm_lang$core$Maybe$map(
 					_user$project$Card_State$update(_p10)),
@@ -10752,7 +10752,7 @@ var _user$project$State$update = F2(
 					_p13,
 					_p12,
 					A3(
-						_user$project$ModelUpdater$updateCard,
+						_user$project$Model$updateCard,
 						_p12.id,
 						_elm_lang$core$Maybe$map(
 							_user$project$Card_State$update(_p13)),
@@ -10765,7 +10765,7 @@ var _user$project$State$update = F2(
 					_p14,
 					_p15,
 					A3(
-						_user$project$ModelUpdater$updateRule,
+						_user$project$Model$updateRule,
 						_p15.card.id.uid,
 						_elm_lang$core$Maybe$map(
 							_user$project$Rule_State$update(_p14)),

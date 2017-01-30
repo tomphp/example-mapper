@@ -1,7 +1,6 @@
 module Requests
     exposing
-        ( addRequestNo
-        , refresh
+        ( refresh
         , addQuestion
         , addRule
         , addExample
@@ -14,16 +13,11 @@ import Card.Types exposing (Card)
 import Types exposing (Request, Model)
 
 
-toJson : Model -> Request -> String
+toJson : { a | lastRequestNo : Int } -> Request -> String
 toJson model =
     addRequestNo model.lastRequestNo
         >> Json.Encode.object
         >> Json.Encode.encode 0
-
-
-addRequestNo : Int -> Request -> Request
-addRequestNo requestNo request =
-    ( "request_no", int requestNo ) :: request
 
 
 refresh : Request
@@ -59,3 +53,8 @@ updateCard card =
     , ( "id", string card.id.uid )
     , ( "text", string card.text )
     ]
+
+
+addRequestNo : Int -> Request -> Request
+addRequestNo requestNo request =
+    ( "request_no", int requestNo ) :: request

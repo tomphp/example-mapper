@@ -1,4 +1,4 @@
-module ModelUpdater
+module Model
     exposing
         ( addDelayedAction
         , incrementLastRequestNo
