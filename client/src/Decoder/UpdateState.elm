@@ -8,6 +8,10 @@ import Model
 import Maybe.Extra exposing (orElse)
 
 
+type alias Versioned a =
+    { a | version : Int }
+
+
 decoder : Decoder (List ModelUpdater)
 decoder =
     field "state" state
@@ -30,22 +34,6 @@ story =
 replaceCard : Card -> ModelUpdater
 replaceCard card =
     Model.updateCard card.id (replaceWithIfNewer card)
-
-
-replaceWithIfNewer : Card -> Maybe Card -> Maybe Card
-replaceWithIfNewer newCard oldCard =
-    let
-        isNewerThan =
-            \old new -> new.version > old.version
-
-        mostRecent =
-            \new old ->
-                if new |> isNewerThan old then
-                    new
-                else
-                    old
-    in
-        Maybe.map (mostRecent newCard) oldCard |> orElse (Just newCard)
 
 
 questions : Decoder (List ModelUpdater)
@@ -111,3 +99,21 @@ toCardState s =
 
         _ ->
             Saved
+
+
+replaceWithIfNewer : Card -> Maybe Card -> Maybe Card
+replaceWithIfNewer newCard oldCard =
+    Maybe.map (mostRecent newCard) oldCard |> orElse (Just newCard)
+
+
+mostRecent : Card -> Card -> Card
+mostRecent new old =
+    if new |> isNewerThan old then
+        new
+    else
+        old
+
+
+isNewerThan : Versioned a -> Versioned a -> Bool
+isNewerThan old new =
+    new.version > old.version

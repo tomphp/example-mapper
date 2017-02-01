@@ -10351,22 +10351,22 @@ var _user$project$Decoder_UpdateState$card = function (cardType) {
 						_user$project$Decoder_UpdateState$cardId(cardType),
 						_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$decode(_user$project$Card_Types$Card))))));
 };
+var _user$project$Decoder_UpdateState$isNewerThan = F2(
+	function (old, $new) {
+		return _elm_lang$core$Native_Utils.cmp($new.version, old.version) > 0;
+	});
+var _user$project$Decoder_UpdateState$mostRecent = F2(
+	function ($new, old) {
+		return A2(_user$project$Decoder_UpdateState$isNewerThan, old, $new) ? $new : old;
+	});
 var _user$project$Decoder_UpdateState$replaceWithIfNewer = F2(
 	function (newCard, oldCard) {
-		var isNewerThan = F2(
-			function (old, $new) {
-				return _elm_lang$core$Native_Utils.cmp($new.version, old.version) > 0;
-			});
-		var mostRecent = F2(
-			function ($new, old) {
-				return A2(isNewerThan, old, $new) ? $new : old;
-			});
 		return A2(
 			_elm_community$maybe_extra$Maybe_Extra$orElse,
 			_elm_lang$core$Maybe$Just(newCard),
 			A2(
 				_elm_lang$core$Maybe$map,
-				mostRecent(newCard),
+				_user$project$Decoder_UpdateState$mostRecent(newCard),
 				oldCard));
 	});
 var _user$project$Decoder_UpdateState$replaceCard = function (card) {
