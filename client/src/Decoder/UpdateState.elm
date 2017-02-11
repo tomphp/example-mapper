@@ -19,52 +19,45 @@ decoder =
 
 state : Decoder (List ModelUpdater)
 state =
+    allCards |> map (List.map replaceCard)
+
+
+allCards : Decoder (List Card)
+allCards =
     field "story_card" story
         |> map2 (++) (field "questions" questions)
         |> map2 (++) (field "rules" rules)
 
 
-story : Decoder (List ModelUpdater)
+story : Decoder (List Card)
 story =
-    card StoryCard
-        |> map replaceCard
-        |> map (\x -> [ x ])
+    card StoryCard |> map (\x -> [ x ])
 
 
-replaceCard : Card -> ModelUpdater
-replaceCard card =
-    Model.updateCard card.id (replaceWithIfNewer card)
-
-
-questions : Decoder (List ModelUpdater)
+questions : Decoder (List Card)
 questions =
-    card QuestionCard
-        |> map replaceCard
-        |> list
+    card QuestionCard |> list
 
 
-rules : Decoder (List ModelUpdater)
+rules : Decoder (List Card)
 rules =
-    rule
-        |> list
-        |> map List.concat
+    rule |> list |> map List.concat
 
 
-rule : Decoder (List ModelUpdater)
+rule : Decoder (List Card)
 rule =
     let
         ruleCard =
             field "rule_card" (card RuleCard)
     in
         map2 (::)
-            (ruleCard |> map replaceCard)
+            ruleCard
             (ruleCard |> andThen examples)
 
 
-examples : Card -> Decoder (List ModelUpdater)
+examples : Card -> Decoder (List Card)
 examples ruleCard =
     card (ExampleCard ruleCard.id.uid)
-        |> map replaceCard
         |> list
         |> field "examples"
 
@@ -99,6 +92,11 @@ toCardState s =
 
         _ ->
             Saved
+
+
+replaceCard : Card -> ModelUpdater
+replaceCard card =
+    Model.updateCard card.id (replaceWithIfNewer card)
 
 
 replaceWithIfNewer : Card -> Maybe Card -> Maybe Card
