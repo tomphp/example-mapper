@@ -1,7 +1,6 @@
 module Decoder.UpdateState exposing (decoder)
 
 import Card.Types exposing (Card, CardType(..), CardState(..), CardId)
-import Dict
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (required, decode, hardcoded, custom)
 import Maybe.Extra exposing (orElse)
@@ -23,8 +22,7 @@ state =
     allCards
         |> andThen
             (\cards ->
-                succeed
-                    (List.map replaceCard cards ++ [ cleanUpAction cards ])
+                succeed (List.map replaceCard cards ++ [ cleanUpAction cards ])
             )
 
 
@@ -37,9 +35,7 @@ allCards =
 
 cleanUpAction : List Card -> ModelUpdater
 cleanUpAction =
-    List.map (\card -> ( card.id.uid, card.id ))
-        >> Dict.fromList
-        >> Model.cleanUp
+    List.map .id >> Model.cleanUp
 
 
 story : Decoder (List Card)

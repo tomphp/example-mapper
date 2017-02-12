@@ -17,13 +17,16 @@ view r =
 
 
 examples : Rule -> Html RuleMsg
-examples rule =
-    div [ class "examples" ] (rule.examples |> Dict.values |> exampleCards)
+examples =
+    .examples
+        >> Dict.values
+        >> exampleCards
+        >> div [ class "examples" ]
 
 
 exampleCards : List Card -> List (Html RuleMsg)
-exampleCards examples =
-    examples |> List.sortBy .position |> List.map divCard
+exampleCards =
+    List.sortBy .position >> List.map divCard
 
 
 divCard : Card -> Html RuleMsg

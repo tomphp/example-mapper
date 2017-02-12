@@ -9,6 +9,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Json
 import Json.Decode as Json
+import Maybe.Extra
 import List
 
 
@@ -177,39 +178,45 @@ cardName card =
 
 cardClass : CardType -> CardState -> String
 cardClass cardType cardState =
-    String.concat [ "card", cardTypeClass cardType, cardStateClass cardState ]
+    [ Just "card"
+    , Just (cardTypeClass cardType)
+    , cardStateClass cardState
+    ]
+        |> Maybe.Extra.values
+        |> List.intersperse " "
+        |> String.concat
 
 
 cardTypeClass : CardType -> String
 cardTypeClass cardType =
     case cardType of
         StoryCard ->
-            " card--story"
+            "card--story"
 
         RuleCard ->
-            " card--rule"
+            "card--rule"
 
         ExampleCard _ ->
-            " card--example"
+            "card--example"
 
         QuestionCard ->
-            " card--question"
+            "card--question"
 
 
-cardStateClass : CardState -> String
+cardStateClass : CardState -> Maybe String
 cardStateClass state =
     case state of
         Editing _ ->
-            " card--editing"
+            Just "card--editing"
 
         Preparing ->
-            " card--editing"
+            Just "card--editing"
 
         Saving ->
-            " card--saving"
+            Just "card--saving"
 
         _ ->
-            ""
+            Nothing
 
 
 cardContent : Card -> Html CardMsg

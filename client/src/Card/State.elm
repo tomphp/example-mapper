@@ -42,7 +42,7 @@ update msg card =
 
 addCardButton : CardType -> Card
 addCardButton cardType =
-    { id = { uid = cardId cardType, cardType = cardType }
+    { id = { uid = addCardButtonId cardType, cardType = cardType }
     , state = AddButton
     , text = ""
     , position = 999
@@ -50,8 +50,8 @@ addCardButton cardType =
     }
 
 
-cardId : CardType -> String
-cardId cardType =
+addCardButtonId : CardType -> String
+addCardButtonId cardType =
     case cardType of
         RuleCard ->
             "new-rule"

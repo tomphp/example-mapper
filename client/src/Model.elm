@@ -88,9 +88,9 @@ updateRule id update model =
     { model | rules = Dict.update id update model.rules }
 
 
-cleanUp : Dict String CardId -> Model -> Model
+cleanUp : List CardId -> Model -> Model
 cleanUp keep model =
-    Dict.diff (Debug.log "all" <| allCardIds model) (Debug.log "keep" keep)
+    Dict.diff (allCardIds model) (idDict keep)
         |> Dict.filter (\id _ -> String.startsWith "new-" id |> not)
         |> Dict.foldl (\_ -> deleteCard) model
 
@@ -117,8 +117,7 @@ allCardIds model =
         ++ allRuleIds model
         ++ allExampleIds model
     )
-        |> List.map (\id -> ( id.uid, id ))
-        |> Dict.fromList
+        |> idDict
 
 
 allQuestionIds : Model -> List CardId
@@ -139,3 +138,8 @@ allExampleIds =
         >> List.map Dict.values
         >> List.concat
         >> List.map .id
+
+
+idDict : List CardId -> Dict String CardId
+idDict =
+    List.map (\id -> ( id.uid, id )) >> Dict.fromList

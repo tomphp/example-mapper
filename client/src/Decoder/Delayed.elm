@@ -20,18 +20,23 @@ decoder =
 buildUpdater : ( String, Int ) -> ModelUpdater
 buildUpdater ( clientId, requestNo ) =
     \model ->
-        let
-            modelIfClientIdMatches clientId model =
-                if Just clientId == model.clientId then
-                    Just model
-                else
-                    Nothing
-        in
-            modelIfClientIdMatches clientId model
-                |> Maybe.map .delayed
-                |> Maybe.andThen (Dict.get requestNo)
-                |> Maybe.map (applyAction model)
-                |> Maybe.withDefault model
+        modelIfClientIdMatches clientId model
+            |> Maybe.andThen (getActionForRequest requestNo)
+            |> Maybe.map (applyAction model)
+            |> Maybe.withDefault model
+
+
+modelIfClientIdMatches : String -> Model -> Maybe Model
+modelIfClientIdMatches clientId model =
+    if Just clientId == model.clientId then
+        Just model
+    else
+        Nothing
+
+
+getActionForRequest : Int -> Model -> Maybe DelayedAction
+getActionForRequest requestNo =
+    .delayed >> Dict.get requestNo
 
 
 applyAction : Model -> DelayedAction -> Model
