@@ -6,12 +6,13 @@ module Model
         , updateQuestionCard
         , updateRule
         , updateCard
+        , cleanUp
         , setClientId
         )
 
 import Card.State exposing (addCardButton)
 import Card.Types exposing (Card, CardType(..), CardId)
-import Dict
+import Dict exposing (Dict)
 import Rule.Types exposing (RuleId, Rule)
 import Types exposing (Model, ModelUpdater, DelayedAction)
 import Maybe.Extra exposing (orElse)
@@ -85,3 +86,56 @@ updateExampleCard ruleId id update =
 updateRule : RuleId -> (Maybe Rule -> Maybe Rule) -> Model -> Model
 updateRule id update model =
     { model | rules = Dict.update id update model.rules }
+
+
+cleanUp : Dict String CardId -> Model -> Model
+cleanUp keep model =
+    Dict.diff (Debug.log "all" <| allCardIds model) (Debug.log "keep" keep)
+        |> Dict.filter (\id _ -> String.startsWith "new-" id |> not)
+        |> Dict.foldl (\_ -> deleteCard) model
+
+
+deleteCard : CardId -> Model -> Model
+deleteCard id model =
+    case id.cardType of
+        StoryCard ->
+            model
+
+        RuleCard ->
+            { model | rules = Dict.remove id.uid model.rules }
+
+        ExampleCard ruleId ->
+            updateRule ruleId (Maybe.map (\r -> { r | examples = Dict.remove id.uid r.examples })) model
+
+        QuestionCard ->
+            { model | questions = Dict.remove id.uid model.questions }
+
+
+allCardIds : Model -> Dict String CardId
+allCardIds model =
+    (allQuestionIds model
+        ++ allRuleIds model
+        ++ allExampleIds model
+    )
+        |> List.map (\id -> ( id.uid, id ))
+        |> Dict.fromList
+
+
+allQuestionIds : Model -> List CardId
+allQuestionIds =
+    .questions >> Dict.values >> List.map .id
+
+
+allRuleIds : Model -> List CardId
+allRuleIds =
+    .rules >> Dict.values >> List.map (.card >> .id)
+
+
+allExampleIds : Model -> List CardId
+allExampleIds =
+    .rules
+        >> Dict.values
+        >> List.map .examples
+        >> List.map Dict.values
+        >> List.concat
+        >> List.map .id

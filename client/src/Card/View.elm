@@ -1,5 +1,6 @@
 module Card.View exposing (view)
 
+import Card.Types exposing (CardMsg(..))
 import Card.Types exposing (CardState(..), Card, CardType(..))
 import Card.View.AddButton as AddButton
 import Card.View.Background as Background
@@ -7,8 +8,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Json.Decode as Json
+import Json.Decode as Json
 import List
-import Card.Types exposing (CardMsg(..))
 
 
 view : Card -> Html CardMsg
@@ -40,37 +41,61 @@ drawCard card =
     in
         div attributes
             (List.concat
-                [ toolbar card
+                [ [ toolbar card ]
                 , [ Background.view card ]
                 , [ cardContent card ]
+                , cardOverlay card
                 ]
             )
 
 
-toolbar : Card -> List (Html CardMsg)
+toolbar : Card -> Html CardMsg
 toolbar card =
-    case card.state of
-        Preparing ->
-            [ editToolbar card ]
+    div [ class "card__toolbar" ]
+        (case card.state of
+            Preparing ->
+                editToolbar card
 
-        Editing _ ->
-            [ editToolbar card ]
+            Editing _ ->
+                editToolbar card
+
+            Saved ->
+                normalToolbar card
+
+            _ ->
+                []
+        )
+
+
+normalToolbar : Card -> List (Html CardMsg)
+normalToolbar card =
+    case card.id.cardType of
+        StoryCard ->
+            []
 
         _ ->
-            []
-
-
-editToolbar : Card -> Html CardMsg
-editToolbar card =
-    div [ class "card__toolbar" ]
-        [ button
-            [ class "card__toolbar-button card__toolbar-button--save"
-            , onClick (saveAction card)
-            , title "Save card"
+            [ button
+                [ class "card__toolbar-button card__toolbar-button--delete"
+                , onWithOptions
+                    "click"
+                    { preventDefault = True, stopPropagation = True }
+                    (Json.succeed RequestDelete)
+                , title "Delete Card"
+                ]
+                []
             ]
-            []
-        , cancelButton card
+
+
+editToolbar : Card -> List (Html CardMsg)
+editToolbar card =
+    [ button
+        [ class "card__toolbar-button card__toolbar-button--save"
+        , onClick (saveAction card)
+        , title "Save card"
         ]
+        []
+    , cancelButton card
+    ]
 
 
 cancelButton : Card -> Html CardMsg
@@ -105,6 +130,49 @@ saveAction card =
 
         _ ->
             FinishEditing
+
+
+cardOverlay : Card -> List (Html CardMsg)
+cardOverlay card =
+    case card.state of
+        DeleteRequested ->
+            [ div
+                [ class "card__overlay card__overlay--yes-no" ]
+                [ div [ class "card__overlay__message" ]
+                    [ text ("Are you sure you want to delete this " ++ (cardName card) ++ "?") ]
+                , div [ class "card__overlay__buttons" ]
+                    [ button
+                        [ class "card__overlay__button card__overlay__button--yes"
+                        , onClick ConfirmDelete
+                        ]
+                        []
+                    , button
+                        [ class "card__overlay__button card__overlay__button--no"
+                        , onClick CancelDelete
+                        ]
+                        []
+                    ]
+                ]
+            ]
+
+        _ ->
+            []
+
+
+cardName : Card -> String
+cardName card =
+    case card.id.cardType of
+        StoryCard ->
+            "story"
+
+        RuleCard ->
+            "rule"
+
+        ExampleCard _ ->
+            "example"
+
+        QuestionCard ->
+            "question"
 
 
 cardClass : CardType -> CardState -> String

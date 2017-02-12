@@ -1,11 +1,12 @@
 module Decoder.UpdateState exposing (decoder)
 
 import Card.Types exposing (Card, CardType(..), CardState(..), CardId)
-import Types exposing (ModelUpdater, Model)
+import Dict
 import Json.Decode exposing (..)
 import Json.Decode.Pipeline exposing (required, decode, hardcoded, custom)
-import Model
 import Maybe.Extra exposing (orElse)
+import Model
+import Types exposing (ModelUpdater, Model)
 
 
 type alias Versioned a =
@@ -19,7 +20,12 @@ decoder =
 
 state : Decoder (List ModelUpdater)
 state =
-    allCards |> map (List.map replaceCard)
+    allCards
+        |> andThen
+            (\cards ->
+                succeed
+                    (List.map replaceCard cards ++ [ cleanUpAction cards ])
+            )
 
 
 allCards : Decoder (List Card)
@@ -27,6 +33,13 @@ allCards =
     field "story_card" story
         |> map2 (++) (field "questions" questions)
         |> map2 (++) (field "rules" rules)
+
+
+cleanUpAction : List Card -> ModelUpdater
+cleanUpAction =
+    List.map (\card -> ( card.id.uid, card.id ))
+        >> Dict.fromList
+        >> Model.cleanUp
 
 
 story : Decoder (List Card)
@@ -46,13 +59,8 @@ rules =
 
 rule : Decoder (List Card)
 rule =
-    let
-        ruleCard =
-            field "rule_card" (card RuleCard)
-    in
-        map2 (::)
-            ruleCard
-            (ruleCard |> andThen examples)
+    field "rule_card" (card RuleCard)
+        |> andThen (\card -> map2 (::) (succeed card) (examples card))
 
 
 examples : Card -> Decoder (List Card)

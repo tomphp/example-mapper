@@ -30,6 +30,15 @@ update msg card =
         SetAddButton ->
             { card | state = AddButton, text = "" }
 
+        RequestDelete ->
+            { card | state = DeleteRequested }
+
+        CancelDelete ->
+            { card | state = Saved }
+
+        ConfirmDelete ->
+            { card | state = Saving }
+
 
 addCardButton : CardType -> Card
 addCardButton cardType =

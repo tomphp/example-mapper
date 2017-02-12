@@ -5,11 +5,12 @@ module Requests
         , addRule
         , addExample
         , updateCard
+        , deleteCard
         , toJson
         )
 
 import Json.Encode exposing (..)
-import Card.Types exposing (Card)
+import Card.Types exposing (Card, CardType(..))
 import Types exposing (Request, Model)
 
 
@@ -53,6 +54,28 @@ updateCard card =
     , ( "id", string card.id.uid )
     , ( "text", string card.text )
     ]
+
+
+deleteCard : Card -> Request
+deleteCard card =
+    let
+        messageType =
+            case card.id.cardType of
+                RuleCard ->
+                    "delete_rule"
+
+                ExampleCard _ ->
+                    "delete_example"
+
+                QuestionCard ->
+                    "delete_question"
+
+                StoryCard ->
+                    "noop"
+    in
+        [ ( "type", string messageType )
+        , ( "id", string card.id.uid )
+        ]
 
 
 addRequestNo : Int -> Request -> Request

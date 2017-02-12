@@ -115,6 +115,9 @@ handleCardUpdate msg card model =
                 |> Maybe.map (delayAction (ResetAddButton card))
                 |> Maybe.withDefault ( model, Cmd.none )
 
+        ConfirmDelete ->
+            sendRequest model (Requests.deleteCard card)
+
         _ ->
             ( model, Cmd.none )
 

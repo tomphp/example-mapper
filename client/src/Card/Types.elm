@@ -35,6 +35,7 @@ type CardState
     | Locked
     | Saving
     | Saved
+    | DeleteRequested
 
 
 type CardMsg
@@ -46,3 +47,6 @@ type CardMsg
     | FinishCreateNew
     | CancelCreateNew
     | SetAddButton
+    | RequestDelete
+    | ConfirmDelete
+    | CancelDelete

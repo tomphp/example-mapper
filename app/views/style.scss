@@ -19,6 +19,7 @@ $panel-padding: 15px;
 
 $card-z-index: 100;
 $panel-z-index: 200;
+$overlay-z-index: 110;
 
 $card-small-width: 254px;
 $card-small-height: 152px;
@@ -221,11 +222,17 @@ body {
 
   &__toolbar-button {
     background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center center;
     width: 26px;
     height: 26px;
     border: none;
     cursor: pointer;
     margin: 2px;
+  }
+
+  &__toolbar-button--delete {
+    background-image: url('/glyphicons-17-bin.png')
   }
 
   &__toolbar-button--save {
@@ -234,6 +241,45 @@ body {
 
   &__toolbar-button--cancel {
     background-image: url('/glyphicons-193-remove-sign.png')
+  }
+
+  &__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: $overlay-z-index;
+
+    &__message {
+      margin-top: 50px;
+      color: #fff;
+      font-weight: bold;
+      text-align: center;
+      padding: 10px;
+    }
+
+    &__buttons {
+      text-align: center;
+    }
+
+    &__button {
+      background-color: transparent;
+      width: 26px;
+      height: 26px;
+      border: none;
+      cursor: pointer;
+      margin: 2px;
+    }
+
+    &__button--no {
+      background-image: url('/glyphicons-193-remove-sign.png')
+    }
+
+    &__button--yes {
+      background-image: url('/glyphicons-194-ok-sign.png')
+    }
   }
 
   &__text {

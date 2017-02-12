@@ -92,6 +92,15 @@ module ExampleMapper
               when 'add_example'
                 id = SecureRandom.uuid
                 @storage.add_example(story_id, data['rule_id'], id, data['text'])
+
+              when 'delete_question'
+                @storage.delete_question(data['id'])
+
+              when 'delete_rule'
+                @storage.delete_rule(data['id'])
+
+              when 'delete_example'
+                @storage.delete_example(data['id'])
               end
 
               @redis.publish(CHANNEL, {

@@ -79,7 +79,32 @@ module ExampleMapper
         end
       end
 
+      def delete_question(id)
+        delete_card(id)
+      end
+
+      def delete_example(id)
+        transaction do
+          delete_card(id)
+          query("DELETE FROM examples WHERE card_id = '#{e(id)}'")
+        end
+      end
+
+      def delete_rule(id)
+        transaction do
+          fetch_examples(id).each do |example|
+            delete_card(example['card_id'])
+          end
+          query("DELETE FROM examples WHERE rule_card_id = '#{e(id)}'")
+          delete_card(id)
+        end
+      end
+
       private
+
+      def delete_card(id)
+        query("DELETE FROM cards WHERE card_id = '#{e(id)}'")
+      end
 
       def format_card(row)
         {
