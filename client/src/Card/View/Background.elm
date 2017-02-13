@@ -54,13 +54,14 @@ lines : List (Svg CardMsg)
 lines =
     let
         start =
-            3 * lineHeight
+            3
 
         end =
-            cardHeight
+            cardHeight // lineHeight
 
         lines =
-            List.filter (divisibleBy lineHeight) (List.range start end)
+            List.range start end
+                |> List.map ((*) lineHeight)
                 |> List.map toString
     in
         List.map
@@ -75,8 +76,3 @@ lines =
                     []
             )
             lines
-
-
-divisibleBy : Int -> Int -> Bool
-divisibleBy divisor number =
-    number % divisor == 0
