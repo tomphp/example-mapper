@@ -11461,26 +11461,45 @@ var _user$project$Card_View$normalToolbar = function (card) {
 	}
 };
 var _user$project$Card_View$toolbar = function (card) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('card__toolbar'),
-			_1: {ctor: '[]'}
-		},
-		function () {
-			var _p8 = card.state;
-			switch (_p8.ctor) {
-				case 'Preparing':
-					return _user$project$Card_View$editToolbar(card);
-				case 'Editing':
-					return _user$project$Card_View$editToolbar(card);
-				case 'Saved':
-					return _user$project$Card_View$normalToolbar(card);
-				default:
-					return {ctor: '[]'};
-			}
-		}());
+	var _p8 = card.state;
+	switch (_p8.ctor) {
+		case 'Preparing':
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('card__toolbar'),
+					_1: {ctor: '[]'}
+				},
+				_user$project$Card_View$editToolbar(card));
+		case 'Editing':
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('card__toolbar'),
+					_1: {ctor: '[]'}
+				},
+				_user$project$Card_View$editToolbar(card));
+		case 'Saved':
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('card__toolbar card__toolbar--mouseover'),
+					_1: {ctor: '[]'}
+				},
+				_user$project$Card_View$normalToolbar(card));
+		default:
+			return A2(
+				_elm_lang$html$Html$div,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Attributes$class('card__toolbar'),
+					_1: {ctor: '[]'}
+				},
+				{ctor: '[]'});
+	}
 };
 var _user$project$Card_View$drawCard = function (card) {
 	var clickHandler = function () {

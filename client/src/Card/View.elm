@@ -52,20 +52,18 @@ drawCard card =
 
 toolbar : Card -> Html CardMsg
 toolbar card =
-    div [ class "card__toolbar" ]
-        (case card.state of
-            Preparing ->
-                editToolbar card
+    case card.state of
+        Preparing ->
+            div [ class "card__toolbar" ] (editToolbar card)
 
-            Editing _ ->
-                editToolbar card
+        Editing _ ->
+            div [ class "card__toolbar" ] (editToolbar card)
 
-            Saved ->
-                normalToolbar card
+        Saved ->
+            div [ class "card__toolbar card__toolbar--mouseover" ] (normalToolbar card)
 
-            _ ->
-                []
-        )
+        _ ->
+            div [ class "card__toolbar" ] []
 
 
 normalToolbar : Card -> List (Html CardMsg)

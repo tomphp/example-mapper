@@ -336,6 +336,19 @@ body {
   }
 }
 
+.card .card__toolbar--mouseover {
+  opacity: 0;
+  -webkit-transition: opacity .5s ease-in-out;
+  -moz-transition: opacity .5s ease-in-out;
+  -ms-transition: opacity .5s ease-in-out;
+  -o-transition: opacity .5s ease-in-out;
+  transition: opacity .5s ease-in-out;
+}
+
+.card:hover .card__toolbar--mouseover {
+  opacity: 1;
+}
+
 textarea.card__input:focus {
     outline-width: 0;
 }
