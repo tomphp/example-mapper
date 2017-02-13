@@ -14,28 +14,26 @@ decoder =
     decode (,)
         |> required "from" string
         |> required "client_request_no" int
-        |> map buildUpdater
+        |> map (uncurry buildUpdater)
 
 
-buildUpdater : ( String, Int ) -> ModelUpdater
-buildUpdater ( clientId, requestNo ) =
-    \model ->
-        modelIfClientIdMatches clientId model
-            |> Maybe.andThen (getActionForRequest requestNo)
+buildUpdater : String -> Int -> ModelUpdater
+buildUpdater clientId requestNo model =
+    if clientIdMatches clientId model then
+        actionForRequest requestNo model
             |> Maybe.map (applyAction model)
             |> Maybe.withDefault model
-
-
-modelIfClientIdMatches : String -> Model -> Maybe Model
-modelIfClientIdMatches clientId model =
-    if Just clientId == model.clientId then
-        Just model
     else
-        Nothing
+        model
 
 
-getActionForRequest : Int -> Model -> Maybe DelayedAction
-getActionForRequest requestNo =
+clientIdMatches : String -> Model -> Bool
+clientIdMatches clientId model =
+    Just clientId == model.clientId
+
+
+actionForRequest : Int -> Model -> Maybe DelayedAction
+actionForRequest requestNo =
     .delayed >> Dict.get requestNo
 
 

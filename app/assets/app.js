@@ -10388,7 +10388,7 @@ var _user$project$Decoder_Delayed$applyAction = F2(
 		var _p0 = action;
 		return A2(_user$project$Decoder_Delayed$resetAddButton, _p0._0, model);
 	});
-var _user$project$Decoder_Delayed$getActionForRequest = function (requestNo) {
+var _user$project$Decoder_Delayed$actionForRequest = function (requestNo) {
 	return function (_p1) {
 		return A2(
 			_elm_lang$core$Dict$get,
@@ -10398,29 +10398,25 @@ var _user$project$Decoder_Delayed$getActionForRequest = function (requestNo) {
 			}(_p1));
 	};
 };
-var _user$project$Decoder_Delayed$modelIfClientIdMatches = F2(
+var _user$project$Decoder_Delayed$clientIdMatches = F2(
 	function (clientId, model) {
 		return _elm_lang$core$Native_Utils.eq(
 			_elm_lang$core$Maybe$Just(clientId),
-			model.clientId) ? _elm_lang$core$Maybe$Just(model) : _elm_lang$core$Maybe$Nothing;
+			model.clientId);
 	});
-var _user$project$Decoder_Delayed$buildUpdater = F2(
-	function (_p2, model) {
-		var _p3 = _p2;
-		return A2(
+var _user$project$Decoder_Delayed$buildUpdater = F3(
+	function (clientId, requestNo, model) {
+		return A2(_user$project$Decoder_Delayed$clientIdMatches, clientId, model) ? A2(
 			_elm_lang$core$Maybe$withDefault,
 			model,
 			A2(
 				_elm_lang$core$Maybe$map,
 				_user$project$Decoder_Delayed$applyAction(model),
-				A2(
-					_elm_lang$core$Maybe$andThen,
-					_user$project$Decoder_Delayed$getActionForRequest(_p3._1),
-					A2(_user$project$Decoder_Delayed$modelIfClientIdMatches, _p3._0, model))));
+				A2(_user$project$Decoder_Delayed$actionForRequest, requestNo, model))) : model;
 	});
 var _user$project$Decoder_Delayed$decoder = A2(
 	_elm_lang$core$Json_Decode$map,
-	_user$project$Decoder_Delayed$buildUpdater,
+	_elm_lang$core$Basics$uncurry(_user$project$Decoder_Delayed$buildUpdater),
 	A3(
 		_NoRedInk$elm_decode_pipeline$Json_Decode_Pipeline$required,
 		'client_request_no',
