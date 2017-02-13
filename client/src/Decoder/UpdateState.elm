@@ -19,11 +19,7 @@ decoder =
 
 state : Decoder (List ModelUpdater)
 state =
-    allCards
-        |> andThen
-            (\cards ->
-                succeed (List.map replaceCard cards ++ [ cleanUpAction cards ])
-            )
+    allCards |> andThen (updates >> succeed)
 
 
 allCards : Decoder (List Card)
@@ -31,6 +27,11 @@ allCards =
     field "story_card" story
         |> map2 (++) (field "questions" questions)
         |> map2 (++) (field "rules" rules)
+
+
+updates : List Card -> List ModelUpdater
+updates cards =
+    List.map replaceCard cards ++ [ cleanUpAction cards ]
 
 
 cleanUpAction : List Card -> ModelUpdater
@@ -50,7 +51,7 @@ questions =
 
 rules : Decoder (List Card)
 rules =
-    rule |> list |> map List.concat
+    list rule |> map List.concat
 
 
 rule : Decoder (List Card)
@@ -61,9 +62,7 @@ rule =
 
 examples : Card -> Decoder (List Card)
 examples ruleCard =
-    card (ExampleCard ruleCard.id.uid)
-        |> list
-        |> field "examples"
+    field "examples" (list (card (ExampleCard ruleCard.id.uid)))
 
 
 card : CardType -> Decoder Card

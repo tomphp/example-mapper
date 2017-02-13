@@ -10215,6 +10215,14 @@ var _user$project$Model$allCardIds = function (model) {
 				_user$project$Model$allRuleIds(model),
 				_user$project$Model$allExampleIds(model))));
 };
+var _user$project$Model$deleteExample = F2(
+	function (id, rule) {
+		return _elm_lang$core$Native_Utils.update(
+			rule,
+			{
+				examples: A2(_elm_lang$core$Dict$remove, id.uid, rule.examples)
+			});
+	});
 var _user$project$Model$updateRule = F3(
 	function (id, update, model) {
 		return _elm_lang$core$Native_Utils.update(
@@ -10240,13 +10248,7 @@ var _user$project$Model$deleteCard = F2(
 					_user$project$Model$updateRule,
 					_p5._0,
 					_elm_lang$core$Maybe$map(
-						function (r) {
-							return _elm_lang$core$Native_Utils.update(
-								r,
-								{
-									examples: A2(_elm_lang$core$Dict$remove, id.uid, r.examples)
-								});
-						}),
+						_user$project$Model$deleteExample(id)),
 					model);
 			default:
 				return _elm_lang$core$Native_Utils.update(
@@ -10375,6 +10377,10 @@ var _user$project$Model$incrementLastRequestNo = function (model) {
 		model,
 		{lastRequestNo: model.lastRequestNo + 1});
 };
+var _user$project$Model$applyUpdates = F2(
+	function (updates, model) {
+		return A3(_elm_lang$core$List$foldl, _elm_lang$core$Basics$identity, model, updates);
+	});
 
 var _user$project$Decoder_Delayed$resetAddButton = function (card) {
 	return A2(
@@ -10559,6 +10565,16 @@ var _user$project$Decoder_UpdateState$cleanUpAction = function (_p1) {
 			},
 			_p1));
 };
+var _user$project$Decoder_UpdateState$updates = function (cards) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		A2(_elm_lang$core$List$map, _user$project$Decoder_UpdateState$replaceCard, cards),
+		{
+			ctor: '::',
+			_0: _user$project$Decoder_UpdateState$cleanUpAction(cards),
+			_1: {ctor: '[]'}
+		});
+};
 var _user$project$Decoder_UpdateState$allCards = A3(
 	_elm_lang$core$Json_Decode$map2,
 	F2(
@@ -10576,16 +10592,9 @@ var _user$project$Decoder_UpdateState$allCards = A3(
 		A2(_elm_lang$core$Json_Decode$field, 'story_card', _user$project$Decoder_UpdateState$story)));
 var _user$project$Decoder_UpdateState$state = A2(
 	_elm_lang$core$Json_Decode$andThen,
-	function (cards) {
+	function (_p2) {
 		return _elm_lang$core$Json_Decode$succeed(
-			A2(
-				_elm_lang$core$Basics_ops['++'],
-				A2(_elm_lang$core$List$map, _user$project$Decoder_UpdateState$replaceCard, cards),
-				{
-					ctor: '::',
-					_0: _user$project$Decoder_UpdateState$cleanUpAction(cards),
-					_1: {ctor: '[]'}
-				}));
+			_user$project$Decoder_UpdateState$updates(_p2));
 	},
 	_user$project$Decoder_UpdateState$allCards);
 var _user$project$Decoder_UpdateState$decoder = A2(_elm_lang$core$Json_Decode$field, 'state', _user$project$Decoder_UpdateState$state);
@@ -10791,11 +10800,20 @@ var _user$project$State$send = function (url) {
 		return _user$project$Ports$socketOut;
 	}
 };
+var _user$project$State$sendRequest = F2(
+	function (model, request) {
+		var m = _user$project$Model$incrementLastRequestNo(model);
+		var cmd = A2(
+			_user$project$State$send,
+			m.flags.backendUrl,
+			A2(_user$project$Requests$toJson, m, request));
+		return {ctor: '_Tuple2', _0: m, _1: cmd};
+	});
 var _user$project$State$updateModel = F2(
 	function (json, model) {
 		var _p1 = A2(_elm_lang$core$Json_Decode$decodeString, _user$project$Decoder$decoder, json);
 		if (_p1.ctor === 'Ok') {
-			return A3(_elm_lang$core$List$foldl, _elm_lang$core$Basics$identity, model, _p1._0);
+			return A2(_user$project$Model$applyUpdates, _p1._0, model);
 		} else {
 			return _elm_lang$core$Native_Utils.update(
 				model,
@@ -10837,30 +10855,14 @@ var _user$project$State$newCardRequest = function (card) {
 			return _elm_lang$core$Maybe$Nothing;
 	}
 };
-var _user$project$State$mapModel = F2(
+var _user$project$State$delayAction = F2(
 	function (updater, _p5) {
 		var _p6 = _p5;
 		return {
 			ctor: '_Tuple2',
-			_0: updater(_p6._0),
+			_0: A2(_user$project$Model$addDelayedAction, updater, _p6._0),
 			_1: _p6._1
 		};
-	});
-var _user$project$State$delayAction = F2(
-	function (updater, result) {
-		return A2(
-			_user$project$State$mapModel,
-			_user$project$Model$addDelayedAction(updater),
-			result);
-	});
-var _user$project$State$sendRequest = F2(
-	function (model, request) {
-		var m = _user$project$Model$incrementLastRequestNo(model);
-		var cmd = A2(
-			_user$project$State$send,
-			m.flags.backendUrl,
-			A2(_user$project$Requests$toJson, m, request));
-		return {ctor: '_Tuple2', _0: m, _1: cmd};
 	});
 var _user$project$State$handleCardUpdate = F3(
 	function (msg, card, model) {
@@ -10904,6 +10906,22 @@ var _user$project$State$handleCardUpdate = F3(
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 		}
 	});
+var _user$project$State$updateRule = F2(
+	function (id, msg) {
+		return A2(
+			_user$project$Model$updateRule,
+			id,
+			_elm_lang$core$Maybe$map(
+				_user$project$Rule_State$update(msg)));
+	});
+var _user$project$State$updateCard = F2(
+	function (id, msg) {
+		return A2(
+			_user$project$Model$updateCard,
+			id,
+			_elm_lang$core$Maybe$map(
+				_user$project$Card_State$update(msg)));
+	});
 var _user$project$State$handleRuleUpdate = F3(
 	function (msg, rule, model) {
 		var _p8 = msg;
@@ -10913,12 +10931,7 @@ var _user$project$State$handleRuleUpdate = F3(
 			_user$project$State$handleCardUpdate,
 			_p10,
 			_p9,
-			A3(
-				_user$project$Model$updateCard,
-				_p9.id,
-				_elm_lang$core$Maybe$map(
-					_user$project$Card_State$update(_p10)),
-				model));
+			A3(_user$project$State$updateCard, _p9.id, _p10, model));
 	});
 var _user$project$State$update = F2(
 	function (msg, model) {
@@ -10939,12 +10952,7 @@ var _user$project$State$update = F2(
 					_user$project$State$handleCardUpdate,
 					_p13,
 					_p12,
-					A3(
-						_user$project$Model$updateCard,
-						_p12.id,
-						_elm_lang$core$Maybe$map(
-							_user$project$Card_State$update(_p13)),
-						model));
+					A3(_user$project$State$updateCard, _p12.id, _p13, model));
 			default:
 				var _p15 = _p11._0;
 				var _p14 = _p11._1;
@@ -10952,12 +10960,7 @@ var _user$project$State$update = F2(
 					_user$project$State$handleRuleUpdate,
 					_p14,
 					_p15,
-					A3(
-						_user$project$Model$updateRule,
-						_p15.card.id.uid,
-						_elm_lang$core$Maybe$map(
-							_user$project$Rule_State$update(_p14)),
-						model));
+					A3(_user$project$State$updateRule, _p15.card.id.uid, _p14, model));
 		}
 	});
 var _user$project$State$initialModel = function (flags) {

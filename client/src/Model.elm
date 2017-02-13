@@ -1,6 +1,7 @@
 module Model
     exposing
         ( addDelayedAction
+        , applyUpdates
         , incrementLastRequestNo
         , updateStoryCard
         , updateQuestionCard
@@ -16,6 +17,11 @@ import Dict exposing (Dict)
 import Rule.Types exposing (RuleId, Rule)
 import Types exposing (Model, ModelUpdater, DelayedAction)
 import Maybe.Extra exposing (orElse)
+
+
+applyUpdates : List ModelUpdater -> Model -> Model
+applyUpdates updates model =
+    List.foldl identity model updates
 
 
 incrementLastRequestNo : Model -> Model
@@ -105,19 +111,20 @@ deleteCard id model =
             { model | rules = Dict.remove id.uid model.rules }
 
         ExampleCard ruleId ->
-            updateRule ruleId (Maybe.map (\r -> { r | examples = Dict.remove id.uid r.examples })) model
+            updateRule ruleId (Maybe.map (deleteExample id)) model
 
         QuestionCard ->
             { model | questions = Dict.remove id.uid model.questions }
 
 
+deleteExample : CardId -> Rule -> Rule
+deleteExample id rule =
+    { rule | examples = Dict.remove id.uid rule.examples }
+
+
 allCardIds : Model -> Dict String CardId
 allCardIds model =
-    (allQuestionIds model
-        ++ allRuleIds model
-        ++ allExampleIds model
-    )
-        |> idDict
+    (allQuestionIds model ++ allRuleIds model ++ allExampleIds model) |> idDict
 
 
 allQuestionIds : Model -> List CardId
