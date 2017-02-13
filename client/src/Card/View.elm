@@ -26,21 +26,12 @@ view card =
 drawCard : Card -> Html CardMsg
 drawCard card =
     let
-        clickHandler =
-            case card.state of
-                Saved ->
-                    [ onClick StartEditing ]
-
-                _ ->
-                    []
-
         attributes =
             [ class (cardClass card.id.cardType card.state)
             , id ("card-" ++ card.id.uid)
             ]
-                ++ clickHandler
     in
-        div attributes
+        div (attributes ++ cardClickHandler card)
             (List.concat
                 [ [ toolbar card ]
                 , [ Background.view card ]
@@ -48,6 +39,16 @@ drawCard card =
                 , cardOverlay card
                 ]
             )
+
+
+cardClickHandler : Card -> List (Attribute CardMsg)
+cardClickHandler card =
+    case card.state of
+        Saved ->
+            [ onClick StartEditing ]
+
+        _ ->
+            []
 
 
 toolbar : Card -> Html CardMsg

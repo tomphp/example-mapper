@@ -11498,36 +11498,36 @@ var _user$project$Card_View$toolbar = function (card) {
 				{ctor: '[]'});
 	}
 };
-var _user$project$Card_View$drawCard = function (card) {
-	var clickHandler = function () {
-		var _p9 = card.state;
-		if (_p9.ctor === 'Saved') {
-			return {
-				ctor: '::',
-				_0: _elm_lang$html$Html_Events$onClick(_user$project$Card_Types$StartEditing),
-				_1: {ctor: '[]'}
-			};
-		} else {
-			return {ctor: '[]'};
-		}
-	}();
-	var attributes = A2(
-		_elm_lang$core$Basics_ops['++'],
-		{
+var _user$project$Card_View$cardClickHandler = function (card) {
+	var _p9 = card.state;
+	if (_p9.ctor === 'Saved') {
+		return {
 			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class(
-				A2(_user$project$Card_View$cardClass, card.id.cardType, card.state)),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$html$Html_Attributes$id(
-					A2(_elm_lang$core$Basics_ops['++'], 'card-', card.id.uid)),
-				_1: {ctor: '[]'}
-			}
-		},
-		clickHandler);
+			_0: _elm_lang$html$Html_Events$onClick(_user$project$Card_Types$StartEditing),
+			_1: {ctor: '[]'}
+		};
+	} else {
+		return {ctor: '[]'};
+	}
+};
+var _user$project$Card_View$drawCard = function (card) {
+	var attributes = {
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$class(
+			A2(_user$project$Card_View$cardClass, card.id.cardType, card.state)),
+		_1: {
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$id(
+				A2(_elm_lang$core$Basics_ops['++'], 'card-', card.id.uid)),
+			_1: {ctor: '[]'}
+		}
+	};
 	return A2(
 		_elm_lang$html$Html$div,
-		attributes,
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			attributes,
+			_user$project$Card_View$cardClickHandler(card)),
 		_elm_lang$core$List$concat(
 			{
 				ctor: '::',
