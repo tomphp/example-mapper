@@ -10223,6 +10223,9 @@ var _user$project$Model$deleteExample = F2(
 				examples: A2(_elm_lang$core$Dict$remove, id.uid, rule.examples)
 			});
 	});
+var _user$project$Model$newCardButtonId = function (id) {
+	return A2(_elm_lang$core$String$startsWith, 'new-', id);
+};
 var _user$project$Model$updateRule = F3(
 	function (id, update, model) {
 		return _elm_lang$core$Native_Utils.update(
@@ -10270,7 +10273,7 @@ var _user$project$Model$cleanUp = F2(
 				_elm_lang$core$Dict$filter,
 				F2(
 					function (id, _p7) {
-						return !A2(_elm_lang$core$String$startsWith, 'new-', id);
+						return !_user$project$Model$newCardButtonId(id);
 					}),
 				A2(
 					_elm_lang$core$Dict$diff,

@@ -97,7 +97,7 @@ updateRule id update model =
 cleanUp : List CardId -> Model -> Model
 cleanUp keep model =
     Dict.diff (allCardIds model) (idDict keep)
-        |> Dict.filter (\id _ -> String.startsWith "new-" id |> not)
+        |> Dict.filter (\id _ -> not (isAddButton id))
         |> Dict.foldl (\_ -> deleteCard) model
 
 
@@ -150,3 +150,8 @@ allExampleIds =
 idDict : List CardId -> Dict String CardId
 idDict =
     List.map (\id -> ( id.uid, id )) >> Dict.fromList
+
+
+isAddButton : String -> Bool
+isAddButton id =
+    String.startsWith "new-" id
