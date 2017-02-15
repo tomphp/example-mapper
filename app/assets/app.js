@@ -11136,9 +11136,9 @@ var _user$project$Card_View_AddButton$AddButton = F4(
 		return {id: a, cssClass: b, label: c, cardType: d};
 	});
 
-var _user$project$Card_View_Background$lineHeight = 15;
-var _user$project$Card_View_Background$cardHeight = 190;
-var _user$project$Card_View_Background$cardWidth = 318;
+var _user$project$Card_View_Background$lineHeight = 12;
+var _user$project$Card_View_Background$cardHeight = 152;
+var _user$project$Card_View_Background$cardWidth = 254;
 var _user$project$Card_View_Background$lines = function () {
 	var end = (_user$project$Card_View_Background$cardHeight / _user$project$Card_View_Background$lineHeight) | 0;
 	var start = 3;

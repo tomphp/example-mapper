@@ -8,17 +8,17 @@ import Svg.Attributes exposing (..)
 
 cardWidth : Int
 cardWidth =
-    318
+    254
 
 
 cardHeight : Int
 cardHeight =
-    190
+    152
 
 
 lineHeight : Int
 lineHeight =
-    15
+    12
 
 
 view : Card -> Html CardMsg

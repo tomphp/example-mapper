@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css?family=Covered+By+Your+Grace');
 
-$card-width: 318px;
-$card-height: 190px;
+$card-width: 254px;
+$card-height: 152px;
 
 $card-red: #fcc;
 $card-yellow: #ffa;
@@ -9,10 +9,10 @@ $card-blue: #cdf;
 $card-green: #cfd;
 
 $card-padding: 10px;
-$card-content-offset: 24px;
+$card-content-offset: 30px;
 
-$card-line-height: 30px;
-$card-font-size: 28px;
+$card-line-height: 24px;
+$card-font-size: 21px;
 $card-font-family: 'Covered By Your Grace', cursive;
 
 $panel-padding: 15px;
@@ -20,12 +20,6 @@ $panel-padding: 15px;
 $card-z-index: 100;
 $panel-z-index: 200;
 $overlay-z-index: 110;
-
-$card-small-width: 254px;
-$card-small-height: 152px;
-$card-small-content-offset: 30px;
-$card-small-font-size: 24px;
-$card-small-line-height: 24px;
 
 html, head, body {
   padding:0;
@@ -288,6 +282,12 @@ body {
     margin: 0;
     font-size: $card-font-size;
     font-family: $card-font-family;
+
+    &--title {
+      padding-top: 10px;
+      font-size: $card-font-size * 3;
+      line-height: $card-font-size * 3;
+    }
   }
 
   &__input {
@@ -301,38 +301,6 @@ body {
     border: 0;
     background-color: transparent;
     resize: none;
-  }
-}
-
-.card--small {
-  height: $card-small-height;
-  width: $card-small-width;
-
-  .card__content {
-    top: $card-small-content-offset;
-    left: $card-padding;
-    width: $card-small-width - (2 * $card-padding);
-    height: $card-small-height - $card-small-content-offset;
-  }
-
-  .card__text {
-    line-height: $card-small-line-height;
-    font-size: $card-small-font-size;
-    font-family: $card-font-family;
-
-    &--title {
-      padding-top: 10px;
-      font-size: $card-small-font-size * 3;
-      line-height: $card-small-font-size * 3;
-    }
-  }
-
-  .card__input {
-    width: $card-small-width - (2 * $card-padding);
-    height: $card-small-height - $card-small-content-offset;
-    line-height: $card-small-line-height;
-    font-size: $card-small-font-size;
-    font-family: $card-font-family;
   }
 }
 
