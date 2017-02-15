@@ -10149,6 +10149,22 @@ var _user$project$Types$UpdateModel = function (a) {
 };
 var _user$project$Types$Noop = {ctor: 'Noop'};
 
+var _user$project$Rule$updateCard = F2(
+	function (update, rule) {
+		return _elm_lang$core$Native_Utils.update(
+			rule,
+			{
+				card: A2(
+					_elm_lang$core$Maybe$withDefault,
+					rule.card,
+					update(
+						_elm_lang$core$Maybe$Just(rule.card)))
+			});
+	});
+
+var _user$project$Model$isAddButton = function (id) {
+	return A2(_elm_lang$core$String$startsWith, 'new-', id);
+};
 var _user$project$Model$idDict = function (_p0) {
 	return _elm_lang$core$Dict$fromList(
 		A2(
@@ -10223,9 +10239,6 @@ var _user$project$Model$deleteExample = F2(
 				examples: A2(_elm_lang$core$Dict$remove, id.uid, rule.examples)
 			});
 	});
-var _user$project$Model$newCardButtonId = function (id) {
-	return A2(_elm_lang$core$String$startsWith, 'new-', id);
-};
 var _user$project$Model$updateRule = F3(
 	function (id, update, model) {
 		return _elm_lang$core$Native_Utils.update(
@@ -10273,7 +10286,7 @@ var _user$project$Model$cleanUp = F2(
 				_elm_lang$core$Dict$filter,
 				F2(
 					function (id, _p7) {
-						return !_user$project$Model$newCardButtonId(id);
+						return !_user$project$Model$isAddButton(id);
 					}),
 				A2(
 					_elm_lang$core$Dict$diff,
@@ -10290,52 +10303,42 @@ var _user$project$Model$updateExampleCard = F3(
 					return _elm_lang$core$Native_Utils.update(
 						r,
 						{
-							examples: A3(_elm_lang$core$Dict$update, id, update, r.examples)
+							examples: A3(
+								_elm_lang$core$Dict$update,
+								id,
+								_elm_lang$core$Maybe$map(update),
+								r.examples)
 						});
 				}));
 	});
-var _user$project$Model$updateRuleCard = F2(
-	function (id, update) {
-		var updateCardInRule = F2(
-			function (u, r) {
-				return _elm_lang$core$Native_Utils.update(
-					r,
-					{
-						card: A2(
-							_elm_lang$core$Maybe$withDefault,
-							r.card,
-							u(
-								_elm_lang$core$Maybe$Just(r.card)))
-					});
-			});
+var _user$project$Model$newRule = F2(
+	function (id, card) {
 		var addExampleButton = _user$project$Card_State$addCardButton(
 			_user$project$Card_Types$ExampleCard(id));
-		var examples = A2(_elm_lang$core$Dict$singleton, addExampleButton.id.uid, addExampleButton);
-		var ruleFromNothing = A2(
-			_elm_lang$core$Maybe$map,
-			function (c) {
-				return {card: c, examples: examples};
-			},
-			update(_elm_lang$core$Maybe$Nothing));
+		return {
+			card: card,
+			examples: A2(_elm_lang$core$Dict$singleton, addExampleButton.id.uid, addExampleButton)
+		};
+	});
+var _user$project$Model$updateRuleCard = F2(
+	function (id, update) {
 		return A2(
 			_user$project$Model$updateRule,
 			id,
-			function (_p8) {
-				return A2(
-					_elm_community$maybe_extra$Maybe_Extra$orElse,
-					ruleFromNothing,
-					A2(
-						_elm_lang$core$Maybe$map,
-						updateCardInRule(update),
-						_p8));
-			});
+			_elm_lang$core$Maybe$map(
+				_user$project$Rule$updateCard(
+					_elm_lang$core$Maybe$map(update))));
 	});
 var _user$project$Model$updateQuestionCard = F3(
 	function (id, update, model) {
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				questions: A3(_elm_lang$core$Dict$update, id, update, model.questions)
+				questions: A3(
+					_elm_lang$core$Dict$update,
+					id,
+					_elm_lang$core$Maybe$map(update),
+					model.questions)
 			});
 	});
 var _user$project$Model$updateStoryCard = F2(
@@ -10343,22 +10346,112 @@ var _user$project$Model$updateStoryCard = F2(
 		return _elm_lang$core$Native_Utils.update(
 			model,
 			{
-				storyCard: update(model.storyCard)
+				storyCard: A2(_elm_lang$core$Maybe$map, update, model.storyCard)
 			});
 	});
 var _user$project$Model$updateCard = function (id) {
-	var _p9 = id.cardType;
-	switch (_p9.ctor) {
+	var _p8 = id.cardType;
+	switch (_p8.ctor) {
 		case 'StoryCard':
 			return _user$project$Model$updateStoryCard;
 		case 'RuleCard':
 			return _user$project$Model$updateRuleCard(id.uid);
 		case 'ExampleCard':
-			return A2(_user$project$Model$updateExampleCard, _p9._0, id.uid);
+			return A2(_user$project$Model$updateExampleCard, _p8._0, id.uid);
 		default:
 			return _user$project$Model$updateQuestionCard(id.uid);
 	}
 };
+var _user$project$Model$addCard = F2(
+	function (card, model) {
+		var _p9 = card.id.cardType;
+		switch (_p9.ctor) {
+			case 'StoryCard':
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						storyCard: _elm_lang$core$Maybe$Just(card)
+					});
+			case 'RuleCard':
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						rules: A3(
+							_elm_lang$core$Dict$insert,
+							card.id.uid,
+							A2(_user$project$Model$newRule, card.id.uid, card),
+							model.rules)
+					});
+			case 'ExampleCard':
+				return A3(
+					_user$project$Model$updateRule,
+					_p9._0,
+					_elm_lang$core$Maybe$map(
+						function (r) {
+							return _elm_lang$core$Native_Utils.update(
+								r,
+								{
+									examples: A3(_elm_lang$core$Dict$insert, card.id.uid, card, r.examples)
+								});
+						}),
+					model);
+			default:
+				return _elm_lang$core$Native_Utils.update(
+					model,
+					{
+						questions: A3(_elm_lang$core$Dict$insert, card.id.uid, card, model.questions)
+					});
+		}
+	});
+var _user$project$Model$hasCard = F2(
+	function (id, model) {
+		var _p10 = id.cardType;
+		switch (_p10.ctor) {
+			case 'StoryCard':
+				return _elm_community$maybe_extra$Maybe_Extra$isJust(model.storyCard);
+			case 'RuleCard':
+				return A2(_elm_lang$core$Dict$member, id.uid, model.rules);
+			case 'ExampleCard':
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					false,
+					A2(
+						_elm_lang$core$Maybe$map,
+						function (_p11) {
+							return A2(
+								_elm_lang$core$Dict$member,
+								id.uid,
+								function (_) {
+									return _.examples;
+								}(_p11));
+						},
+						A2(_elm_lang$core$Dict$get, _p10._0, model.rules)));
+			default:
+				return A2(_elm_lang$core$Dict$member, id.uid, model.questions);
+		}
+	});
+var _user$project$Model$addOrUpdateCard = F3(
+	function (id, update, model) {
+		return A2(_user$project$Model$hasCard, id, model) ? A3(
+			_user$project$Model$updateCard,
+			id,
+			function (c) {
+				return A2(
+					_elm_lang$core$Maybe$withDefault,
+					c,
+					update(
+						_elm_lang$core$Maybe$Just(c)));
+			},
+			model) : A2(
+			_elm_lang$core$Maybe$withDefault,
+			model,
+			A2(
+				_elm_lang$core$Maybe$map,
+				function (c) {
+					return A2(_user$project$Model$addCard, c, model);
+				},
+				update(_elm_lang$core$Maybe$Nothing)));
+	});
 var _user$project$Model$setClientId = F2(
 	function (id, model) {
 		return _elm_lang$core$Native_Utils.update(
@@ -10387,7 +10480,7 @@ var _user$project$Model$applyUpdates = F2(
 
 var _user$project$Decoder_Delayed$resetAddButton = function (card) {
 	return A2(
-		_user$project$Model$updateCard,
+		_user$project$Model$addOrUpdateCard,
 		card.id,
 		_elm_lang$core$Maybe$map(
 			_user$project$Card_State$update(_user$project$Card_Types$SetAddButton)));
@@ -10474,7 +10567,7 @@ var _user$project$Decoder_UpdateState$replaceWithIfNewer = F2(
 	});
 var _user$project$Decoder_UpdateState$replaceCard = function (card) {
 	return A2(
-		_user$project$Model$updateCard,
+		_user$project$Model$addOrUpdateCard,
 		card.id,
 		_user$project$Decoder_UpdateState$replaceWithIfNewer(card));
 };
@@ -10920,7 +11013,7 @@ var _user$project$State$updateRule = F2(
 var _user$project$State$updateCard = F2(
 	function (id, msg) {
 		return A2(
-			_user$project$Model$updateCard,
+			_user$project$Model$addOrUpdateCard,
 			id,
 			_elm_lang$core$Maybe$map(
 				_user$project$Card_State$update(msg)));

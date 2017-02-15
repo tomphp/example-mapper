@@ -87,7 +87,7 @@ handleRuleUpdate msg rule model =
 
 updateCard : CardId -> CardMsg -> ModelUpdater
 updateCard id msg =
-    Model.updateCard id (Maybe.map (Card.State.update msg))
+    Model.addOrUpdateCard id (Maybe.map (Card.State.update msg))
 
 
 updateRule : RuleId -> RuleMsg -> ModelUpdater

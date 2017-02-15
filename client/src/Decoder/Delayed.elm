@@ -46,4 +46,4 @@ applyAction model action =
 
 resetAddButton : Card -> Model -> Model
 resetAddButton card =
-    Model.updateCard card.id (Maybe.map (Card.State.update SetAddButton))
+    Model.addOrUpdateCard card.id (Maybe.map (Card.State.update SetAddButton))

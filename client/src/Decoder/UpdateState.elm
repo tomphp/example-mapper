@@ -99,7 +99,7 @@ toCardState s =
 
 replaceCard : Card -> ModelUpdater
 replaceCard card =
-    Model.updateCard card.id (replaceWithIfNewer card)
+    Model.addOrUpdateCard card.id (replaceWithIfNewer card)
 
 
 replaceWithIfNewer : Card -> Maybe Card -> Maybe Card
