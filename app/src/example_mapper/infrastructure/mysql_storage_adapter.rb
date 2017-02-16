@@ -190,11 +190,19 @@ module ExampleMapper
 
       def query(sql)
         @logger.debug "MySQL Query: #{sql}"
-        @client.query(sql)
+        time('Query') do
+          @client.query(sql)
+        end
       end
 
       def e(value)
         @client.escape(value)
+      end
+
+      def time(name)
+        start = Time.now
+
+        yield.tap { @logger.debug "#{name} took #{Time.now - start}" }
       end
     end
   end

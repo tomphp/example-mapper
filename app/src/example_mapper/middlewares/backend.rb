@@ -34,6 +34,7 @@ module ExampleMapper
           redis_sub = Redis.new(host: uri.host, port: uri.port, password: uri.password)
           redis_sub.subscribe(CHANNEL) do |on|
             on.message do |_channel, msg|
+              @logger.debug "Redis message received"
               with_error_handling do
                 story_id = JSON.parse(msg)['story_id']
 
@@ -110,6 +111,7 @@ module ExampleMapper
                 type: :update_state,
                 state: @storage.fetch_story(story_id)
               }.to_json)
+              @logger.debug 'Redis message published'
             end
           end
 
